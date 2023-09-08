@@ -140,26 +140,23 @@ def connect(url_or_alias: str, username: str = None, password: str = None):
     environments = read_environments_json()
     env = None
 
-    # Url only
-    if not username and not password:
-        # Url & env
-        try:
-            for e in environments['environments']:
-                if url_or_alias in e:
-                    env = environments['environments'][e]
-            if env is None: raise Exception
-        # Url in case alias-ed
-        except:
-            for e in environments['environments']:
-                if url_or_alias in environments['environments'][e]['url']:
-                    env = environments['environments'][e]
+    # Retrieve env by alias
+    try:
+        for e in environments['environments']:
+            if url_or_alias in e:
+                env = environments['environments'][e]
+        if env is None: raise Exception
+    # If it fails, retrieve env by url
+    except:
+        for e in environments['environments']:
+            if url_or_alias in environments['environments'][e]['url']:
+                env = environments['environments'][e]
 
     # If env is not registered and no username/password provided
     if not env and not password and not username:
         log(msg="Unable to recognize environment, please check the information is correct or provide username and password. ",
             in_console=True, style="bold red")
         return None
-
     # If env not registered but username and password provided
     elif not env and password and username:
         env = add_or_update_environments_json(env=url_or_alias, username=username, password=password)
