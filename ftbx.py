@@ -337,11 +337,13 @@ if __name__ == "__main__":
             env = connect(url_or_alias=args.options[0], username=args.options[1], password=args.options[2])
             if not env:
                 quit()
+    # Show current environment
     elif args.tool == "env":
         # Log default environment
         default_env = read_environments_json()['environments']['default']
         log(msg=f"Current default environment is {default_env['url']} - user: {default_env['username']}. ",
             in_console=True)
+    # Create action
     elif args.tool == "create_action":
         # create a single action
         if len(args.options) == 1:
@@ -350,6 +352,7 @@ if __name__ == "__main__":
         # invalid scenario
         else:
             log(msg="No action or too many actions given as parameters. ", level="e", style="bold red")
+    # Create workflow
     elif args.tool == "create_workflow":
         # create a single action
         if len(args.options) == 1:
@@ -357,6 +360,7 @@ if __name__ == "__main__":
         # invalid scenario
         else:
             log(msg="No workflow or too many workflow given as parameters. ", level="e", style="bold red")
+    # List config items
     elif args.tool == "list":
         # for config objects
         if len(args.options) == 1 and args.options[0] in FLEX_CONFIG_ITEMS:
@@ -364,3 +368,7 @@ if __name__ == "__main__":
         # invalid scenario
         else:
             log(msg="No object, too many objects, or incorrect object given as parameters. ", level="e", style="bold red")
+    # Pull config items
+    elif args.tool == "pull":
+        # TODO: pull actions etc with 'all' option
+        print("TODO")
