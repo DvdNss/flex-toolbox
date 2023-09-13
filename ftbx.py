@@ -316,59 +316,110 @@ def list_items(name: str, contains: str = "") -> bool:
     return True
 
 
+def pull_item(type: str, name: str, id: int):
+    """
+    Retrieve item and its config from API.
+
+    :param type: type of items
+    :param name: name of the item
+    :param id: id of the item
+
+    :return:
+    """
+
+    return False
+
+
+def connect_command_func(args):
+    """Action on connect command. """
+
+    # connect with alias or url without creds
+    if not args.username and not args.password:
+        env = connect(url_or_alias=args.env_url)
+        if not env:
+            quit()
+    # connect to url with creds
+    elif args.username and args.password:
+        env = connect(url_or_alias=args.env_url, username=args.username, password=args.password)
+        if not env:
+            quit()
+
+
+def env_command_func(args):
+    """Action on env command. """
+
+    # Log default environment
+    default_env = read_environments_json()['environments']['default']
+    log(msg=f"Current default environment is {default_env['url']} - user: {default_env['username']}. ",
+        in_console=True)
+
+
+def create_action_command_func(args):
+    """Action on create_action command. """
+
+    # create a single action
+    if args.name:
+        quit() if not create_folder(folder_name=args.name) else None
+        quit() if not create_object(name=args.name, type="action") else None
+    # invalid scenario
+    else:
+        log(msg="No action or too many actions given as parameters. ", level="e", style="bold red")
+
+
+def create_workflow_command_func(args):
+    """Action on create_worflow command. """
+
+    # create a single action
+    if args.name:
+        quit() if not create_folder(args.name) else None
+    # invalid scenario
+    else:
+        log(msg="No workflow or too many workflow given as parameters. ", level="e", style="bold red")
+
+
+def list_command_func(args):
+    """Action on list command. """
+
+    # for config objects
+    if args.config_item:
+        quit() if not list_items(name=args.config_item, contains=args.contains) else None
+    # invalid scenario
+    else:
+        log(msg="No object, too many objects, or incorrect object given as parameters. ", level="e",
+            style="bold red")
+
+
 if __name__ == "__main__":
+    # parser
+    parser = argparse.ArgumentParser(description='Flex ToolBoX')
+    subparsers = parser.add_subparsers(help='Tools')
 
-    # Script args
-    parser = argparse.ArgumentParser(description='Flex ToolBox')
-    parser.add_argument('tool', type=str, help='Flex tool to use.')
-    parser.add_argument('options', type=str, nargs='*', help='Tool options')
-    parser.add_argument('--contains', type=str, help="Name to search", default="")
+    # env
+    env_command = subparsers.add_parser('env', help='Show current env')
+    env_command.set_defaults(func=env_command_func)
+
+    # connect
+    connect_command = subparsers.add_parser('connect', help='Connect to a Flex env')
+    connect_command.add_argument('env_url', type=str, help='URL of the Flex environment ')
+    connect_command.add_argument('username', type=str, nargs='?', help='Flex username ')
+    connect_command.add_argument('password', type=str, nargs='?', help='Flex password ')
+    connect_command.set_defaults(func=connect_command_func)
+
+    # list
+    list_command = subparsers.add_parser('list', help='List config items from env')
+    list_command.add_argument('config_item', type=str, choices=FLEX_CONFIG_ITEMS, help='Config item to list')
+    list_command.add_argument('--contains', type=str, default="", help="Search by text")
+    list_command.set_defaults(func=list_command_func)
+
+    # create_action
+    create_action_command = subparsers.add_parser('create_action', help='Create action')
+    create_action_command.add_argument('name', type=str, help='Name of the action')
+    create_action_command.set_defaults(func=create_action_command_func)
+
+    # create_workflow
+    create_workflow_command = subparsers.add_parser('create_workflow', help='Create workflow')
+    create_workflow_command.add_argument('name', type=str, help='Name of the workflow')
+    create_workflow_command.set_defaults(func=create_workflow_command_func)
+
     args = parser.parse_args()
-
-    # Connect to an environment
-    if args.tool == "connect":
-        # connect with alias or url without creds
-        if len(args.options) == 1:
-            env = connect(url_or_alias=args.options[0])
-            if not env:
-                quit()
-        # connect to url with creds
-        elif len(args.options) == 3:
-            env = connect(url_or_alias=args.options[0], username=args.options[1], password=args.options[2])
-            if not env:
-                quit()
-    # Show current environment
-    elif args.tool == "env":
-        # Log default environment
-        default_env = read_environments_json()['environments']['default']
-        log(msg=f"Current default environment is {default_env['url']} - user: {default_env['username']}. ",
-            in_console=True)
-    # Create action
-    elif args.tool == "create_action":
-        # create a single action
-        if len(args.options) == 1:
-            quit() if not create_folder(folder_name=args.options[0]) else None
-            quit() if not create_object(name=args.options[0], type="action") else None
-        # invalid scenario
-        else:
-            log(msg="No action or too many actions given as parameters. ", level="e", style="bold red")
-    # Create workflow
-    elif args.tool == "create_workflow":
-        # create a single action
-        if len(args.options) == 1:
-            quit() if not create_folder(args.options[0]) else None
-        # invalid scenario
-        else:
-            log(msg="No workflow or too many workflow given as parameters. ", level="e", style="bold red")
-    # List config items
-    elif args.tool == "list":
-        # for config objects
-        if len(args.options) == 1 and args.options[0] in FLEX_CONFIG_ITEMS:
-            quit() if not list_items(name=args.options[0], contains=args.contains) else None
-        # invalid scenario
-        else:
-            log(msg="No object, too many objects, or incorrect object given as parameters. ", level="e", style="bold red")
-    # Pull config items
-    elif args.tool == "pull":
-        # TODO: pull actions etc with 'all' option
-        print("TODO")
+    args.func(args)
