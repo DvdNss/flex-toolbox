@@ -21,12 +21,6 @@
   ```shell
   ftbx env
   ```
-  
-* create action (locally)
-  ```shell
-  # Creates an action called "set-asset-status"
-  ftbx create_action set-asset-status
-  ```
 
 * list config items (workflowDefinitions, actions..) and their ids
   ```shell
@@ -56,3 +50,21 @@
     'workflowDefinitions',
     'workspaces'
 ]
+
+* pull actions
+  ```shell
+  # Pull **ALL** actions
+  ftbx pull actions
+  
+  # Pull actions matching a filter (several filters can be selected)
+  ftbx pull actions --filters name=action_name
+  ftbx pull actions --filters id=309
+  ftbx pull actions --filters enabled=true
+  ftbx pull actions --filters type=script
+  ```
+  
+* push actions
+  ```shell
+  # Push action to an env (will be created if doesn't exist)
+  ftbx push actions check-end-node-wf 
+  ```
