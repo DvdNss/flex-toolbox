@@ -13,7 +13,7 @@
 
 import argparse
 
-from VARIABLES import FLEX_CONFIG_ITEMS
+from VARIABLES import FLEX_ITEMS
 from src.connect import connect_command_func
 from src.create_action import create_action_command_func
 from src.create_workflow import create_workflow_command_func
@@ -40,8 +40,8 @@ if __name__ == "__main__":
 
     # list
     list_command = subparsers.add_parser('list', help='List config items from env')
-    list_command.add_argument('config_item', type=str, choices=FLEX_CONFIG_ITEMS, help='Config item to list')
-    list_command.add_argument('--contains', type=str, default="", help="Search by text")
+    list_command.add_argument('config_item', type=str, choices=FLEX_ITEMS, help='Config item to list')
+    list_command.add_argument('--filters', type=str, nargs="*", help="Search by text")
     list_command.set_defaults(func=list_command_func)
 
     # create_action
@@ -56,13 +56,13 @@ if __name__ == "__main__":
 
     # pull
     pull_command = subparsers.add_parser('pull', help='Pull config items from Flex')
-    pull_command.add_argument('config_item', type=str, choices=FLEX_CONFIG_ITEMS, help='Config item to pull')
+    pull_command.add_argument('config_item', type=str, choices=FLEX_ITEMS, help='Config item to pull')
     pull_command.add_argument('--filters', type=str, nargs='*', help='Filters to apply')
     pull_command.set_defaults(func=pull_command_func)
 
     # pull
     pull_command = subparsers.add_parser('push', help='Push config items to Flex')
-    pull_command.add_argument('config_item', type=str, choices=FLEX_CONFIG_ITEMS, help='Config item to push')
+    pull_command.add_argument('config_item', type=str, choices=FLEX_ITEMS, help='Config item to push')
     pull_command.add_argument('item_names', type=str, nargs='*', help='Items to push')
     pull_command.add_argument('--all', type=bool, help='Whether to push all config items or not')
     pull_command.set_defaults(func=push_command_func)

@@ -55,12 +55,14 @@ def push_command_func(args):
             with open(f"{item}/config.json", 'r') as config_file:
                 data = json.load(config_file)
 
-            if data['objectType']['name'] == 'action':
+            if args.config_item == 'actions' and data['objectType']['name'] == 'action':
                 push_action(action_name=item, action_config=data)
+            else:
+                print(f'Cannot push action {item} since it is not an action.\n')
 
         # path doesn't exist
         else:
-            print(f"Cannot find folder for {item}.")
+            print(f"Cannot find folder for {item}.\n")
 
 
 def push_action(action_name, action_config):
@@ -92,7 +94,7 @@ def push_action(action_name, action_config):
     total_count = session.request("GET", get_action, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
     if 'errors' in total_count:
-        raise Exception(f"\n\nError while sending {get_action}. \nError message: {total_count['errors']['error']} ")
+        raise Exception(f"\n\nError while sending {get_action}. \nError message: {total_count['errors']['error']}\n ")
 
     total_count = total_count['totalCount']
 
@@ -113,7 +115,7 @@ def push_action(action_name, action_config):
 
         if 'errors' in create_action:
             raise Exception(
-                f"\n\nError while sending {create_action_request}. \nError message: {create_action['errors']['error']} ")
+                f"\n\nError while sending {create_action_request}. \nError message: {create_action['errors']['error']}\n")
 
         # push script
         action_id = create_action['id']
@@ -128,7 +130,7 @@ def push_action(action_name, action_config):
 
         if 'errors' in update_action:
             raise Exception(
-                f"\n\nError while sending {update_action_request}. \nError message: {update_action['errors']['error']} ")
+                f"\n\nError while sending {update_action_request}. \nError message: {update_action['errors']['error']}\n")
 
     # push script
     if os.path.isfile(f"{action_name}/script.groovy"):
@@ -146,13 +148,17 @@ def push_action(action_name, action_config):
             last_char = script_content.rindex("}")
             script_content = script_content[:last_char - 2].replace("class Script extends PluginCommand {\n\t",
                                                                     "").replace("\t\t", '\t').strip() + "\n}"
+            try:
+                exec_lock_type = action_config['configuration']['instance']['execution-lock-type']
+            except:
+                exec_lock_type = "NONE"
 
             payload = {
                 "internal-script": {
                     "script-content": script_content,
                     "script-import": imports if imports else None
                 },
-                "execution-lock-type": action_config['configuration']['instance']['execution-lock-type']
+                "execution-lock-type": exec_lock_type
             }
 
             # update configuration
@@ -162,4 +168,6 @@ def push_action(action_name, action_config):
 
             if 'errors' in update_configuration:
                 raise Exception(
-                    f"\n\nError while sending {update_configuration_request}. \nError message: {update_configuration['errors']['error']} ")
+                    f"\n\nError while sending {update_configuration_request}. \nError message: {update_configuration['errors']['error']}\n")
+
+            print(f"action: {action_name} has been pushed successfully to {env['url']}.\n")

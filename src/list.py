@@ -8,6 +8,7 @@
     DESCRIPTION: TODO
     
 """
+from typing import List
 
 import requests
 from requests.auth import HTTPBasicAuth
@@ -25,15 +26,17 @@ session = requests.Session()
 def list_command_func(args):
     """Action on list command. """
 
-    list_items(name=args.config_item, contains=args.contains)
+    list_items(config_item=args.config_item, filters=args.filters)
+
+    # TODO: custom for userDefinedObject, tagCollections
 
 
-def list_items(name: str, contains: str = "") -> bool:
+def list_items(config_item: str, filters: List[str] = []) -> bool:
     """
     List items ids.
 
-    :param name: item to retrieve from API (ex: workflows, accounts..)
-    :param contains: contains a specific string
+    :param config_item: item to retrieve from API (ex: workflows, accounts..)
+    :param filters: filters to apply
 
     :return: True if succeeds, False if fails
     """
@@ -49,38 +52,37 @@ def list_items(name: str, contains: str = "") -> bool:
     # Init. connection & auth with env API
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])
 
-    # Get item total count
-    try:
-        total_count_request = f"{env['url']}/api/{name};limit=1;offset=0;name=end"
-        total_count = session.request("GET", total_count_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()[
-            'totalCount']
-    except Exception as ex:
-        print(f"ERROR: {ex}")
-        return False
+    total_count_request = f"{env['url']}/api/{config_item};limit=1;offset=0;{';'.join(filters) if filters else ''}"
+    total_count = session.request("GET", total_count_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
+
+    if 'errors' in total_count:
+        raise Exception(
+            f"\n\nError while sending {total_count_request}. \nError message: {total_count['errors']['error']}\n")
+
+    total_count = total_count['totalCount']
 
     # Sequentially get all items (batch_size at a time)
     for _ in range(0, int(total_count / batch_size) + 1):
 
-        try:
-            # Get batch of items from API
-            batched_item_request = f"{env['url']}/api/{name};limit={str(batch_size)};offset={str(offset)};name=end"
-            items_batch = session.request("GET", batched_item_request, headers=HEADERS, auth=auth,
-                                          data=PAYLOAD).json()
+        # Get batch of items from API
+        batched_item_request = f"{env['url']}/api/{config_item};limit={str(batch_size)};offset={str(offset)};{';'.join(filters) if filters else ''}"
+        items_batch = session.request("GET", batched_item_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
-            # Add batch of items to the list
-            items.extend(items_batch[name])
+        if 'errors' in items_batch:
+            raise Exception(
+                f"\n\nError while sending {batched_item_request}. \nError message: {items_batch['errors']['error']}\n")
 
-            # Incr. offset
-            offset = offset + batch_size
-        except KeyError as e:
-            print(f"ERROR: {e}")
-            return False
+        # Add batch of items to the list
+        items.extend(items_batch[config_item])
+
+        # Incr. offset
+        offset = offset + batch_size
 
     # Sort the list
     sorted_items = sorted(items, key=lambda x: x['name'].lower())
 
     # Convert list of items to dict
     for item in sorted_items:
-        print(f"[{item['name']}] - ID: {item['id']}") if contains in item['name'].lower() else None
+        print(f"[{item['name']}] - ID: {item['id']}")
 
     return True

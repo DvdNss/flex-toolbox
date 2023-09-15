@@ -62,7 +62,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
 
     if 'errors' in total_count:
         raise Exception(
-            f"\n\nError while sending {total_count_request}. \nError message: {total_count['errors']['error']} ")
+            f"\n\nError while sending {total_count_request}. \nError message: {total_count['errors']['error']}\n")
 
     total_count = total_count['totalCount']
 
@@ -75,7 +75,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
             items_batch = session.request("GET", batched_item_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
             if 'errors' in items_batch:
-                raise Exception(f"\n\nError while sending {batched_item_request}. \nError message: {items_batch['errors']['error']} ")
+                raise Exception(f"\n\nError while sending {batched_item_request}. \nError message: {items_batch['errors']['error']}\n")
 
             # Add batch of items to the list
             items.extend(items_batch[config_item])
@@ -125,8 +125,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
         # create or overwrite item config_file
         with open(f"{item}/config.json", "w") as config_file:
             json.dump(obj=sorted_items_dict[item], fp=config_file, indent=4)
-
-    print(f"{config_item} have been pulled. ")
+            print(f"action: {item} has been retrieved successfully from {env['url']}. ")
 
     # Add line break for UI
     print("")

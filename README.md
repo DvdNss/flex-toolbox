@@ -61,6 +61,7 @@
   ftbx pull actions --filters id=309
   ftbx pull actions --filters enabled=true
   ftbx pull actions --filters type=script
+  ftbx pull actions --filters type=script enabled=true
   ```
   
 * push actions

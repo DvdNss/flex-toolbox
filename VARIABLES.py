@@ -47,7 +47,7 @@ WORKFLOW_CONFIG = {
 
 DEFAULT_GROOVY_SCRIPT = "import com.ooyala.flex.plugins.PluginCommand\n\nclass script extends PluginCommand {\n\tdef execute(){\n\t\t// your code here\n\t}\n}"
 
-FLEX_CONFIG_ITEMS = [
+FLEX_ITEMS = [
     'accounts',
     'actions',
     'eventHandlers',
@@ -65,8 +65,20 @@ FLEX_CONFIG_ITEMS = [
     'variants',
     'wizards',
     'workflowDefinitions',
-    'workspaces'
+    'workspaces',
+    'assets',
+    'collections',
+    'taxonomies',
+    'variants',
+    'jobs',
+    'tasks',
+    'workflows',
+    'quotas',
+    'users',
+    'events',
+    'objectTypes',
 ]
+
 
 class PluginType(Enum):
     """ Enum of plugin types. """
