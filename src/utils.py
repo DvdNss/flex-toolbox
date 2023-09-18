@@ -23,7 +23,7 @@ def create_folder(folder_name: str, ignore_error: bool = False):
 
     try:
         os.mkdir(folder_name)
-        print(f"Folder {folder_name} was created. ")
+        # print(f"Folder {folder_name} was created. ")
         return True
     except FileExistsError:
         if ignore_error:

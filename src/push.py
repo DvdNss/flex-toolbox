@@ -49,10 +49,10 @@ def push_command_func(args):
     for item in args.item_names:
 
         # if path exists
-        if os.path.isdir(item):
+        if os.path.isdir(f"{args.config_item}/{item}"):
 
             # check if is action
-            with open(f"{item}/config.json", 'r') as config_file:
+            with open(f"{args.config_item}/{item}/config.json", 'r') as config_file:
                 data = json.load(config_file)
 
             if args.config_item == 'actions' and data['objectType']['name'] == 'action':
@@ -112,6 +112,7 @@ def push_action(action_name, action_config):
         create_action_request = f"{env['url']}/api/actions"
         create_action = session.request("POST", create_action_request, headers=HEADERS, auth=auth,
                                         data=json.dumps(payload)).json()
+        print(f"\nPerforming [POST] {env['url']}/api/actions...\n")
 
         if 'errors' in create_action:
             raise Exception(
@@ -127,14 +128,15 @@ def push_action(action_name, action_config):
         update_action_request = f"{env['url']}/api/actions/{action_id}"
         update_action = session.request("PUT", update_action_request, headers=HEADERS, auth=auth,
                                         data=json.dumps(payload)).json()
+        print(f"\nPerforming [PUT] {update_action_request}...\n")
 
         if 'errors' in update_action:
             raise Exception(
                 f"\n\nError while sending {update_action_request}. \nError message: {update_action['errors']['error']}\n")
 
     # push script
-    if os.path.isfile(f"{action_name}/script.groovy"):
-        with open(f"{action_name}/script.groovy", 'r') as groovy_file:
+    if os.path.isfile(f"actions/{action_name}/script.groovy"):
+        with open(f"actions/{action_name}/script.groovy", 'r') as groovy_file:
             script_content = groovy_file.read().strip() \
                 .replace("import com.ooyala.flex.plugins.PluginCommand", "")
 
@@ -165,9 +167,9 @@ def push_action(action_name, action_config):
             update_configuration_request = f"{env['url']}/api/actions/{action_id}/configuration"
             update_configuration = session.request("PUT", update_configuration_request, headers=HEADERS, auth=auth,
                                                    data=json.dumps(payload)).json()
+            print(f"\nPerforming [PUT] {update_configuration_request}...\n")
+            print(f"action: {action_name} has been pushed successfully to {env['url']}.\n")
 
             if 'errors' in update_configuration:
                 raise Exception(
                     f"\n\nError while sending {update_configuration_request}. \nError message: {update_configuration['errors']['error']}\n")
-
-            print(f"action: {action_name} has been pushed successfully to {env['url']}.\n")

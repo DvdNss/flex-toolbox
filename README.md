@@ -27,31 +27,12 @@
   # List actions and their ids
   ftbx list actions
 
-  # List actions containg "set" and their ids
-  ftbx list actions --contains set
+  # List assets with fql
+  ftbx list assets --filters "fql=(mimetype~mp4)"
   ```
-  > available items are: [
-    'accounts',
-    'actions',
-    'eventHandlers',
-    'groups',
-    'messageTemplates',
-    'metadataDefinitions',
-    'profiles',
-    'resources',
-    'roles',
-    'tags',
-    'taskDefinitions',
-    'taxonomies',
-    'timedActions',
-    'userDefinedObjectsTypes',
-    'variants',
-    'wizards',
-    'workflowDefinitions',
-    'workspaces'
-]
+  > available items are: ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs', 'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles', 'tags', 'taskDefinitions', 'tasks', 'taxonomies', 'taxonomies', 'timedActions', 'userDefinedObjectsTypes', 'users', 'variants', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']
 
-* pull actions
+* pull items
   ```shell
   # Pull **ALL** actions
   ftbx pull actions
@@ -64,7 +45,7 @@
   ftbx pull actions --filters type=script enabled=true
   ```
   
-* push actions
+* push items
   ```shell
   # Push action to an env (will be created if doesn't exist)
   ftbx push actions check-end-node-wf 

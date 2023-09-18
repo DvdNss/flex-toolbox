@@ -9,6 +9,8 @@
     
 """
 import json
+import os.path
+import urllib.parse
 from typing import List
 
 import requests
@@ -31,7 +33,14 @@ def pull_command_func(args):
     """Action on pull command. """
 
     if args.config_item == "actions":
-        get_items(config_item='actions', sub_items=['configuration'], filters=args.filters)
+        get_items(config_item='actions',
+                  sub_items=['configuration', 'references'],
+                  filters=args.filters)
+    elif args.config_item == "accounts":
+        get_items(config_item='accounts',
+                  sub_items=['metadata', 'properties', 'references'], filters=args.filters)
+    elif args.config_item == "assets":
+        get_items(config_item='assets', sub_items=['metadata'], filters=args.filters)
 
 
 def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = []) -> dict:
@@ -50,6 +59,12 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
     batch_size = 100
     items = []
 
+    # encode fql
+    if filters:
+        for idx, filter in enumerate(filters):
+            if "fql=" in filter:
+                filters[idx] = "fql=" + urllib.parse.quote(filter.replace("fql=", ""))
+
     # Retrieve default env
     env = get_default_env()
 
@@ -57,7 +72,8 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])
 
     # Get item total count
-    total_count_request = f"{env['url']}/api/{config_item};limit=1;offset=0;{';'.join(filters) if filters else ''}"
+    total_count_request = f"{env['url']}/api/{config_item};offset=0;{';'.join(filters) if filters else ''}"
+    print(f"\nPerforming {env['url']}/api/{config_item};{';'.join(filters) if filters else ''}...\n")
     total_count = session.request("GET", total_count_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
     if 'errors' in total_count:
@@ -71,11 +87,12 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
 
         try:
             # Get batch of items from API
-            batched_item_request = f"{env['url']}/api/{config_item};limit={str(batch_size)};offset={str(offset)};{';'.join(filters) if filters else ''}"
+            batched_item_request = f"{env['url']}/api/{config_item};offset={str(offset)};{';'.join(filters) if filters else ''}"
             items_batch = session.request("GET", batched_item_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
             if 'errors' in items_batch:
-                raise Exception(f"\n\nError while sending {batched_item_request}. \nError message: {items_batch['errors']['error']}\n")
+                raise Exception(
+                    f"\n\nError while sending {batched_item_request}. \nError message: {items_batch['errors']['error']}\n")
 
             # Add batch of items to the list
             items.extend(items_batch[config_item])
@@ -103,29 +120,37 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
                 session.request("GET", sub_item_request, headers=HEADERS, auth=auth, data=PAYLOAD).content.decode(
                     "utf-8", "ignore").strip()
 
+    if not os.path.isdir(f"{config_item}"):
+        os.mkdir(f"{config_item}")
+
     # create retrieved objects
     for item in sorted_items_dict:
 
         # create config_item folder
-        create_folder(item, ignore_error=True)
-
-        # create groovy script
-        if sorted_items_dict[item]['type']['name'] in ['script', 'decision']:
-
-            # script in action
-            try:
-                create_script(item, sorted_items_dict[item])
-
-            # no script in action
-            except:
-                print(f"Something went wrong while trying to retrieve {item} script.. Default script will be created instead.")
-                with open(f"{item}/script.groovy", "w") as groovy_file:
-                    groovy_file.write(DEFAULT_GROOVY_SCRIPT)
+        create_folder(f"{config_item}/{item}", ignore_error=True)
 
         # create or overwrite item config_file
-        with open(f"{item}/config.json", "w") as config_file:
+        with open(f"{config_item}/{item}/config.json", "w") as config_file:
             json.dump(obj=sorted_items_dict[item], fp=config_file, indent=4)
-            print(f"action: {item} has been retrieved successfully from {env['url']}. ")
+
+        # create groovy script
+        try:
+            if sorted_items_dict[item]['type']['name'] in ['script', 'decision']:
+
+                # script
+                try:
+                    create_script(f"{config_item}/{item}", sorted_items_dict[item])
+
+                # no script
+                except:
+                    print(
+                        f"Something went wrong while trying to retrieve {item} script.. Default script will be created instead.")
+                    with open(f"{item}/script.groovy", "w") as groovy_file:
+                        groovy_file.write(DEFAULT_GROOVY_SCRIPT)
+        except:
+            pass
+
+        print(f"{config_item}: {item} has been retrieved successfully from {env['url']}. ")
 
     # Add line break for UI
     print("")
@@ -146,12 +171,15 @@ def create_script(item_name, item_config):
     script = "class Script extends PluginCommand {\n\t<&code>\n}"
 
     try:
-        imports.extend(['import ' + imp['value'] + '\n' for imp in item_config['configuration']['instance']['internal-script']['script-import']])
+        imports.extend(['import ' + imp['value'] + '\n' for imp in
+                        item_config['configuration']['instance']['internal-script']['script-import']])
     except:
         pass
 
     try:
-        script = script.replace("<&code>", item_config['configuration']['instance']['internal-script']['script-content'].replace("\r\n", "\n\t"))
+        script = script.replace("<&code>",
+                                item_config['configuration']['instance']['internal-script']['script-content'].replace(
+                                    "\r\n", "\n\t"))
     except:
         script = script.replace("<&code>", "")
 

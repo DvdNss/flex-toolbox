@@ -8,6 +8,7 @@
     DESCRIPTION: TODO
     
 """
+import urllib.parse
 from typing import List
 
 import requests
@@ -46,14 +47,21 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
     batch_size = 100
     items = []
 
+    # encode fql
+    if filters:
+        for idx, filter in enumerate(filters):
+            if "fql=" in filter:
+                filters[idx] = "fql=" + urllib.parse.quote(filter.replace("fql=", ""))
+
     # Retrieve default env
     env = get_default_env()
 
     # Init. connection & auth with env API
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])
 
-    total_count_request = f"{env['url']}/api/{config_item};limit=1;offset=0;{';'.join(filters) if filters else ''}"
+    total_count_request = f"{env['url']}/api/{config_item};offset=0;{';'.join(filters) if filters else ''}"
     total_count = session.request("GET", total_count_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
+    print(f"\nPerforming [GET] {env['url']}/api/{config_item};{';'.join(filters) if filters else ''}...\n")
 
     if 'errors' in total_count:
         raise Exception(
@@ -65,7 +73,7 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
     for _ in range(0, int(total_count / batch_size) + 1):
 
         # Get batch of items from API
-        batched_item_request = f"{env['url']}/api/{config_item};limit={str(batch_size)};offset={str(offset)};{';'.join(filters) if filters else ''}"
+        batched_item_request = f"{env['url']}/api/{config_item};offset={str(offset)};{';'.join(filters) if filters else ''}"
         items_batch = session.request("GET", batched_item_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
         if 'errors' in items_batch:
@@ -82,7 +90,11 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
     sorted_items = sorted(items, key=lambda x: x['name'].lower())
 
     # Convert list of items to dict
-    for item in sorted_items:
-        print(f"[{item['name']}] - ID: {item['id']}")
+    if sorted_items:
+        for item in sorted_items:
+            print(f"[{item['name']}] - ID: {item['id']}")
+    else:
+        print(f"No {config_item} found for the given parameters. ")
+    print("")
 
     return True
