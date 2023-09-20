@@ -41,6 +41,17 @@ def pull_command_func(args):
                   sub_items=['metadata', 'properties', 'references'], filters=args.filters)
     elif args.config_item == "assets":
         get_items(config_item='assets', sub_items=['metadata'], filters=args.filters)
+    elif args.config_item == "eventHandlers":
+        get_items(config_item='eventHandlers', sub_items=['configuration', 'references'], filters=args.filters)
+    elif args.config_item == "groups":
+        get_items(config_item='groups', sub_items=['members', 'references'], filters=args.filters)
+    elif args.config_item == "jobs":
+        get_items(config_item='jobs', sub_items=['configuration'], filters=args.filters)
+
+# 'collections', 'jobs',
+#  'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
+#  'tags', 'taskDefinitions', 'tasks', 'taxonomies', 'taxonomies', 'timedActions', 'userDefinedObjectTypes',
+#  'users', 'variants', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']
 
 
 def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = []) -> dict:

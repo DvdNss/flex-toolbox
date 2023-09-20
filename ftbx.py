@@ -54,7 +54,6 @@ if __name__ == "__main__":
     create_workflow_command.add_argument('name', type=str, help='Name of the workflow')
     create_workflow_command.set_defaults(func=create_workflow_command_func)
 
-    # pull
     pull_command = subparsers.add_parser('pull', help='Pull config items from Flex')
     pull_command.add_argument('config_item', type=str, choices=FLEX_ITEMS, help='Config item to pull')
     pull_command.add_argument('--filters', type=str, nargs='*', help='Filters to apply')

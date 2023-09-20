@@ -49,8 +49,9 @@ DEFAULT_GROOVY_SCRIPT = "import com.ooyala.flex.plugins.PluginCommand\n\nclass s
 
 FLEX_ITEMS = ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
               'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
-              'tags', 'taskDefinitions', 'tasks', 'taxonomies', 'taxonomies', 'timedActions', 'userDefinedObjectsTypes',
-              'users', 'variants', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']
+              'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'taxonomies', 'timedActions',
+              'userDefinedObjectTypes', 'users', 'variants', 'variants', 'wizards', 'workflowDefinitions', 'workflows',
+              'workspaces']
 
 
 class PluginType(Enum):
