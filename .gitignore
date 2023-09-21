@@ -1,6 +1,6 @@
 /venv/
 /.idea/
-environments.json
+*.json
 /actions/
 /accounts/
 /assets/

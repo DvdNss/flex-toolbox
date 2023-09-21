@@ -8,6 +8,7 @@
     DESCRIPTION: list command functions
     
 """
+import json
 from typing import List
 
 import pandas as pd
@@ -166,6 +167,11 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
         pd.set_option('display.max_colwidth', None)
         table.index += 1
         print(table)
+
+        # Save result as JSON for further details
+        with open('list.json', 'w') as result_file:
+            json.dump(sorted_items, result_file, indent=4)
+            print("\nResults of the query have been saved as list.json for your best convenience.")
 
     # Empty results from API
     else:
