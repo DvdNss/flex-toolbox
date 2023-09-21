@@ -28,16 +28,6 @@ def list_command_func(args):
 
     list_items(config_item=args.config_item, filters=args.filters)
 
-    # collections
-
-    # ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
-    #               'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
-    #               'tagsCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'taxonomies', 'timedActions',
-    #               'userDefinedObjectTypes',
-    #               'users', 'variants', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']
-
-    # TODO: custom for userDefinedObject, tagCollections
-
 
 def list_items(config_item: str, filters: List[str] = []) -> bool:
     """
