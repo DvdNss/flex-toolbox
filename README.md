@@ -29,8 +29,15 @@
 
   # List assets with fql
   ftbx list assets --filters "fql=(mimetype~mp4)"
+  
+  # List 5 jobs in a failed status
+  ftbx list jobs --filters status=Failed limit=5
   ```
-  > available items are: ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs', 'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles', 'tags', 'taskDefinitions', 'tasks', 'taxonomies', 'taxonomies', 'timedActions', 'userDefinedObjectsTypes', 'users', 'variants', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']
+  > available items are: ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
+              'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
+              'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'taxonomies', 'timedActions',
+              'userDefinedObjectTypes', 'users', 'variants', 'variants', 'wizards', 'workflowDefinitions', 'workflows',
+              'workspaces']
 
 * pull items
   ```shell

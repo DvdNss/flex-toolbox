@@ -120,7 +120,7 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
         log_fields = ['name', 'id']
     elif config_item == 'users':
         sorted_items = get_items(config_item=config_item, filters=filters)
-        log_fields = ['name', 'id', 'userType', 'email', 'lastLoggedIn']
+        log_fields = ['displayName', 'id', 'userType', 'email', 'lastLoggedIn']
     elif config_item == 'variants':
         sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'defaultMetadataDefinition.displayName', 'defaultMetadataDefinition.id']
