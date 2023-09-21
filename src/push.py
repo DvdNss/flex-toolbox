@@ -5,7 +5,7 @@
     AUTHOR: David NAISSE
     DATE: September 14, 2023
 
-    DESCRIPTION: TODO
+    DESCRIPTION: push command functions
     
 """
 import json

@@ -7,7 +7,7 @@
     AUTHOR: David NAISSE
     DATE: September 07, 2023
 
-    DESCRIPTION: TODO
+    DESCRIPTION: terminal command reader
     
 """
 

@@ -5,7 +5,7 @@
     AUTHOR: David NAISSE
     DATE: September 13, 2023
 
-    DESCRIPTION: TODO
+    DESCRIPTION: functions that are used across the project
     
 """
 import json
