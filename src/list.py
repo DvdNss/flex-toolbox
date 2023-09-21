@@ -10,10 +10,10 @@
 """
 from typing import List
 
-import requests
 import pandas as pd
+import requests
 
-from src.utils import get_items
+from src.utils import get_items, get_tags_and_taxonomies
 
 # Global variables
 PAYLOAD = ""
@@ -99,7 +99,13 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
         sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'tagCollections':
-        sorted_items = get_items(config_item=config_item, filters=filters, prefix='metadata')
+        # No way to retrieve tags from API directly, so bypassing by reading tags from MD DEFs
+        # NOTE: Will only retrieve tags that are used by MD DEFs
+        print("\nRetrieving tagCollections from Metadata Definitions as "
+              "it is not possible to list them directly from the API...\nPlease note that only tagCollections that are used"
+              " in metadata definitions will be retrieved.")
+        metadata_definitions = get_items(config_item="metadataDefinitions", sub_items=['definition'])
+        sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['tagCollections'])
         log_fields = ['name', 'id']
     elif config_item == 'taskDefinitions':
         sorted_items = get_items(config_item=config_item, filters=filters)
@@ -108,7 +114,13 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
         sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'status', 'asset.name', 'asset.id']
     elif config_item == 'taxonomies':
-        sorted_items = get_items(config_item=config_item, filters=filters)
+        # No way to retrieve taxonomies from API directly, so bypassing by reading tags from MD DEFs
+        # NOTE: Will only retrieve taxonomies that are used by MD DEFs
+        print("\nRetrieving taxonomies from Metadata Definitions as "
+              "it is not possible to list them directly from the API...\nPlease note that only taxonomies that are used"
+              " in metadata definitions will be retrieved.")
+        metadata_definitions = get_items(config_item="metadataDefinitions", sub_items=['definition'])
+        sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['taxonomies'])
         log_fields = ['name', 'id']
     elif config_item == 'timedActions':
         sorted_items = get_items(config_item=config_item, filters=filters)
