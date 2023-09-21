@@ -121,9 +121,14 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
     items_dict = {}
 
     try:
-        for item in items:
-            items_dict[f"{item['name']} [{item['id']}]"] = item  # item_name: item_config
-    except:
+        if config_item != "collections":
+            for item in items:
+                items_dict[f"{item['name']} [{item['id']}]"] = item  # item_name: item_config
+        else:
+            for item in items:
+                items_dict[f"{item['name']} [{item['uuid']}]"] = item  # collection_name: collection_config
+    # Exception handler for events
+    except Exception as ex:
         for item in items:
             items_dict[f"{item['time']} [{item['id']}]"] = item  # event_time: event
 
