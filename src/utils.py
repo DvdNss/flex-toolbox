@@ -80,7 +80,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
 
     # Get total count
     test_request = f"{env['url']}/{prefix}/{config_item};offset=0;{';'.join(filters) if filters else ''}"
-    print(f"\nPerforming {env['url']}/{prefix}/{config_item}{';' + ';'.join(filters) if filters else ''}...\n")
+    print(f"\nPerforming [GET] {env['url']}/{prefix}/{config_item}{';' + ';'.join(filters) if filters else ''}...\n")
     test_response = session.request("GET", test_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
     # Exception handler
