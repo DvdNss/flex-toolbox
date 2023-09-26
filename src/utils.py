@@ -91,60 +91,68 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
     # Retrieve totalCount
     total_count = test_response['limit'] if test_response['limit'] != 100 else test_response['totalCount']
 
-    # Sequentially get all items (batch_size at a time)
-    for _ in tqdm(range(0, int(total_count / batch_size) + 1), desc=f"Retrieving {config_item}"):
+    if total_count != 0:
 
-        try:
-            batched_item_request = f"{env['url']}/{prefix}/{config_item};offset={str(offset)};{';'.join(filters) if filters else ''}"
+        # Sequentially get all items (batch_size at a time)
+        for _ in tqdm(range(0, int(total_count / batch_size) + 1), desc=f"Retrieving {config_item}"):
 
-            # Get batch of items from API
-            items_batch = session.request("GET", batched_item_request, headers=HEADERS, auth=auth,
-                                          data=PAYLOAD).json()
+            try:
+                batched_item_request = f"{env['url']}/{prefix}/{config_item};offset={str(offset)};{';'.join(filters) if filters else ''}"
+
+                # Get batch of items from API
+                items_batch = session.request("GET", batched_item_request, headers=HEADERS, auth=auth,
+                                              data=PAYLOAD).json()
+
+                # Exception handler
+                if 'errors' in items_batch:
+                    raise Exception(f"\n\nError while sending {batched_item_request}. "
+                                    f"\nError message: {items_batch['errors']['error']}\n")
+
+                # Add batch of items to the list
+                items.extend(items_batch[config_item] if config_item in items_batch else items_batch)
+
+                # Incr. offset
+                offset = offset + batch_size
 
             # Exception handler
-            if 'errors' in items_batch:
-                raise Exception(f"\n\nError while sending {batched_item_request}. "
-                                f"\nError message: {items_batch['errors']['error']}\n")
+            except KeyError as e:
+                print(f"Either empty result from API or exact same number for totalCount and batch_size. \n"
+                      f"Error is: {e}. Skipping.")
 
-            # Add batch of items to the list
-            items.extend(items_batch[config_item] if config_item in items_batch else items_batch)
+        # Convert list of items to dict
+        items_dict = {}
 
-            # Incr. offset
-            offset = offset + batch_size
-
-        # Exception handler
-        except KeyError as e:
-            print(f"Either empty result from API or exact same number for totalCount and batch_size. \n"
-                  f"Error is: {e}. Skipping.")
-
-    # Convert list of items to dict
-    items_dict = {}
-
-    try:
-        if config_item != "collections":
+        try:
+            if config_item != "collections":
+                for item in items:
+                    items_dict[f"{item['name']} [{item['id']}]"] = item  # item_name: item_config
+            else:
+                for item in items:
+                    items_dict[f"{item['name']} [{item['uuid']}]"] = item  # collection_name: collection_config
+        # Exception handler for events
+        except Exception as ex:
             for item in items:
-                items_dict[f"{item['name']} [{item['id']}]"] = item  # item_name: item_config
-        else:
-            for item in items:
-                items_dict[f"{item['name']} [{item['uuid']}]"] = item  # collection_name: collection_config
-    # Exception handler for events
-    except Exception as ex:
-        for item in items:
-            items_dict[f"{item['time']} [{item['id']}]"] = item  # event_time: event
+                items_dict[f"{item['time']} [{item['id']}]"] = item  # event_time: event
 
-    # Sort items dict by name (ignoring case)
-    sorted_items_dict = {i: items_dict[i] for i in sorted(list(items_dict.keys()), key=lambda s: s.casefold())}
+        # Sort items dict by name (ignoring case)
+        sorted_items_dict = {i: items_dict[i] for i in sorted(list(items_dict.keys()), key=lambda s: s.casefold())}
 
-    # Get all items sub_items from API
-    for item in tqdm(sorted_items_dict, desc=f"Retrieving {config_item} {sub_items}"):
-        for sub_item in sub_items:
-            sub_item_request = f"{env['url']}/{prefix}/{config_item}/{str(items_dict[item]['id'] if config_item is not 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}"
-            sorted_items_dict[item][sub_item] = session.request("GET", sub_item_request, headers=HEADERS, auth=auth,
-                                                                data=PAYLOAD).json() if sub_item != "body" else \
-                session.request("GET", sub_item_request, headers=HEADERS, auth=auth, data=PAYLOAD).content.decode(
-                    "utf-8", "ignore").strip()
+        # Get all items sub_items from API
+        for item in tqdm(sorted_items_dict, desc=f"Retrieving {config_item} {sub_items}"):
+            for sub_item in sub_items:
+                sub_item_request = f"{env['url']}/{prefix}/{config_item}/{str(items_dict[item]['id'] if config_item != 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}"
+                sorted_items_dict[item][sub_item] = session.request("GET", sub_item_request, headers=HEADERS, auth=auth,
+                                                                    data=PAYLOAD).json() if sub_item != "body" else \
+                    session.request("GET", sub_item_request, headers=HEADERS, auth=auth, data=PAYLOAD).content.decode(
+                        "utf-8", "ignore").strip()
 
-    return sorted_items_dict
+        return sorted_items_dict
+
+    else:
+
+        print(f"No {config_item} found for the given parameters. ")
+
+        return {}
 
 
 def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
