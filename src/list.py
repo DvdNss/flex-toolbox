@@ -137,6 +137,9 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
     elif config_item == 'workspaces':
         sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
+    elif config_item == 'all':
+        print("This command is not avaiable. ")
+        quit()
 
     print("")
 

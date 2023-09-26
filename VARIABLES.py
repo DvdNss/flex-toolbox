@@ -47,11 +47,26 @@ WORKFLOW_CONFIG = {
 
 DEFAULT_GROOVY_SCRIPT = "import com.ooyala.flex.plugins.PluginCommand\n\nclass script extends PluginCommand {\n\tdef execute(){\n\t\t// your code here\n\t}\n}"
 
-FLEX_ITEMS = ['all', 'accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
-              'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
-              'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'taxonomies', 'timedActions',
-              'userDefinedObjectTypes', 'users', 'variants', 'variants', 'wizards', 'workflowDefinitions', 'workflows',
-              'workspaces']
+FLEX_ITEMS_PULL = ['all', 'accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
+                   'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
+                   'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'taxonomies', 'timedActions',
+                   'userDefinedObjectTypes', 'users', 'variants', 'variants', 'wizards', 'workflowDefinitions',
+                   'workflows',
+                   'workspaces']
+
+FLEX_ITEMS_LIST = ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
+                   'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
+                   'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'taxonomies', 'timedActions',
+                   'userDefinedObjectTypes', 'users', 'variants', 'variants', 'wizards', 'workflowDefinitions',
+                   'workflows',
+                   'workspaces']
+
+FLEX_ITEMS_PUSH = ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
+                   'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
+                   'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'taxonomies', 'timedActions',
+                   'userDefinedObjectTypes', 'users', 'variants', 'variants', 'wizards', 'workflowDefinitions',
+                   'workflows',
+                   'workspaces']
 
 
 class PluginType(Enum):
