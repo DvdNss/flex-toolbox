@@ -138,7 +138,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
     # Get all items sub_items from API
     for item in tqdm(sorted_items_dict, desc=f"Retrieving {config_item} {sub_items}"):
         for sub_item in sub_items:
-            sub_item_request = f"{env['url']}/{prefix}/{config_item}/{str(items_dict[item]['id'])}/{sub_item}"
+            sub_item_request = f"{env['url']}/{prefix}/{config_item}/{str(items_dict[item]['id'] if config_item is not 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}"
             sorted_items_dict[item][sub_item] = session.request("GET", sub_item_request, headers=HEADERS, auth=auth,
                                                                 data=PAYLOAD).json() if sub_item != "body" else \
                 session.request("GET", sub_item_request, headers=HEADERS, auth=auth, data=PAYLOAD).content.decode(
