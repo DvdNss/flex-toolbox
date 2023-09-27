@@ -79,7 +79,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])
 
     # Get total count
-    test_request = f"{env['url']}/{prefix}/{config_item};offset=0;{';'.join(filters) if filters else ''}"
+    test_request = f"{env['url']}/{prefix}/{config_item}{';' + ';'.join(filters) if filters else ''}"
     print(f"\nPerforming [GET] {env['url']}/{prefix}/{config_item}{';' + ';'.join(filters) if filters else ''}...\n")
     test_response = session.request("GET", test_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
@@ -89,7 +89,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
                         f" \nError message: {test_response['errors']['error']}\n")
 
     # Retrieve totalCount
-    total_count = test_response['limit'] if test_response['limit'] != 100 else test_response['totalCount']
+    total_count = test_response['limit'] if test_response['limit'] != batch_size else test_response['totalCount']
 
     if total_count != 0:
 
@@ -97,7 +97,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
         for _ in tqdm(range(0, int(total_count / batch_size) + 1), desc=f"Retrieving {config_item}"):
 
             try:
-                batched_item_request = f"{env['url']}/{prefix}/{config_item};offset={str(offset)};{';'.join(filters) if filters else ''}"
+                batched_item_request = f"{env['url']}/{prefix}/{config_item};offset={str(offset)}{';' + ';'.join(filters) if filters else ''}"
 
                 # Get batch of items from API
                 items_batch = session.request("GET", batched_item_request, headers=HEADERS, auth=auth,

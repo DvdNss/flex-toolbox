@@ -107,6 +107,7 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
     elif config_item == 'taxonomies':
         # No way to retrieve taxonomies from API directly, so bypassing by reading tags from MD DEFs
         # NOTE: Will only retrieve taxonomies that are used by MD DEFs
+        # todo: specific call for taxonomies
         print("\nRetrieving taxonomies from Metadata Definitions as "
               "it is not possible to list them directly from the API...\nPlease note that only taxonomies that are used"
               " in metadata definitions will be retrieved.")

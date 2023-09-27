@@ -45,7 +45,7 @@ session = requests.Session()
 
 
 def push_command_func(args):
-    """Action on pull command. """
+    """Action on push command. """
 
     # iterate over items to push
     for item in args.item_names:
@@ -58,7 +58,9 @@ def push_command_func(args):
                 data = json.load(config_file)
 
             if args.config_item == 'actions' and data['objectType']['name'] == 'action':
-                push_action(action_name=item, action_config=data)
+                push_item(config_item=args.config_item, item_name=item, item_config=data)
+            elif args.config_item == 'jobs' and data['objectType']['name'] == 'job':
+                push_job(job_config=data)
             else:
                 print(f'Cannot push action {item} since it is not an action.\n')
 
@@ -67,17 +69,18 @@ def push_command_func(args):
             print(f"Cannot find folder for {item}.\n")
 
 
-def push_action(action_name, action_config):
+def push_item(config_item: str, item_name: str, item_config: dict):
     """
     Push action for Flex.
 
-    :param action_name: action to push
-    :param action_config: action config
+    :param config_item: config entity
+    :param item_name: item name
+    :param item_config: item config
     :return:
     """
 
     payload = {}
-    action_id = action_config['id']
+    item_id = item_config['id']
     imports = []
 
     # Retrieve default env
@@ -88,57 +91,56 @@ def push_action(action_name, action_config):
 
     # build payload
     for field in ACTION_UPDATE_FIELDS:
-        if field in action_config:
-            payload[field] = action_config[field]
+        if field in item_config:
+            payload[field] = item_config[field]
 
     # check if action already exists first
-    get_action = f"{env['url']}/api/actions;name={action_name}"
-    response = session.request("GET", get_action, headers=HEADERS, auth=auth, data=PAYLOAD).json()
+    get_item = f"{env['url']}/api/{config_item};name={item_name}"
+    item = session.request("GET", get_item, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
-    if 'errors' in response:
-        raise Exception(f"\n\nError while sending {get_action}. \nError message: {response['errors']['error']}\n ")
+    if 'errors' in item:
+        raise Exception(f"\n\nError while sending {get_item}. \nError message: {item['errors']['error']}\n ")
 
-    total_count = response['totalCount']
+    total_count = item['totalCount']
 
     # action doesn't exist, create it
     if total_count == 0:
 
         # set action parameters
-        payload['pluginClass'] = action_config['pluginClass']
-        payload['pluginUuid'] = action_config['pluginUuid']
-        payload['type'] = action_config['type']['name']
+        payload['pluginClass'] = item_config['pluginClass']
+        payload['pluginUuid'] = item_config['pluginUuid']
+        payload['type'] = item_config['type']['name']
         payload['visibilityIds'] = [get_default_account_id()]
         payload['accountId'] = get_default_account_id()
 
         # create action
-        create_action_request = f"{env['url']}/api/actions"
-        print(f"\nPerforming [POST] {env['url']}/api/actions...")
-        create_action = session.request("POST", create_action_request, headers=HEADERS, auth=auth,
-                                        data=json.dumps(payload)).json()
+        create_item_request = f"{env['url']}/api/{config_item}"
+        print(f"\nPerforming [POST] {env['url']}/api/{config_item}...")
+        create_item = session.request("POST", create_item_request, headers=HEADERS, auth=auth,
+                                      data=json.dumps(payload)).json()
 
-        if 'errors' in create_action:
+        if 'errors' in create_item:
             raise Exception(
-                f"\n\nError while sending {create_action_request}. \nError message: {create_action['errors']['error']}\n")
+                f"\n\nError while sending {create_item_request}. \nError message: {create_item['errors']['error']}\n")
 
-        action_id = create_action['id']
+        item_id = create_item['id']
 
         # enable action
-        enable_action_request = f"{env['url']}/api/actions/{action_id}/actions"
-        enable_action = session.request("POST", enable_action_request, headers=HEADERS, auth=auth,
-                                        data=json.dumps({"action": "enable"})).json()
+        enable_item_request = f"{env['url']}/api/{config_item}/{item_id}/actions"
+        enable_item = session.request("POST", enable_item_request, headers=HEADERS, auth=auth,
+                                      data=json.dumps({"action": "enable"})).json()
 
-        if 'errors' in enable_action:
+        if 'errors' in enable_item:
             raise Exception(
-                f"\n\nError while sending {enable_action_request}. \nError message: {enable_action['errors']['error']}\n")
+                f"\n\nError while sending {enable_item_request}. \nError message: {enable_item['errors']['error']}\n")
 
     # action exists, update it
     elif total_count == 1:
 
-        action = get_items(config_item='actions', filters=[f"name={action_name}"])
-        action_id = action.get(next(iter(action))).get('id')
+        item_id = item.get(config_item)[0].get('id')
 
         # update action
-        update_action_request = f"{env['url']}/api/actions/{action_id}"
+        update_action_request = f"{env['url']}/api/{config_item}/{item_id}"
         print(f"\nPerforming [PUT] {update_action_request}...")
         update_action = session.request("PUT", update_action_request, headers=HEADERS, auth=auth,
                                         data=json.dumps(payload)).json()
@@ -148,8 +150,8 @@ def push_action(action_name, action_config):
                 f"\n\nError while sending {update_action_request}. \nError message: {update_action['errors']['error']}\n")
 
     # push script
-    if os.path.isfile(f"actions/{action_name}/script.groovy"):
-        with open(f"actions/{action_name}/script.groovy", 'r') as groovy_file:
+    if os.path.isfile(f"{config_item}/{item_name}/script.groovy"):
+        with open(f"{config_item}/{item_name}/script.groovy", 'r') as groovy_file:
             script_content = groovy_file.read().strip() \
                 .replace("import com.ooyala.flex.plugins.PluginCommand", "")
 
@@ -161,23 +163,26 @@ def push_action(action_name, action_config):
 
             # get code
             last_char = script_content.rindex("}")
-            script_content = script_content[:last_char - 2].replace("class Script extends PluginCommand {\n\t",
-                                                                    "").replace("\t\t", '\t').strip() + "\n}"
+            script_content = script_content[:last_char - 2].replace("class Script extends PluginCommand {",
+                                                                    "").strip() + "\n}"
             try:
-                exec_lock_type = action_config['configuration']['instance']['execution-lock-type']
+                exec_lock_type = item_config['configuration']['instance']['execution-lock-type']
             except:
                 exec_lock_type = "NONE"
 
+            # payload
             payload = {
                 "internal-script": {
                     "script-content": script_content,
-                    "script-import": imports if imports else None
                 },
                 "execution-lock-type": exec_lock_type
             }
 
+            if imports:
+                payload['internal-script']['script-import'] = imports
+
             # update configuration
-            update_configuration_request = f"{env['url']}/api/actions/{action_id}/configuration"
+            update_configuration_request = f"{env['url']}/api/{config_item}/{item_id}/configuration"
             print(f"\nPerforming [PUT] {update_configuration_request}...\n")
             update_configuration = session.request("PUT", update_configuration_request, headers=HEADERS, auth=auth,
                                                    data=json.dumps(payload)).json()
@@ -187,15 +192,15 @@ def push_action(action_name, action_config):
                 raise Exception(
                     f"\n\nError while sending {update_configuration_request}. \nError message: {update_configuration['errors']['error']}\n")
 
-            print(f"action: {action_name} has been pushed successfully to {env['url']}.\n")
+            print(f"{config_item}: {item_name} has been pushed successfully to {env['url']}.\n")
 
     # push config
-    if os.path.isfile(f"actions/{action_name}/configuration.json"):
-        with open(f"actions/{action_name}/configuration.json", 'r') as config_json:
+    if os.path.isfile(f"{config_item}/{item_name}/configuration.json"):
+        with open(f"{config_item}/{item_name}/configuration.json", 'r') as config_json:
             payload = json.load(config_json)
 
             # update configuration
-            update_configuration_request = f"{env['url']}/api/actions/{action_id}/configuration"
+            update_configuration_request = f"{env['url']}/api/{config_item}/{item_id}/configuration"
             print(f"\nPerforming [PUT] {update_configuration_request}...\n")
             update_configuration = session.request("PUT", update_configuration_request, headers=HEADERS, auth=auth,
                                                    data=json.dumps(payload)).json()
@@ -204,10 +209,135 @@ def push_action(action_name, action_config):
                 raise Exception(
                     f"\n\nError while sending {update_configuration_request}. \nError message: {update_configuration['errors']['error']}\n")
 
-            print(f"action: {action_name} has been pushed successfully to {env['url']}.\n")
+            print(f"{config_item}: {item_name} has been pushed successfully to {env['url']}.\n")
 
     print("---")
 
     # get updated action
-    updated_action = get_items(config_item='actions', filters=[f"id={action_id}"])
+    updated_action = get_items(config_item='actions', filters=[f"id={item_id}"])
     save_items(config_item='actions', items=updated_action)
+
+
+def push_job(job_config: dict):
+    """
+        Push action for Flex.
+
+        :param job_config: job config
+        :return:
+        """
+
+    payload = {}
+    job_id = job_config['id']
+    imports = []
+
+    # Retrieve default env
+    env = get_default_env()
+
+    # Init. connection & auth with env API
+    auth = HTTPBasicAuth(username=env['username'], password=env['password'])
+
+    # check if action already exists first
+    job_request = f"{env['url']}/api/jobs/{job_id}"
+    job = session.request("GET", job_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
+
+    # exception handler
+    if 'errors' in job:
+        raise Exception(f"\n\nError while sending {job_request}. \nError message: {job['errors']['error']}\n ")
+    else:
+        job_id = job['id']
+
+    # push script
+    if os.path.isfile(f"jobs/{job['name']} [{job_id}]/script.groovy"):
+        with open(f"jobs/{job['name']} [{job_id}]/script.groovy", 'r') as groovy_file:
+            script_content = groovy_file.read().strip() \
+                .replace("import com.ooyala.flex.plugins.PluginCommand", "")
+
+            # get imports
+            for line in script_content.split("\n"):
+                if line.startswith("import") and "PluginCommand" not in line:
+                    imports.append({'value': line[7:], 'isExpression': False})
+                    script_content = script_content.replace(line, "")
+
+            # get code
+            last_char = script_content.rindex("}")
+            script_content = script_content[:last_char - 2].replace("class Script extends PluginCommand {",
+                                                                    "").strip() + "\n}"
+
+            # groovy
+            if job_config.get('action').get('pluginClass') == "tv.nativ.mio.plugins.actions.script.GroovyScriptCommand":
+
+                try:
+                    exec_lock_type = job_config['configuration']['instance']['requires-lock']
+                except:
+                    exec_lock_type = {
+                        "value": "NONE",
+                        "isExpression": False
+                    }
+
+                # payload
+                payload = {
+                    "script-contents": {
+                        "script": script_content,
+                    },
+                    "requires-lock": exec_lock_type
+                }
+
+                if imports:
+                    payload['imports'] = {"import": imports}
+
+            # JEF
+            else:
+
+                try:
+                    exec_lock_type = job_config['configuration']['instance']['execution-lock-type']
+                except:
+                    exec_lock_type = "NONE"
+
+                payload = {
+                    "internal-script": {
+                        "script-content": script_content,
+                    },
+                    "execution-lock-type": exec_lock_type
+                }
+
+                if imports:
+                    payload['internal-script']['script-import'] = imports
+
+            # update configuration
+            update_configuration_request = f"{env['url']}/api/jobs/{job_id}/configuration"
+            print(f"\nPerforming [PUT] {update_configuration_request}...\n")
+            update_configuration = session.request("PUT", update_configuration_request, headers=HEADERS, auth=auth,
+                                                   data=json.dumps(payload)).json()
+
+            # exception handler
+            if 'errors' in update_configuration:
+                raise Exception(
+                    f"\n\nError while sending {update_configuration_request}. \nError message: {update_configuration['errors']['error']}\n")
+
+    # push config
+    if os.path.isfile(f"jobs/{job['name']} [{job_id}]/configuration.json"):
+        with open(f"jobs/{job['name']} [{job_id}]/configuration.json", 'r') as config_json:
+            payload = json.load(config_json)
+
+            # update configuration
+            update_configuration_request = f"{env['url']}/api/jobs/{job_id}/configuration"
+            print(f"\nPerforming [PUT] {update_configuration_request}...\n")
+            update_configuration = session.request("PUT", update_configuration_request, headers=HEADERS, auth=auth,
+                                                   data=json.dumps(payload)).json()
+            # exception handler
+            if 'errors' in update_configuration:
+                raise Exception(
+                    f"\n\nError while sending {update_configuration_request}. \nError message: {update_configuration['errors']['error']}\n")
+
+    # retry job
+    retry_job_request = f"{env['url']}/api/jobs/{job_id}/actions"
+    retry_job = session.request("POST", retry_job_request, headers=HEADERS, auth=auth,
+                                data=json.dumps({"action": "retry"})).json()
+
+    print(f"jobs: {job['name']} [{job_id}] has been pushed successfully to {env['url']} and has been retried.\n")
+
+    print("---")
+
+    # get updated item
+    updated_job = get_items(config_item='jobs', filters=[f"id={job_id}"])
+    save_items(config_item='jobs', items=updated_job)
