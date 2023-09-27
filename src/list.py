@@ -67,7 +67,7 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
         log_fields = ['name', 'id', 'role.name', 'role.id']
     elif config_item == 'jobs':
         sorted_items = get_items(config_item=config_item, filters=filters)
-        log_fields = ['name', 'id', 'status', 'actionType', 'asset.id', 'workflow.id']
+        log_fields = ['name', 'id', 'status', 'actionType.name', 'asset.id', 'workflow.id']
     elif config_item == 'messageTemplates':
         sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
