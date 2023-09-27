@@ -418,13 +418,19 @@ def create_script(item_name, item_config):
 
     try:
         script = script.replace("<&code>", item_config['configuration']['instance']['script_type']['script']
-                                .replace("\n", "\n\t"))
+                                .replace("\r\n", "\n\t"))
+    except:
+        pass
+
+    try:
+        script = script.replace("<&code>", item_config['configuration']['instance']['internal-script']['script-content']
+                                .replace("\r\n", "\n\t"))
     except:
         pass
 
     try:
         script = script.replace("<&code>", item_config['configuration']['instance']['script-contents']['script']
-                                .replace("\n", "\n\t"))
+                                .replace("\r\n", "\n\t"))
     except:
         script = script.replace("<&code>", "")
 

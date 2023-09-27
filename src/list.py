@@ -168,7 +168,10 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
         table = pd.DataFrame(rows, columns=columns)
         pd.set_option('display.colheader_justify', 'center')
         pd.set_option('display.max_colwidth', None)
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.max_rows', None)
         table.index += 1
+        pd.DataFrame.to_csv(table, "list.csv")
         print(table)
 
         # Save result as JSON for further details

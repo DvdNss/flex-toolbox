@@ -16,6 +16,8 @@ from requests.auth import HTTPBasicAuth
 
 from src.connect import get_default_account_id
 from src.env import get_default_env
+from src.pull import save_items
+from src.utils import get_items
 
 # Global variables
 PAYLOAD = ""
@@ -52,7 +54,7 @@ def push_command_func(args):
         if os.path.isdir(f"{args.config_item}/{item}"):
 
             # check if is action
-            with open(f"{args.config_item}/{item}/config.json", 'r') as config_file:
+            with open(f"{args.config_item}/{item}/_object.json", 'r') as config_file:
                 data = json.load(config_file)
 
             if args.config_item == 'actions' and data['objectType']['name'] == 'action':
@@ -91,12 +93,12 @@ def push_action(action_name, action_config):
 
     # check if action already exists first
     get_action = f"{env['url']}/api/actions;name={action_name}"
-    total_count = session.request("GET", get_action, headers=HEADERS, auth=auth, data=PAYLOAD).json()
+    response = session.request("GET", get_action, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
-    if 'errors' in total_count:
-        raise Exception(f"\n\nError while sending {get_action}. \nError message: {total_count['errors']['error']}\n ")
+    if 'errors' in response:
+        raise Exception(f"\n\nError while sending {get_action}. \nError message: {response['errors']['error']}\n ")
 
-    total_count = total_count['totalCount']
+    total_count = response['totalCount']
 
     # action doesn't exist, create it
     if total_count == 0:
@@ -110,25 +112,36 @@ def push_action(action_name, action_config):
 
         # create action
         create_action_request = f"{env['url']}/api/actions"
+        print(f"\nPerforming [POST] {env['url']}/api/actions...")
         create_action = session.request("POST", create_action_request, headers=HEADERS, auth=auth,
                                         data=json.dumps(payload)).json()
-        print(f"\nPerforming [POST] {env['url']}/api/actions...\n")
 
         if 'errors' in create_action:
             raise Exception(
                 f"\n\nError while sending {create_action_request}. \nError message: {create_action['errors']['error']}\n")
 
-        # push script
         action_id = create_action['id']
+
+        # enable action
+        enable_action_request = f"{env['url']}/api/actions/{action_id}/actions"
+        enable_action = session.request("POST", enable_action_request, headers=HEADERS, auth=auth,
+                                        data=json.dumps({"action": "enable"})).json()
+
+        if 'errors' in enable_action:
+            raise Exception(
+                f"\n\nError while sending {enable_action_request}. \nError message: {enable_action['errors']['error']}\n")
 
     # action exists, update it
     elif total_count == 1:
 
+        action = get_items(config_item='actions', filters=[f"name={action_name}"])
+        action_id = action.get(next(iter(action))).get('id')
+
         # update action
         update_action_request = f"{env['url']}/api/actions/{action_id}"
+        print(f"\nPerforming [PUT] {update_action_request}...")
         update_action = session.request("PUT", update_action_request, headers=HEADERS, auth=auth,
                                         data=json.dumps(payload)).json()
-        print(f"\nPerforming [PUT] {update_action_request}...\n")
 
         if 'errors' in update_action:
             raise Exception(
@@ -165,11 +178,36 @@ def push_action(action_name, action_config):
 
             # update configuration
             update_configuration_request = f"{env['url']}/api/actions/{action_id}/configuration"
+            print(f"\nPerforming [PUT] {update_configuration_request}...\n")
             update_configuration = session.request("PUT", update_configuration_request, headers=HEADERS, auth=auth,
                                                    data=json.dumps(payload)).json()
-            print(f"\nPerforming [PUT] {update_configuration_request}...\n")
-            print(f"action: {action_name} has been pushed successfully to {env['url']}.\n")
 
+            # exception handler
             if 'errors' in update_configuration:
                 raise Exception(
                     f"\n\nError while sending {update_configuration_request}. \nError message: {update_configuration['errors']['error']}\n")
+
+            print(f"action: {action_name} has been pushed successfully to {env['url']}.\n")
+
+    # push config
+    if os.path.isfile(f"actions/{action_name}/configuration.json"):
+        with open(f"actions/{action_name}/configuration.json", 'r') as config_json:
+            payload = json.load(config_json)
+
+            # update configuration
+            update_configuration_request = f"{env['url']}/api/actions/{action_id}/configuration"
+            print(f"\nPerforming [PUT] {update_configuration_request}...\n")
+            update_configuration = session.request("PUT", update_configuration_request, headers=HEADERS, auth=auth,
+                                                   data=json.dumps(payload)).json()
+            # exception handler
+            if 'errors' in update_configuration:
+                raise Exception(
+                    f"\n\nError while sending {update_configuration_request}. \nError message: {update_configuration['errors']['error']}\n")
+
+            print(f"action: {action_name} has been pushed successfully to {env['url']}.\n")
+
+    print("---")
+
+    # get updated action
+    updated_action = get_items(config_item='actions', filters=[f"id={action_id}"])
+    save_items(config_item='actions', items=updated_action)
