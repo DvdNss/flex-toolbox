@@ -13,7 +13,7 @@ from typing import List
 
 import requests
 
-from src.utils import create_folder, get_tags_and_taxonomies, get_items
+from src.utils import create_folder, get_tags_and_taxonomies, get_items, get_taxonomies
 
 # Global variables
 PAYLOAD = ""
@@ -58,7 +58,7 @@ def save_items(config_item: str, items: dict):
         else:
             folder_name = f"{items.get(item).get('name')}".replace("/", "").replace(":", "")
 
-            # Create object folder
+        # Create object folder
         create_folder(folder_name=f"{config_item}/{folder_name}", ignore_error=True)
 
         # Save subfields in other files
@@ -184,6 +184,31 @@ def save_items(config_item: str, items: dict):
     print("") if items else None
 
 
+def save_taxonomies(taxonomies):
+    """
+    Save taxonomies.
+
+    :param taxonomies:
+    :return:
+    """
+
+    # create parent folder
+    create_folder(folder_name="taxonomies", ignore_error=True)
+
+    print("")
+
+    for idx, taxonomy in enumerate(taxonomies):
+        # create taxonomy folder
+        create_folder(folder_name=f"taxonomies/{taxonomy.get('name')}", ignore_error=True)
+
+        # save taxonomy
+        with open(f"taxonomies/{taxonomy.get('name')}/_object.json", "w") as item_config:
+            json.dump(obj=taxonomies[idx], fp=item_config, indent=4)
+            print(f"taxonomies: {taxonomy.get('name')} has been retrieved successfully. ")
+
+    print("") if taxonomies else None
+
+
 def pull_items(config_item: str, filters: List[str] = []) -> bool:
     """
     List items ids.
@@ -255,14 +280,8 @@ def pull_items(config_item: str, filters: List[str] = []) -> bool:
         sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
         save_items(config_item=config_item, items=sorted_items)
     elif config_item == 'taxonomies':
-        # No way to retrieve taxonomies from API directly, so bypassing by reading tags from MD DEFs
-        # NOTE: Will only retrieve taxonomies that are used by MD DEFs
-        print("\nRetrieving taxonomies from Metadata Definitions as "
-              "it is not possible to list them directly from the API...\nPlease note that only taxonomies that are used"
-              " in metadata definitions will be retrieved.")
-        metadata_definitions = get_items(config_item="metadataDefinitions", sub_items=['definition'])
-        sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['taxonomies'])
-        save_items(config_item=config_item, items=sorted_items)
+        taxonomies = get_taxonomies(filters=filters)
+        save_taxonomies(taxonomies=taxonomies)
     elif config_item == 'timedActions':
         sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
         save_items(config_item=config_item, items=sorted_items)
@@ -422,17 +441,21 @@ def create_script(item_name, item_config):
         pass
 
     try:
-        script = script.replace("<&code>", item_config['configuration']['instance']['script_type']['script'][:-2] + "\n\t}")
+        script = script.replace("<&code>",
+                                item_config['configuration']['instance']['script_type']['script'][:-2] + "\n\t}")
     except:
         pass
 
     try:
-        script = script.replace("<&code>", item_config['configuration']['instance']['internal-script']['script-content'][:-2] + "\n\t}")
+        script = script.replace("<&code>",
+                                item_config['configuration']['instance']['internal-script']['script-content'][
+                                :-2] + "\n\t}")
     except:
         pass
 
     try:
-        script = script.replace("<&code>", item_config['configuration']['instance']['script-contents']['script'][:-2] + "\n\t}")
+        script = script.replace("<&code>",
+                                item_config['configuration']['instance']['script-contents']['script'][:-2] + "\n\t}")
     except:
         script = script.replace("<&code>", "")
 

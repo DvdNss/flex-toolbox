@@ -14,7 +14,7 @@ from typing import List
 import pandas as pd
 import requests
 
-from src.utils import get_items, get_tags_and_taxonomies
+from src.utils import get_items, get_tags_and_taxonomies, get_taxonomies
 
 # Global variables
 PAYLOAD = ""
@@ -41,6 +41,7 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
     """
 
     sorted_items = {}
+    taxonomies = []
     log_fields = []
 
     if config_item == 'accounts':
@@ -105,14 +106,7 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
         sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'status', 'asset.name', 'asset.id']
     elif config_item == 'taxonomies':
-        # No way to retrieve taxonomies from API directly, so bypassing by reading tags from MD DEFs
-        # NOTE: Will only retrieve taxonomies that are used by MD DEFs
-        # todo: specific call for taxonomies
-        print("\nRetrieving taxonomies from Metadata Definitions as "
-              "it is not possible to list them directly from the API...\nPlease note that only taxonomies that are used"
-              " in metadata definitions will be retrieved.")
-        metadata_definitions = get_items(config_item="metadataDefinitions", sub_items=['definition'])
-        sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['taxonomies'])
+        taxonomies = get_taxonomies(filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'timedActions':
         sorted_items = get_items(config_item=config_item, filters=filters)
@@ -144,32 +138,24 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
 
     print("")
 
-    # Convert to dataframe and display
-    rows = []
-    columns = log_fields
-    if sorted_items:
-        for item in sorted_items:
-            row = []
-
-            # Extract field
-            for field in log_fields:
-                if "." not in field:
-                    row.append(str(sorted_items.get(item).get(field)))
-                else:
-                    tmp = sorted_items.get(item)
-                    for subfield in field.split("."):
-                        try:
-                            tmp = tmp.get(subfield)
-                        except:
-                            pass
-                    row.append(str(tmp))
+    if taxonomies:
+        rows = []
+        columns = log_fields
+        columns.append('taxons [id]')
+        for idx, taxonomy in enumerate(taxonomies):
+            row = [taxonomy['name'], taxonomy['id']]
+            if 'childTaxons' in taxonomy:
+                child_taxons = []
+                for idx2, child_taxon in enumerate(taxonomy['childTaxons']):
+                    child_taxons.append(
+                        f"{taxonomy['childTaxons'][idx2]['name']} [{taxonomy['childTaxons'][idx2]['id']}]")
+                row.append(", ".join(child_taxons))
             rows.append(row)
 
         # Display dataframe
         table = pd.DataFrame(rows, columns=columns)
         pd.set_option('display.colheader_justify', 'center')
         pd.set_option('display.max_colwidth', None)
-        pd.set_option('display.max_columns', None)
         pd.set_option('display.max_rows', None)
         table.index += 1
         pd.DataFrame.to_csv(table, "list.csv")
@@ -177,12 +163,48 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
 
         # Save result as JSON for further details
         with open('list.json', 'w') as result_file:
-            json.dump(sorted_items, result_file, indent=4)
-            print("\nResults of the query have been saved as list.json for your best convenience.")
+            json.dump(taxonomies, result_file, indent=4)
+            print("\nResults of the query (with nested taxons) have been saved as list.json for your best convenience.")
 
-    # Empty results from API
     else:
-        print(f"No {config_item} found for the given parameters. ")
-    print("")
+        # Convert to dataframe and display
+        rows = []
+        columns = log_fields
+        if sorted_items:
+            for item in sorted_items:
+                row = []
+
+                # Extract field
+                for field in log_fields:
+                    if "." not in field:
+                        row.append(str(sorted_items.get(item).get(field)))
+                    else:
+                        tmp = sorted_items.get(item)
+                        for subfield in field.split("."):
+                            try:
+                                tmp = tmp.get(subfield)
+                            except:
+                                pass
+                        row.append(str(tmp))
+                rows.append(row)
+
+            # Display dataframe
+            table = pd.DataFrame(rows, columns=columns)
+            pd.set_option('display.colheader_justify', 'center')
+            pd.set_option('display.max_colwidth', None)
+            pd.set_option('display.max_rows', None)
+            table.index += 1
+            pd.DataFrame.to_csv(table, "list.csv")
+            print(table)
+
+            # Save result as JSON for further details
+            with open('list.json', 'w') as result_file:
+                json.dump(sorted_items, result_file, indent=4)
+                print("\nResults of the query have been saved as list.json for your best convenience.")
+
+        # Empty results from API
+        else:
+            print(f"No {config_item} found for the given parameters. ")
+        print("")
 
     return True

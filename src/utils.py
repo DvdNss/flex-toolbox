@@ -155,6 +155,90 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
         return {}
 
 
+def get_taxonomies(filters: List[str]):
+    """
+    Get taxonomies from public API
+
+    :param filters: filters to apply
+    :return:
+    """
+
+    # encode fql
+    if filters:
+        for idx, filter in enumerate(filters):
+            if "fql=" in filter:
+                filters[idx] = "fql=" + urllib.parse.quote(filter.replace("fql=", ""))
+
+    # Retrieve default env
+    env = get_default_env()
+
+    # Init. connection & auth with env API
+    auth = HTTPBasicAuth(username=env['username'], password=env['password'])
+
+    # Get total count
+    taxonomies_request = f"{env['url']}/api/taxonomies{';' + ';'.join(filters) if filters else ''}"
+    print(f"\nPerforming [GET] {env['url']}/api/taxonomies{';' + ';'.join(filters) if filters else ''}...")
+    taxonomies = session.request("GET", taxonomies_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
+
+    enabled_taxonomies = []
+    for idx, taxonomy in enumerate(taxonomies):
+        if taxonomy['enabled']:
+            enabled_taxonomies.append(taxonomies[idx])
+
+    # get taxons
+    taxonomies = get_taxons(taxonomies=enabled_taxonomies, env=env, auth=auth)
+
+    return taxonomies
+
+
+def get_taxons(taxonomies: List[dict], env, auth, url: str = None):
+    """
+    Get taxonomies' taxons - recursively
+
+    :param taxonomies: taxonomies
+    :param env: env
+    :param auth: auth
+    :param url: url to use
+    :return:
+    """
+
+    # this one is pretty hard to understand
+    for idx, taxonomy in enumerate(taxonomies):
+
+        # build and send api call
+        root_taxons_request = f"{env['url']}/api/taxonomies/{taxonomy['id']}/taxons" if not url else url
+        taxonomies[idx]['childTaxons'] = session.request("GET", root_taxons_request, headers=HEADERS,
+                                                         auth=auth).json()
+        try:
+            # for root taxons' children (childTaxons)
+            for idx2, child_taxon in enumerate(taxonomies[idx]['childTaxons']):
+                # only retrieve the enabled ones
+                if taxonomies[idx]['childTaxons'][idx2]['enabled']:
+                    # check for children recursively if root taxon child has children
+                    if taxonomies[idx]['childTaxons'][idx2]['hasChildren']:
+                        taxonomies[idx]['childTaxons'][idx2]['childTaxons'] = get_taxons(
+                            taxonomies=[taxonomies[idx]['childTaxons'][idx2].copy()],
+                            env=env,
+                            auth=auth,
+                            url=f"{root_taxons_request}/{taxonomies[idx]['childTaxons'][idx2]['id']}/taxons"
+                        )[0]['childTaxons']['taxons']
+        except:
+            # for childTaxons children
+            for idx2, child_taxon in enumerate(taxonomies[idx]['childTaxons']['taxons']):
+                # only retrieve the enabled ones
+                if taxonomies[idx]['childTaxons']['taxons'][idx2]['enabled']:
+                    # check for children recursively if taxon has children
+                    if taxonomies[idx]['childTaxons']['taxons'][idx2]['hasChildren']:
+                        taxonomies[idx]['childTaxons']['taxons'][idx2]['childTaxons'] = get_taxons(
+                            taxonomies=[taxonomies[idx]['childTaxons']['taxons'][idx2].copy()],
+                            env=env,
+                            auth=auth,
+                            url=f"{root_taxons_request.split('taxons/')[0]}taxons/{taxonomies[idx]['childTaxons']['taxons'][idx2]['id']}/taxons"
+                        )[0]['childTaxons']['taxons']
+
+    return taxonomies
+
+
 def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
                             mode: List[str] = ['tagCollections', 'taxonomies']):
     """

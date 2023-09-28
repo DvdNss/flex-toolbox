@@ -1,6 +1,7 @@
 /venv/
 /.idea/
 *.json
+*.csv
 /actions/
 /accounts/
 /assets/
