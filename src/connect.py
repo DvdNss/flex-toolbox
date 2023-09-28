@@ -14,11 +14,11 @@ from requests.auth import HTTPBasicAuth
 
 from src.env import read_environments_json, add_or_update_environments_json, get_default_env
 
-# Global variables
+# global variables
 PAYLOAD = ""
 HEADERS = {'Content-Type': 'application/vnd.nativ.mio.v1+json'}
 
-# Init. session
+# init. session
 session = requests.Session()
 
 
@@ -38,13 +38,13 @@ def ping(env: str, username: str, password: str):
     :return:
     """
 
-    # Init. connection & auth with env API
+    # init. connection & auth with env API
     auth = HTTPBasicAuth(username=username, password=password)
 
-    # Send a test request
+    # send a test request
     response = session.request("GET", f"{env}/api/accounts;limit=1", headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
-    # Handle connection unavailable
+    # handle connection unavailable
     if "errors" in response:
         print(f"ERROR: {response['errors']['error']}")
         raise Exception(response["errors"]["error"])
@@ -65,27 +65,27 @@ def connect(url_or_alias: str, username: str = None, password: str = None):
     environments = read_environments_json()
     env = None
 
-    # Retrieve env by alias
+    # retrieve env by alias
     try:
         for e in environments['environments']:
             if url_or_alias in e:
                 env = environments['environments'][e]
         if env is None: raise Exception
-    # If it fails, retrieve env by url
+    # if it fails, retrieve env by url
     except:
         for e in environments['environments']:
             if url_or_alias in environments['environments'][e]['url']:
                 env = environments['environments'][e]
 
-    # If env is not registered and no username/password provided
+    # if env is not registered and no username/password provided
     if not env and not password and not username:
         print(f"Unable to recognize environment, please check the information is correct or provide username/password.")
         return False
-    # If env not registered but username and password provided
+    # if env not registered but username and password provided
     elif not env and password and username:
         env = add_or_update_environments_json(env=url_or_alias, username=username, password=password)
 
-    # Test connection and default if successful
+    # test connection and default if successful
     ping(env=env['url'], username=env['username'], password=env['password'])
     add_or_update_environments_json(env=env['url'], username=env['username'], password=env['password'], isDefault=True)
 
@@ -99,13 +99,13 @@ def get_default_account_id():
     :return:
     """
 
-    # Retrieve default env
+    # retrieve default env
     env = get_default_env()
 
-    # Init. connection & auth with env API
+    # init. connection & auth with env API
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])
 
-    # Get default account id
+    # get default account id
     try:
         accounts_query = f"{env['url']}/api/accounts;limit=1;offset=0"
         accounts = session.request("GET", accounts_query, headers=HEADERS, auth=auth, data=PAYLOAD).json()['accounts']

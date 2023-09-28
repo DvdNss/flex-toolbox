@@ -19,7 +19,7 @@ from src.env import get_default_env
 from src.pull import save_items
 from src.utils import get_items
 
-# Global variables
+# global variables
 PAYLOAD = ""
 HEADERS = {'Content-Type': 'application/vnd.nativ.mio.v1+json'}
 ACTION_UPDATE_FIELDS = [
@@ -40,7 +40,7 @@ ACTION_UPDATE_FIELDS = [
     'visibilityIds'
 ]
 
-# Init. session
+# init. session
 session = requests.Session()
 
 
@@ -83,10 +83,10 @@ def push_item(config_item: str, item_name: str, item_config: dict):
     item_id = item_config['id']
     imports = []
 
-    # Retrieve default env
+    # retrieve default env
     env = get_default_env()
 
-    # Init. connection & auth with env API
+    # init. connection & auth with env API
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])
 
     # build payload

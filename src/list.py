@@ -16,11 +16,11 @@ import requests
 
 from src.utils import get_items, get_tags_and_taxonomies, get_taxonomies
 
-# Global variables
+# global variables
 PAYLOAD = ""
 HEADERS = {'Content-Type': 'application/vnd.nativ.mio.v1+json'}
 
-# Init. session
+# init. session
 session = requests.Session()
 
 
@@ -91,7 +91,7 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
         sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'tagCollections':
-        # No way to retrieve tags from API directly, so bypassing by reading tags from MD DEFs
+        # no way to retrieve tags from API directly, so bypassing by reading tags from MD DEFs
         # NOTE: Will only retrieve tags that are used by MD DEFs
         print("\nRetrieving tagCollections from Metadata Definitions as "
               "it is not possible to list them directly from the API...\nPlease note that only tagCollections that are used"
@@ -138,6 +138,7 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
 
     print("")
 
+    # taxonomies are handled differently because the API response is different
     if taxonomies:
         rows = []
         columns = log_fields
@@ -152,7 +153,7 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
                 row.append(", ".join(child_taxons))
             rows.append(row)
 
-        # Display dataframe
+        # display dataframe
         table = pd.DataFrame(rows, columns=columns)
         pd.set_option('display.colheader_justify', 'center')
         pd.set_option('display.max_colwidth', None)
@@ -161,20 +162,20 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
         pd.DataFrame.to_csv(table, "list.csv")
         print(table)
 
-        # Save result as JSON for further details
+        # save result as JSON for further details
         with open('list.json', 'w') as result_file:
             json.dump(taxonomies, result_file, indent=4)
             print("\nResults of the query (with nested taxons) have been saved as list.json for your best convenience.")
 
     else:
-        # Convert to dataframe and display
+        # convert to dataframe and display
         rows = []
         columns = log_fields
         if sorted_items:
             for item in sorted_items:
                 row = []
 
-                # Extract field
+                # extract field
                 for field in log_fields:
                     if "." not in field:
                         row.append(str(sorted_items.get(item).get(field)))
@@ -188,7 +189,7 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
                         row.append(str(tmp))
                 rows.append(row)
 
-            # Display dataframe
+            # display dataframe
             table = pd.DataFrame(rows, columns=columns)
             pd.set_option('display.colheader_justify', 'center')
             pd.set_option('display.max_colwidth', None)
@@ -197,12 +198,12 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
             pd.DataFrame.to_csv(table, "list.csv")
             print(table)
 
-            # Save result as JSON for further details
+            # save result as JSON for further details
             with open('list.json', 'w') as result_file:
                 json.dump(sorted_items, result_file, indent=4)
                 print("\nResults of the query have been saved as list.json for your best convenience.")
 
-        # Empty results from API
+        # empty results from API
         else:
             print(f"No {config_item} found for the given parameters. ")
         print("")

@@ -19,11 +19,11 @@ from tqdm import tqdm
 
 from src.env import get_default_env
 
-# Global variables
+# global variables
 PAYLOAD = ""
 HEADERS = {'Content-Type': 'application/vnd.nativ.mio.v1+json'}
 
-# Init. session
+# init. session
 session = requests.Session()
 
 
@@ -61,7 +61,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
     :return: dict['item_name': {item_config}]
     """
 
-    # Init. function variables
+    # init. function variables
     offset = 0
     batch_size = 100
     items = []
@@ -72,54 +72,54 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
             if "fql=" in filter:
                 filters[idx] = "fql=" + urllib.parse.quote(filter.replace("fql=", ""))
 
-    # Retrieve default env
+    # retrieve default env
     env = get_default_env()
 
-    # Init. connection & auth with env API
+    # init. connection & auth with env API
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])
 
-    # Get total count
+    # get total count
     test_request = f"{env['url']}/{prefix}/{config_item}{';' + ';'.join(filters) if filters else ''}"
     print(f"\nPerforming [GET] {env['url']}/{prefix}/{config_item}{';' + ';'.join(filters) if filters else ''}...\n")
     test_response = session.request("GET", test_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
-    # Exception handler
+    # exception handler
     if 'errors' in test_response:
         raise Exception(f"\n\nError while sending {test_request}."
                         f" \nError message: {test_response['errors']['error']}\n")
 
-    # Retrieve totalCount
+    # retrieve totalCount
     total_count = test_response['limit'] if test_response['limit'] != batch_size else test_response['totalCount']
 
     if total_count != 0:
 
-        # Sequentially get all items (batch_size at a time)
+        # sequentially get all items (batch_size at a time)
         for _ in tqdm(range(0, int(total_count / batch_size) + 1), desc=f"Retrieving {config_item}"):
 
             try:
                 batched_item_request = f"{env['url']}/{prefix}/{config_item};offset={str(offset)}{';' + ';'.join(filters) if filters else ''}"
 
-                # Get batch of items from API
+                # get batch of items from API
                 items_batch = session.request("GET", batched_item_request, headers=HEADERS, auth=auth,
                                               data=PAYLOAD).json()
 
-                # Exception handler
+                # exception handler
                 if 'errors' in items_batch:
                     raise Exception(f"\n\nError while sending {batched_item_request}. "
                                     f"\nError message: {items_batch['errors']['error']}\n")
 
-                # Add batch of items to the list
+                # add batch of items to the list
                 items.extend(items_batch[config_item] if config_item in items_batch else items_batch)
 
-                # Incr. offset
+                # incr. offset
                 offset = offset + batch_size
 
-            # Exception handler
+            # exception handler
             except KeyError as e:
                 print(f"Either empty result from API or exact same number for totalCount and batch_size. \n"
                       f"Error is: {e}. Skipping.")
 
-        # Convert list of items to dict
+        # convert list of items to dict
         items_dict = {}
 
         try:
@@ -129,15 +129,15 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
             else:
                 for item in items:
                     items_dict[f"{item['name']} [{item['uuid']}]"] = item  # collection_name: collection_config
-        # Exception handler for events
+        # exception handler for events
         except Exception as ex:
             for item in items:
                 items_dict[f"{item['time']} [{item['id']}]"] = item  # event_time: event
 
-        # Sort items dict by name (ignoring case)
+        # sort items dict by name (ignoring case)
         sorted_items_dict = {i: items_dict[i] for i in sorted(list(items_dict.keys()), key=lambda s: s.casefold())}
 
-        # Get all items sub_items from API
+        # get all items sub_items from API
         for item in tqdm(sorted_items_dict, desc=f"Retrieving {config_item} {sub_items}"):
             for sub_item in sub_items:
                 sub_item_request = f"{env['url']}/{prefix}/{config_item}/{str(items_dict[item]['id'] if config_item != 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}"
@@ -169,13 +169,13 @@ def get_taxonomies(filters: List[str]):
             if "fql=" in filter:
                 filters[idx] = "fql=" + urllib.parse.quote(filter.replace("fql=", ""))
 
-    # Retrieve default env
+    # retrieve default env
     env = get_default_env()
 
-    # Init. connection & auth with env API
+    # init. connection & auth with env API
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])
 
-    # Get total count
+    # get total count
     taxonomies_request = f"{env['url']}/api/taxonomies{';' + ';'.join(filters) if filters else ''}"
     print(f"\nPerforming [GET] {env['url']}/api/taxonomies{';' + ';'.join(filters) if filters else ''}...")
     taxonomies = session.request("GET", taxonomies_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
@@ -249,17 +249,17 @@ def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
     :param save_to: where to save the config
     """
 
-    # Init. tax & tags
+    # init. tax & tags
     taxonomies = []
     tags = []
 
-    # Retrieve default env
+    # retrieve default env
     env = get_default_env()
 
-    # Init. connection & auth with env API
+    # init. connection & auth with env API
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])
 
-    # Fetch tax & tags
+    # fetch tax & tags
     for metadata_definition in metadata_definitions.keys():
         if f"definition" in metadata_definitions[metadata_definition]:
             if f"definition" in metadata_definitions[metadata_definition]["definition"]:
@@ -269,7 +269,7 @@ def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
                     taxonomies=taxonomies
                 )
 
-    # Fetch tags
+    # fetch tags
     if 'tagCollections' in mode:
         tag_dict = dict()
         for tag in tqdm(set(tags), desc=f"Retrieving tags"):
@@ -278,14 +278,14 @@ def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
             tag_collection = session.request("GET", tag_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
             tag_dict[tag_collection['displayName']] = tag_collection
 
-        # Sort
+        # sort
         sorted_tag_dict = {i: tag_dict[i] for i in sorted(list(tag_dict.keys()))}
 
-    # Fetch taxonomies
+    # fetch taxonomies
     if 'taxonomies' in mode:
         tax_dict = dict()
         for tax in tqdm(set(taxonomies), desc=f"Retrieving taxonomies"):
-            # Get taxonomies
+            # get taxonomies
             tax_request = f"{env['url']}/api/taxonomies/{tax}"
             taxonomy = session.request("GET", tax_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
             try:
@@ -293,16 +293,16 @@ def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
             except:
                 continue
 
-        # Sort
+        # sort
         sorted_tax_dict = {i: tax_dict[i] for i in sorted(list(tax_dict.keys()))}
 
-    # Save tags as JSON
+    # save tags as JSON
     if save_to and 'tagCollections' in mode:
         with open(f"{save_to}/configs/tags.json", "w") as tags_config:
             json.dump(obj=sorted_tag_dict, fp=tags_config, indent=4)
             print(f"tags have been saved to {save_to}/configs/tags.json")
 
-    # Save taxonomies as JSON
+    # save taxonomies as JSON
     if save_to and 'taxonomies' in mode:
         with open(f"{save_to}/configs/taxonomies.json", "w") as taxonomies_config:
             json.dump(obj=sorted_tax_dict, fp=taxonomies_config, indent=4)
@@ -327,16 +327,16 @@ def dig_for_tags_and_taxonomies(entries, tags: List, taxonomies: List):
     :param taxonomies: list of taxonomies
     """
 
-    # Recursively search for tags and taxonomies
+    # recursively search for tags and taxonomies
     for entry in entries:
         if "backingStoreType" in entry:
-            # Tags
+            # tags
             if entry['backingStoreType'] == "USER_DEFINED_TAG_COLLECTION" and "backingStoreInstanceId" in entry:
                 tags.append(entry['backingStoreInstanceId'])
-            # Taxonomies
+            # taxonomies
             elif entry['backingStoreType'] == "TAXONOMY" and "filter" in entry:
                 taxonomies.append(entry['filter'])
 
+        # recursive
         elif "children" in entry:
-
             dig_for_tags_and_taxonomies(entries=entry["children"], tags=tags, taxonomies=taxonomies)

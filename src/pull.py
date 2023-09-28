@@ -15,11 +15,11 @@ import requests
 
 from src.utils import create_folder, get_tags_and_taxonomies, get_items, get_taxonomies
 
-# Global variables
+# global variables
 PAYLOAD = ""
 HEADERS = {'Content-Type': 'application/vnd.nativ.mio.v1+json'}
 
-# Init. session
+# init. session
 session = requests.Session()
 
 
@@ -41,15 +41,15 @@ def save_items(config_item: str, items: dict):
     :return:
     """
 
-    # Parent folder
+    # parent folder
     create_folder(folder_name=config_item, ignore_error=True)
 
     print("")
 
-    # Folder for each config
+    # folder for each config
     for item in items:
 
-        # Folder's name
+        # folder's name
         if config_item == 'events':
             folder_name = f"{items.get(item).get('id')}"
         elif config_item == 'jobs' or config_item == 'tasks' or config_item == 'workflows':
@@ -58,12 +58,12 @@ def save_items(config_item: str, items: dict):
         else:
             folder_name = f"{items.get(item).get('name')}".replace("/", "").replace(":", "")
 
-        # Create object folder
+        # create object folder
         create_folder(folder_name=f"{config_item}/{folder_name}", ignore_error=True)
 
-        # Save subfields in other files
+        # save subfields in other files
         if 'configuration' in items.get(item) and items.get(item).get('configuration').get('instance'):
-            # If groovy script
+            # if groovy script
             if 'script-contents' in items.get(item).get('configuration').get('instance'):
                 create_script(item_name=f"{config_item}/{folder_name}", item_config=items.get(item))
                 items.get(item).get('configuration').get('instance').get('script-contents')
@@ -176,7 +176,7 @@ def save_items(config_item: str, items: dict):
         except:
             pass
 
-        # Save main object
+        # save main object
         with open(f"{config_item}/{folder_name}/_object.json", "w") as item_config:
             json.dump(obj=items.get(item), fp=item_config, indent=4)
             print(f"{config_item}: {folder_name} has been retrieved successfully. ")
@@ -265,7 +265,7 @@ def pull_items(config_item: str, filters: List[str] = []) -> bool:
         sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
         save_items(config_item=config_item, items=sorted_items)
     elif config_item == 'tagCollections':
-        # No way to retrieve tags from API directly, so bypassing by reading tags from MD DEFs
+        # no way to retrieve tags from API directly, so bypassing by reading tags from MD DEFs
         # NOTE: Will only retrieve tags that are used by MD DEFs
         print("\nRetrieving tagCollections from Metadata Definitions as "
               "it is not possible to list them directly from the API...\nPlease note that only tagCollections that are used"
@@ -317,56 +317,56 @@ def pull_all() -> bool:
     :return: True if succeeds, False if fails
     """
 
-    # Accounts
+    # accounts
     sorted_items = get_items(config_item="accounts", sub_items=['configuration', 'properties'])
     save_items(config_item='accounts', items=sorted_items)
     print('---')
-    # Actions
+    # actions
     sorted_items = get_items(config_item='actions', sub_items=['configuration'])
     save_items(config_item='actions', items=sorted_items)
     print('---')
-    # Collections
+    # collections
     sorted_items = get_items(config_item='collections', sub_items=['metadata'])
     save_items(config_item='collections', items=sorted_items)
     print('---')
-    # Event Handlers
+    # event Handlers
     sorted_items = get_items(config_item='eventHandlers', sub_items=['configuration'])
     save_items(config_item='eventHandlers', items=sorted_items)
     print('---')
-    # Groups
+    # groups
     sorted_items = get_items(config_item='groups', sub_items=['members'])
     save_items(config_item='groups', items=sorted_items)
     print('---')
-    # Message Templates
+    # message Templates
     sorted_items = get_items(config_item='messageTemplates', sub_items=['body'])
     save_items(config_item='messageTemplates', items=sorted_items)
     print('---')
-    # Metadata Definitions
+    # metadata Definitions
     sorted_items = get_items(config_item='metadataDefinitions', sub_items=['definition'])
     save_items(config_item='metadataDefinitions', items=sorted_items)
     print('---')
-    # Object Types
+    # object Types
     sorted_items = get_items(config_item='objectTypes', sub_items=[])
     save_items(config_item='objectTypes', items=sorted_items)
     print('---')
-    # Profiles
+    # profiles
     sorted_items = get_items(config_item='profiles', sub_items=['configuration'])
     save_items(config_item='profiles', items=sorted_items)
     print('---')
-    # Quotas
+    # quotas
     sorted_items = get_items(config_item='quotas', sub_items=[])
     save_items(config_item='quotas', items=sorted_items)
     print('---')
-    # Resources
+    # resources
     sorted_items = get_items(config_item='resources', sub_items=['configuration'])
     save_items(config_item='resources', items=sorted_items)
     print('---')
-    # Roles
+    # roles
     sorted_items = get_items(config_item='roles', sub_items=[])
     save_items(config_item='roles', items=sorted_items)
     print('---')
-    # Tag Collections
-    # No way to retrieve tags from API directly, so bypassing by reading tags from MD DEFs
+    # tag Collections
+    # no way to retrieve tags from API directly, so bypassing by reading tags from MD DEFs
     # NOTE: Will only retrieve tags that are used by MD DEFs
     print("\nRetrieving tagCollections from Metadata Definitions as "
           "it is not possible to list them directly from the API...\nPlease note that only tagCollections that are used"
@@ -375,12 +375,12 @@ def pull_all() -> bool:
     sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['tagCollections'])
     save_items(config_item='tagCollections', items=sorted_items)
     print('---')
-    # Task Definitions
+    # task Definitions
     sorted_items = get_items(config_item='taskDefinitions', sub_items=[])
     save_items(config_item='taskDefinitions', items=sorted_items)
     print('---')
-    # Taxonomies
-    # No way to retrieve taxonomies from API directly, so bypassing by reading tags from MD DEFs
+    # taxonomies
+    # no way to retrieve taxonomies from API directly, so bypassing by reading tags from MD DEFs
     # NOTE: Will only retrieve taxonomies that are used by MD DEFs
     print("\nRetrieving taxonomies from Metadata Definitions as "
           "it is not possible to list them directly from the API...\nPlease note that only taxonomies that are used"
@@ -389,27 +389,27 @@ def pull_all() -> bool:
     sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['taxonomies'])
     save_items(config_item='taxonomies', items=sorted_items)
     print('---')
-    # Timed Actions
+    # timed Actions
     sorted_items = get_items(config_item='timedActions', sub_items=['configuration'])
     save_items(config_item='timedActions', items=sorted_items)
     print('---')
-    # User defined object types
+    # user defined object types
     sorted_items = get_items(config_item='userDefinedObjectTypes', sub_items=['hierarchy', 'relationships'])
     save_items(config_item='userDefinedObjectTypes', items=sorted_items)
     print('---')
-    # Variants
+    # variants
     sorted_items = get_items(config_item='variants', sub_items=[])
     save_items(config_item='variants', items=sorted_items)
     print('---')
-    # Wizards
+    # wizards
     sorted_items = get_items(config_item='wizards', sub_items=['configuration'])
     save_items(config_item='wizards', items=sorted_items)
     print('---')
-    # Workflow Definitions
+    # workflow Definitions
     sorted_items = get_items(config_item='workflowDefinitions', sub_items=['structure'])
     save_items(config_item='workflowDefinitions', items=sorted_items)
     print('---')
-    # Workspaces
+    # workspaces
     sorted_items = get_items(config_item='workspaces', sub_items=[])
     save_items(config_item='workspaces', items=sorted_items)
 
