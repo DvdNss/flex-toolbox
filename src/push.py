@@ -10,14 +10,15 @@
 """
 import json
 import os
+import re
 
 import requests
 from requests.auth import HTTPBasicAuth
 
 from src.connect import get_default_account_id
 from src.env import get_default_env
-from src.pull import save_items
-from src.utils import get_items
+from src.pull.pull import save_items
+from src.utils import get_items, reformat_tabs, reformat_spaces
 
 # global variables
 PAYLOAD = ""
@@ -165,6 +166,10 @@ def push_item(config_item: str, item_name: str, item_config: dict):
             last_char = script_content.rindex("}")
             script_content = script_content[:last_char - 2].replace("class Script extends PluginCommand {",
                                                                     "").strip() + "\n}"
+
+            script_content = re.sub(r'\t{1,}', reformat_tabs, script_content)
+            script_content = re.sub(r' {4,}', reformat_spaces, script_content)
+
             try:
                 exec_lock_type = item_config['configuration']['instance']['execution-lock-type']
             except:
@@ -262,6 +267,9 @@ def push_job(job_config: dict):
             last_char = script_content.rindex("}")
             script_content = script_content[:last_char - 2].replace("class Script extends PluginCommand {",
                                                                     "").strip() + "\n}"
+
+            script_content = re.sub(r'\t{1,}', reformat_tabs, script_content)
+            script_content = re.sub(r' {4,}', reformat_spaces, script_content)
 
             # groovy
             if job_config.get('action').get('pluginClass') == "tv.nativ.mio.plugins.actions.script.GroovyScriptCommand":

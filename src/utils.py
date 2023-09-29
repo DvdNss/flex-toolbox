@@ -27,6 +27,28 @@ HEADERS = {'Content-Type': 'application/vnd.nativ.mio.v1+json'}
 session = requests.Session()
 
 
+def reformat_tabs(match):
+    """
+    Reformat tabs for groovy scripts.
+
+    :param match:
+    :return:
+    """
+
+    return match.group(0)[1:]
+
+
+def reformat_spaces(match):
+    """
+        Reformat spaces for groovy scripts.
+
+        :param match:
+        :return:
+        """
+
+    return match.group(0)[4:]
+
+
 def create_folder(folder_name: str, ignore_error: bool = False):
     """
     Create folder or return error if already exists.
@@ -153,6 +175,52 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
         print(f"No {config_item} found for the given parameters. ")
 
         return {}
+
+
+def get_surrounding_items(config_item: str, items: dict, sub_items: List[str]):
+    """
+    Get surrounding items of a config item.
+
+    :param config_item: config item
+    :param items: items to get the sub_items of
+    :param sub_items: surrounding items to get
+    :return:
+    """
+
+    # retrieve default env
+    env = get_default_env()
+
+    # init. connection & auth with env API
+    auth = HTTPBasicAuth(username=env['username'], password=env['password'])
+
+    for item in tqdm(items, desc="Retrieving jobs ['asset', 'workflow']"):
+
+        # asset
+        try:
+            asset_id = items.get(item).get('asset').get('id')
+            asset_request = f"{env['url']}/api/assets/{asset_id};includeMetadata=true"
+            # print(f"\nPerforming [GET] {env['url']}/api/assets/{asset_id};includeMetadata=true...")
+            asset = session.request("GET", asset_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
+            items[item]['asset'] = asset
+        except:
+            pass
+
+        # workflow
+        try:
+            workflow_id = items.get(item).get('workflow').get('id')
+            workflow_request = f"{env['url']}/api/workflows/{workflow_id}"
+            # print(f"\nPerforming [GET] {env['url']}/api/workflows/{workflow_id}...")
+            workflow_instance = session.request("GET", workflow_request, headers=HEADERS, auth=auth,
+                                                data=PAYLOAD).json()
+            variables_request = f"{env['url']}/api/workflows/{workflow_id}/variables"
+            # print(f"\nPerforming [GET] {env['url']}/api/workflows/{workflow_id}/variables...")
+            variables = session.request("GET", variables_request, headers=HEADERS, auth=auth,
+                                        data=PAYLOAD).json()
+            items[item]['workflow']['variables'] = variables
+        except:
+            pass
+
+    return items
 
 
 def get_taxonomies(filters: List[str]):

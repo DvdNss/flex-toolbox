@@ -13,7 +13,7 @@ from typing import List
 
 import requests
 
-from src.utils import create_folder, get_tags_and_taxonomies, get_items, get_taxonomies
+from src.utils import create_folder, get_tags_and_taxonomies, get_items, get_taxonomies, get_surrounding_items
 
 # global variables
 PAYLOAD = ""
@@ -66,13 +66,10 @@ def save_items(config_item: str, items: dict):
             # if groovy script
             if 'script-contents' in items.get(item).get('configuration').get('instance'):
                 create_script(item_name=f"{config_item}/{folder_name}", item_config=items.get(item))
-                items.get(item).get('configuration').get('instance').get('script-contents')
             elif 'internal-script' in items.get(item).get('configuration').get('instance'):
                 create_script(item_name=f"{config_item}/{folder_name}", item_config=items.get(item))
-                items.get(item).get('configuration').get('instance').pop('internal-script')
             elif 'script_type' in items.get(item).get('configuration').get('instance'):
                 create_script(item_name=f"{config_item}/{folder_name}", item_config=items.get(item))
-                items.get(item).get('configuration').pop('instance')
             else:
                 with open(f"{config_item}/{folder_name}/configuration.json", "w") as item_config:
                     json.dump(obj=items.get(item).get('configuration').get('instance'), fp=item_config, indent=4)
@@ -164,6 +161,10 @@ def save_items(config_item: str, items: dict):
                 items.get(item).pop('jobs')
 
         if 'history' in items.get(item) and items.get(item).get('history'):
+            history = items.get(item).get('history').copy()
+            for idx, logs in enumerate(history.get('events')):
+                history.get('events')[idx].pop('object')
+                history.get('events')[idx].pop('user')
             with open(f"{config_item}/{folder_name}/history.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('history'), fp=item_config, indent=4)
                 items.get(item).pop('history')
@@ -220,7 +221,7 @@ def pull_items(config_item: str, filters: List[str] = []) -> bool:
     """
 
     if config_item == 'accounts':
-        sorted_items = get_items(config_item=config_item, sub_items=['configuration', 'properties'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=['metadata', 'properties'], filters=filters)
         save_items(config_item=config_item, items=sorted_items)
     elif config_item == 'actions':
         sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
@@ -242,6 +243,8 @@ def pull_items(config_item: str, filters: List[str] = []) -> bool:
         save_items(config_item=config_item, items=sorted_items)
     elif config_item == 'jobs':
         sorted_items = get_items(config_item=config_item, sub_items=['configuration', 'history'], filters=filters)
+        sorted_items = get_surrounding_items(config_item=config_item, items=sorted_items,
+                                             sub_items=['asset', 'workflow'])
         save_items(config_item=config_item, items=sorted_items)
     elif config_item == 'messageTemplates':
         sorted_items = get_items(config_item=config_item, sub_items=['body'], filters=filters)
@@ -442,20 +445,20 @@ def create_script(item_name, item_config):
 
     try:
         script = script.replace("<&code>",
-                                item_config['configuration']['instance']['script_type']['script'][:-2] + "\n\t}")
+                                item_config['configuration']['instance']['script_type']['script'][:-2].replace("\n", "\n    ") + "\n\t}")
     except:
         pass
 
     try:
         script = script.replace("<&code>",
                                 item_config['configuration']['instance']['internal-script']['script-content'][
-                                :-2] + "\n\t}")
+                                :-2].replace("\n", "\n    ") + "\n\t}")
     except:
         pass
 
     try:
         script = script.replace("<&code>",
-                                item_config['configuration']['instance']['script-contents']['script'][:-2] + "\n\t}")
+                                item_config['configuration']['instance']['script-contents']['script'][:-2].replace("\n", "\n    ") + "\n\t}")
     except:
         script = script.replace("<&code>", "")
 
