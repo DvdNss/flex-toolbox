@@ -83,6 +83,7 @@ def push_item(config_item: str, item_name: str, item_config: dict):
     payload = {}
     item_id = item_config['id']
     imports = []
+    plugin = None
 
     # retrieve default env
     env = get_default_env()
@@ -109,7 +110,14 @@ def push_item(config_item: str, item_name: str, item_config: dict):
 
         # set action parameters
         payload['pluginClass'] = item_config['pluginClass']
-        payload['pluginUuid'] = item_config['pluginUuid']
+
+        # pluginUuid for JEF only (not groovy)
+        if "jef" in payload['pluginClass'].lower():
+            payload['pluginUuid'] = item_config['pluginUuid']
+            plugin = "JEF"
+        else:
+            plugin = "GROOVY"
+
         payload['type'] = item_config['type']['name']
         payload['visibilityIds'] = [get_default_account_id()]
         payload['accountId'] = get_default_account_id()
@@ -176,15 +184,32 @@ def push_item(config_item: str, item_name: str, item_config: dict):
                 exec_lock_type = "NONE"
 
             # payload
-            payload = {
-                "internal-script": {
-                    "script-content": script_content,
-                },
-                "execution-lock-type": exec_lock_type
-            }
+            if plugin == "JEF":
 
-            if imports:
-                payload['internal-script']['script-import'] = imports
+                # script
+                payload = {
+                    "internal-script": {
+                        "script-content": script_content,
+                    },
+                    "execution-lock-type": exec_lock_type
+                }
+
+                # imports
+                if imports:
+                    payload['internal-script']['script-import'] = imports
+
+            elif plugin == "GROOVY":
+
+                # payload
+                payload = {
+                    "script-contents": {
+                        "script": script_content,
+                    },
+                }
+
+                # imports
+                if imports:
+                    payload['imports'] = {"import": imports}
 
             # update configuration
             update_configuration_request = f"{env['url']}/api/{config_item}/{item_id}/configuration"
