@@ -53,8 +53,7 @@ def save_items(config_item: str, items: dict):
         if config_item == 'events':
             folder_name = f"{items.get(item).get('id')}"
         elif config_item == 'jobs' or config_item == 'tasks' or config_item == 'workflows':
-            folder_name = f"{items.get(item).get('name')} [{items.get(item).get('id')}]".replace("/", "").replace(":",
-                                                                                                                  "")
+            folder_name = f"{items.get(item).get('id')}".replace("/", "").replace(":", "")
         else:
             folder_name = f"{items.get(item).get('name')}".replace("/", "").replace(":", "")
 

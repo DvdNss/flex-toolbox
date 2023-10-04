@@ -279,7 +279,7 @@ def push_job(job_config: dict):
     # Init. connection & auth with env API
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])
 
-    # check if action already exists first
+    # check job exists
     job_request = f"{env['url']}/api/jobs/{job_id}"
     job = session.request("GET", job_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
@@ -288,6 +288,7 @@ def push_job(job_config: dict):
         raise Exception(f"\n\nError while sending {job_request}. \nError message: {job['errors']['error']}\n ")
     else:
         job_id = job['id']
+        plugin = job['action']['pluginClass']
 
     # push script
     if os.path.isfile(f"jobs/{job['name']} [{job_id}]/script.groovy"):
@@ -310,7 +311,7 @@ def push_job(job_config: dict):
             script_content = re.sub(r' {4,}', reformat_spaces, script_content)
 
             try:
-                exec_lock_type = item_config['configuration']['instance']['execution-lock-type']
+                exec_lock_type = job_config['configuration']['instance']['execution-lock-type']
             except:
                 exec_lock_type = "NONE"
 
