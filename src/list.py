@@ -49,7 +49,7 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
         log_fields = ['name', 'id']
     elif config_item == 'actions':
         sorted_items = get_items(config_item=config_item, filters=filters)
-        log_fields = ['name', 'id']
+        log_fields = ['name', 'id', 'type.name', 'pluginClass']
     elif config_item == 'assets':
         sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'variant.name', 'variant.id']

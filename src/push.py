@@ -110,14 +110,6 @@ def push_item(config_item: str, item_name: str, item_config: dict):
 
         # set action parameters
         payload['pluginClass'] = item_config['pluginClass']
-
-        # pluginUuid for JEF only (not groovy)
-        if "jef" in payload['pluginClass'].lower():
-            payload['pluginUuid'] = item_config['pluginUuid']
-            plugin = "JEF"
-        else:
-            plugin = "GROOVY"
-
         payload['type'] = item_config['type']['name']
         payload['visibilityIds'] = [get_default_account_id()]
         payload['accountId'] = get_default_account_id()
@@ -183,8 +175,8 @@ def push_item(config_item: str, item_name: str, item_config: dict):
             except:
                 exec_lock_type = "NONE"
 
-            # payload
-            if plugin == "JEF":
+            # jef
+            if plugin == "tv.nativ.mio.plugins.actions.jef.JEFActionProxyCommand":
 
                 # script
                 payload = {
@@ -197,12 +189,27 @@ def push_item(config_item: str, item_name: str, item_config: dict):
                 # imports
                 if imports:
                     payload['internal-script']['script-import'] = imports
-
-            elif plugin == "GROOVY":
+            # groovy script
+            elif plugin == "tv.nativ.mio.plugins.actions.script.GroovyScriptCommand":
 
                 # payload
                 payload = {
                     "script-contents": {
+                        "script": script_content,
+                    },
+                }
+
+                # imports
+                if imports:
+                    payload['imports'] = {"import": imports}
+
+            # groovy decision
+            elif plugin == "tv.nativ.mio.plugins.actions.decision.ScriptedDecisionCommand" or \
+                    "tv.nativ.mio.plugins.actions.decision.multi.ScriptedMultiDecisionCommand":
+
+                # payload
+                payload = {
+                    "script_type": {
                         "script": script_content,
                     },
                 }
@@ -297,7 +304,7 @@ def push_job(job_config: dict):
             script_content = re.sub(r' {4,}', reformat_spaces, script_content)
 
             # groovy
-            if job_config.get('action').get('pluginClass') == "tv.nativ.mio.plugins.actions.script.GroovyScriptCommand":
+            if "jef" not in job_config.get('action').get('pluginClass').lower():
 
                 try:
                     exec_lock_type = job_config['configuration']['instance']['requires-lock']
