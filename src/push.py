@@ -110,6 +110,11 @@ def push_item(config_item: str, item_name: str, item_config: dict):
 
         # set action parameters
         payload['pluginClass'] = item_config['pluginClass']
+        plugin = item_config['pluginClass']
+
+        if plugin == "tv.nativ.mio.plugins.actions.jef.JEFActionProxyCommand":
+            payload['pluginUuid'] = item_config['pluginUuid']
+
         payload['type'] = item_config['type']['name']
         payload['visibilityIds'] = [get_default_account_id()]
         payload['accountId'] = get_default_account_id()
@@ -139,6 +144,7 @@ def push_item(config_item: str, item_name: str, item_config: dict):
     elif total_count == 1:
 
         item_id = item.get(config_item)[0].get('id')
+        plugin = item.get(config_item)[0].get('pluginClass')
 
         # update action
         update_action_request = f"{env['url']}/api/{config_item}/{item_id}"
@@ -160,7 +166,7 @@ def push_item(config_item: str, item_name: str, item_config: dict):
             for line in script_content.split("\n"):
                 if line.startswith("import") and "PluginCommand" not in line:
                     imports.append({'value': line[7:], 'isExpression': False})
-                    script_content = script_content.replace(line, "")
+                    script_content = script_content.replace(line + "\n", "")
 
             # get code
             last_char = script_content.rindex("}")
@@ -303,36 +309,15 @@ def push_job(job_config: dict):
             script_content = re.sub(r'\t{1,}', reformat_tabs, script_content)
             script_content = re.sub(r' {4,}', reformat_spaces, script_content)
 
-            # groovy
-            if "jef" not in job_config.get('action').get('pluginClass').lower():
+            try:
+                exec_lock_type = item_config['configuration']['instance']['execution-lock-type']
+            except:
+                exec_lock_type = "NONE"
 
-                try:
-                    exec_lock_type = job_config['configuration']['instance']['requires-lock']
-                except:
-                    exec_lock_type = {
-                        "value": "NONE",
-                        "isExpression": False
-                    }
+            # jef
+            if plugin == "tv.nativ.mio.plugins.actions.jef.JEFActionProxyCommand":
 
-                # payload
-                payload = {
-                    "script-contents": {
-                        "script": script_content,
-                    },
-                    "requires-lock": exec_lock_type
-                }
-
-                if imports:
-                    payload['imports'] = {"import": imports}
-
-            # JEF
-            else:
-
-                try:
-                    exec_lock_type = job_config['configuration']['instance']['execution-lock-type']
-                except:
-                    exec_lock_type = "NONE"
-
+                # script
                 payload = {
                     "internal-script": {
                         "script-content": script_content,
@@ -340,8 +325,37 @@ def push_job(job_config: dict):
                     "execution-lock-type": exec_lock_type
                 }
 
+                # imports
                 if imports:
                     payload['internal-script']['script-import'] = imports
+            # groovy script
+            elif plugin == "tv.nativ.mio.plugins.actions.script.GroovyScriptCommand":
+
+                # payload
+                payload = {
+                    "script-contents": {
+                        "script": script_content,
+                    },
+                }
+
+                # imports
+                if imports:
+                    payload['imports'] = {"import": imports}
+
+            # groovy decision
+            elif plugin == "tv.nativ.mio.plugins.actions.decision.ScriptedDecisionCommand" or \
+                    "tv.nativ.mio.plugins.actions.decision.multi.ScriptedMultiDecisionCommand":
+
+                # payload
+                payload = {
+                    "script_type": {
+                        "script": script_content,
+                    },
+                }
+
+                # imports
+                if imports:
+                    payload['imports'] = {"import": imports}
 
             # update configuration
             update_configuration_request = f"{env['url']}/api/jobs/{job_id}/configuration"

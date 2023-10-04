@@ -431,6 +431,7 @@ def create_script(item_name, item_config):
     imports = ["import com.ooyala.flex.plugins.PluginCommand\n"]
     script = "class Script extends PluginCommand {\n\t<&code>\n}"
 
+    # jef
     try:
         imports.extend(['import ' + imp['value'] + '\n' for imp in
                         item_config['configuration']['instance']['internal-script']['script-import']])
@@ -443,6 +444,7 @@ def create_script(item_name, item_config):
     except:
         pass
 
+    # groovy decision
     try:
         script = script.replace("<&code>",
                                 item_config['configuration']['instance']['script_type']['script'][:-2].replace("\n", "\n    ") + "\n\t}")
@@ -456,6 +458,7 @@ def create_script(item_name, item_config):
     except:
         pass
 
+    # groovy script
     try:
         script = script.replace("<&code>",
                                 item_config['configuration']['instance']['script-contents']['script'][:-2].replace("\n", "\n    ") + "\n\t}")
