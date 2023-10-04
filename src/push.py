@@ -291,8 +291,8 @@ def push_job(job_config: dict):
         plugin = job['action']['pluginClass']
 
     # push script
-    if os.path.isfile(f"jobs/{job['name']} [{job_id}]/script.groovy"):
-        with open(f"jobs/{job['name']} [{job_id}]/script.groovy", 'r') as groovy_file:
+    if os.path.isfile(f"jobs/{job_id}/script.groovy"):
+        with open(f"jobs/{job_id}/script.groovy", 'r') as groovy_file:
             script_content = groovy_file.read().strip() \
                 .replace("import com.ooyala.flex.plugins.PluginCommand", "")
 
@@ -370,8 +370,8 @@ def push_job(job_config: dict):
                     f"\n\nError while sending {update_configuration_request}. \nError message: {update_configuration['errors']['error']}\n")
 
     # push config
-    if os.path.isfile(f"jobs/{job['name']} [{job_id}]/configuration.json"):
-        with open(f"jobs/{job['name']} [{job_id}]/configuration.json", 'r') as config_json:
+    if os.path.isfile(f"jobs/{job_id}/configuration.json"):
+        with open(f"jobs/{job_id}/configuration.json", 'r') as config_json:
             payload = json.load(config_json)
 
             # update configuration
