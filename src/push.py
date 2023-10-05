@@ -146,6 +146,10 @@ def push_item(config_item: str, item_name: str, item_config: dict):
         item_id = item.get(config_item)[0].get('id')
         plugin = item.get(config_item)[0].get('pluginClass')
 
+        # create backup
+        backup = get_items(config_item='actions', sub_items=['configuration'], filters=[f"id={item_id}"])
+        save_items(config_item='actions', items=backup, backup=True)
+
         # update action
         update_action_request = f"{env['url']}/api/{config_item}/{item_id}"
         print(f"\nPerforming [PUT] {update_action_request}...")

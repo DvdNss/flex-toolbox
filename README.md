@@ -50,10 +50,16 @@
   ftbx pull actions --filters enabled=true
   ftbx pull actions --filters type=script
   ftbx pull actions --filters type=script enabled=true
+  
+  # Pull **ALL**
+  ftbx pull all
   ```
   
 * push items
   ```shell
   # Push action to an env (will be created if doesn't exist)
   ftbx push actions check-end-node-wf 
+  
+  # Push job
+  ftbx push jobs 294036
   ```

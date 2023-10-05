@@ -8,6 +8,7 @@
     DESCRIPTION: pull command functions
     
 """
+import datetime
 import json
 from typing import List
 
@@ -32,17 +33,19 @@ def pull_command_func(args):
         pull_all()
 
 
-def save_items(config_item: str, items: dict):
+def save_items(config_item: str, items: dict, backup: bool = False):
     """
     Save Flex items to JSON
 
     :param config_item: config item
     :param items: dict of items
+    :param backup: whether item is backup or not
     :return:
     """
 
     # parent folder
     create_folder(folder_name=config_item, ignore_error=True)
+    now = datetime.datetime.now().strftime("%Y-%m-%d %Hh%Mm%Ss")
 
     print("")
 
@@ -59,6 +62,11 @@ def save_items(config_item: str, items: dict):
 
         # create object folder
         create_folder(folder_name=f"{config_item}/{folder_name}", ignore_error=True)
+        create_folder(folder_name=f"{config_item}/{folder_name}/backup", ignore_error=True)
+
+        if backup:
+            create_folder(folder_name=f"{config_item}/{folder_name}/backup/{now}", ignore_error=True)
+            folder_name = f"{folder_name}/backup/{now}"
 
         # save subfields in other files
         if 'configuration' in items.get(item) and items.get(item).get('configuration').get('instance'):
@@ -179,7 +187,7 @@ def save_items(config_item: str, items: dict):
         # save main object
         with open(f"{config_item}/{folder_name}/_object.json", "w") as item_config:
             json.dump(obj=items.get(item), fp=item_config, indent=4)
-            print(f"{config_item}: {folder_name} has been retrieved successfully. ")
+            print(f"{config_item}: {folder_name} has been retrieved successfully. ") if not backup else print(f"{config_item}: {folder_name} has been backed up successfully. ")
 
     print("") if items else None
 
@@ -320,11 +328,12 @@ def pull_all() -> bool:
     """
 
     # accounts
-    sorted_items = get_items(config_item="accounts", sub_items=['configuration', 'properties'])
+    sorted_items = get_items(config_item="accounts", sub_items=['configuration', 'properties'],
+                             filters=['enabled=true'])
     save_items(config_item='accounts', items=sorted_items)
     print('---')
     # actions
-    sorted_items = get_items(config_item='actions', sub_items=['configuration'])
+    sorted_items = get_items(config_item='actions', sub_items=['configuration'], filters=['enabled=true'])
     save_items(config_item='actions', items=sorted_items)
     print('---')
     # collections
@@ -332,19 +341,19 @@ def pull_all() -> bool:
     save_items(config_item='collections', items=sorted_items)
     print('---')
     # event Handlers
-    sorted_items = get_items(config_item='eventHandlers', sub_items=['configuration'])
+    sorted_items = get_items(config_item='eventHandlers', sub_items=['configuration'], filters=['enabled=true'])
     save_items(config_item='eventHandlers', items=sorted_items)
     print('---')
     # groups
-    sorted_items = get_items(config_item='groups', sub_items=['members'])
+    sorted_items = get_items(config_item='groups', sub_items=['members'], filters=['enabled=true'])
     save_items(config_item='groups', items=sorted_items)
     print('---')
     # message Templates
-    sorted_items = get_items(config_item='messageTemplates', sub_items=['body'])
+    sorted_items = get_items(config_item='messageTemplates', sub_items=['body'], filters=['enabled=true'])
     save_items(config_item='messageTemplates', items=sorted_items)
     print('---')
     # metadata Definitions
-    sorted_items = get_items(config_item='metadataDefinitions', sub_items=['definition'])
+    sorted_items = get_items(config_item='metadataDefinitions', sub_items=['definition'], filters=['enabled=true'])
     save_items(config_item='metadataDefinitions', items=sorted_items)
     print('---')
     # object Types
@@ -352,15 +361,15 @@ def pull_all() -> bool:
     save_items(config_item='objectTypes', items=sorted_items)
     print('---')
     # profiles
-    sorted_items = get_items(config_item='profiles', sub_items=['configuration'])
+    sorted_items = get_items(config_item='profiles', sub_items=['configuration'], filters=['enabled=true'])
     save_items(config_item='profiles', items=sorted_items)
     print('---')
     # quotas
-    sorted_items = get_items(config_item='quotas', sub_items=[])
+    sorted_items = get_items(config_item='quotas', sub_items=[], filters=['enabled=true'])
     save_items(config_item='quotas', items=sorted_items)
     print('---')
     # resources
-    sorted_items = get_items(config_item='resources', sub_items=['configuration'])
+    sorted_items = get_items(config_item='resources', sub_items=['configuration'], filters=['enabled=true'])
     save_items(config_item='resources', items=sorted_items)
     print('---')
     # roles
@@ -382,14 +391,8 @@ def pull_all() -> bool:
     save_items(config_item='taskDefinitions', items=sorted_items)
     print('---')
     # taxonomies
-    # no way to retrieve taxonomies from API directly, so bypassing by reading tags from MD DEFs
-    # NOTE: Will only retrieve taxonomies that are used by MD DEFs
-    print("\nRetrieving taxonomies from Metadata Definitions as "
-          "it is not possible to list them directly from the API...\nPlease note that only taxonomies that are used"
-          " in metadata definitions will be retrieved.")
-    metadata_definitions = get_items(config_item="metadataDefinitions", sub_items=['definition'])
-    sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['taxonomies'])
-    save_items(config_item='taxonomies', items=sorted_items)
+    sorted_items = get_taxonomies(filters=['enabled=true'])
+    save_taxonomies(taxonomies=sorted_items)
     print('---')
     # timed Actions
     sorted_items = get_items(config_item='timedActions', sub_items=['configuration'])
@@ -404,15 +407,15 @@ def pull_all() -> bool:
     save_items(config_item='variants', items=sorted_items)
     print('---')
     # wizards
-    sorted_items = get_items(config_item='wizards', sub_items=['configuration'])
+    sorted_items = get_items(config_item='wizards', sub_items=['configuration'], filters=['enabled=true'])
     save_items(config_item='wizards', items=sorted_items)
     print('---')
     # workflow Definitions
-    sorted_items = get_items(config_item='workflowDefinitions', sub_items=['structure'])
+    sorted_items = get_items(config_item='workflowDefinitions', sub_items=['structure'], filters=['enabled=true'])
     save_items(config_item='workflowDefinitions', items=sorted_items)
     print('---')
     # workspaces
-    sorted_items = get_items(config_item='workspaces', sub_items=[])
+    sorted_items = get_items(config_item='workspaces', sub_items=[], filters=['enabled=true'])
     save_items(config_item='workspaces', items=sorted_items)
 
     return True
@@ -446,7 +449,8 @@ def create_script(item_name, item_config):
     # groovy decision
     try:
         script = script.replace("<&code>",
-                                item_config['configuration']['instance']['script_type']['script'][:-2].replace("\n", "\n    ") + "\n\t}")
+                                item_config['configuration']['instance']['script_type']['script'][:-2].replace("\n",
+                                                                                                               "\n    ") + "\n\t}")
     except:
         pass
 
@@ -460,7 +464,8 @@ def create_script(item_name, item_config):
     # groovy script
     try:
         script = script.replace("<&code>",
-                                item_config['configuration']['instance']['script-contents']['script'][:-2].replace("\n", "\n    ") + "\n\t}")
+                                item_config['configuration']['instance']['script-contents']['script'][:-2].replace("\n",
+                                                                                                                   "\n    ") + "\n\t}")
     except:
         script = script.replace("<&code>", "")
 
