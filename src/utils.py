@@ -94,56 +94,41 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
             if "fql=" in filter:
                 filters[idx] = "fql=" + urllib.parse.quote(filter.replace("fql=", ""))
 
-    # retrieve default env
-    env = get_default_env()
-
-    # init. connection & auth with env API
-    auth = HTTPBasicAuth(username=env['username'], password=env['password'])
+    # retrieve auth material
+    env, auth = get_auth_material()
 
     # get total count
-    test_request = f"{env['url']}/{prefix}/{config_item}{';' + ';'.join(filters) if filters else ''}"
-    print(f"\nPerforming [GET] {env['url']}/{prefix}/{config_item}{';' + ';'.join(filters) if filters else ''}...\n")
-    test_response = session.request("GET", test_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
-
-    # exception handler
-    if 'errors' in test_response:
-        raise Exception(f"\n\nError while sending {test_request}."
-                        f" \nError message: {test_response['errors']['error']}\n")
+    test_query_result = query(
+        method="GET",
+        url=f"{config_item}{';' + ';'.join(filters) if filters else ''}",
+    )
 
     # retrieve totalCount
-    total_count = test_response['limit'] if test_response['limit'] != batch_size else test_response['totalCount']
+    total_count = test_query_result['limit'] if test_query_result['limit'] != batch_size else test_query_result[
+        'totalCount']
 
     if total_count != 0:
 
         # sequentially get all items (batch_size at a time)
         for _ in tqdm(range(0, int(total_count / batch_size) + 1), desc=f"Retrieving {config_item}"):
 
-            try:
-                batched_item_request = f"{env['url']}/{prefix}/{config_item};offset={str(offset)}{';' + ';'.join(filters) if filters else ''}"
+            # get batch of items from API
+            items_batch = query(
+                method="GET",
+                url=f"{config_item};offset={str(offset)}{';' + ';'.join(filters) if filters else ''}",
+                log=False
+            )
 
-                # get batch of items from API
-                items_batch = session.request("GET", batched_item_request, headers=HEADERS, auth=auth,
-                                              data=PAYLOAD).json()
+            # add batch of items to the list
+            items.extend(items_batch[config_item] if config_item in items_batch else items_batch)
 
-                # exception handler
-                if 'errors' in items_batch:
-                    raise Exception(f"\n\nError while sending {batched_item_request}. "
-                                    f"\nError message: {items_batch['errors']['error']}\n")
-
-                # add batch of items to the list
-                items.extend(items_batch[config_item] if config_item in items_batch else items_batch)
-
-                # incr. offset
-                offset = offset + batch_size
-
-            # exception handler
-            except KeyError as e:
-                print(f"Either empty result from API or exact same number for totalCount and batch_size. \n"
-                      f"Error is: {e}. Skipping.")
+            # incr. offset
+            offset = offset + batch_size
 
         # convert list of items to dict
         items_dict = {}
 
+        # item name formatting in resulting dict
         try:
             if config_item != "collections":
                 for item in items:
@@ -162,11 +147,21 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
         # get all items sub_items from API
         for item in tqdm(sorted_items_dict, desc=f"Retrieving {config_item} {sub_items}"):
             for sub_item in sub_items:
-                sub_item_request = f"{env['url']}/{prefix}/{config_item}/{str(items_dict[item]['id'] if config_item != 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}"
-                sorted_items_dict[item][sub_item] = session.request("GET", sub_item_request, headers=HEADERS, auth=auth,
-                                                                    data=PAYLOAD).json() if sub_item != "body" else \
-                    session.request("GET", sub_item_request, headers=HEADERS, auth=auth, data=PAYLOAD).content.decode(
-                        "utf-8", "ignore").strip()
+
+                if sub_item != "body":
+                    sorted_items_dict[item][sub_item] = query(
+                        method="GET",
+                        url=f"{config_item}/{str(items_dict[item]['id'] if config_item != 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}",
+                        log=False
+                    )
+                else:
+                    sorted_items_dict[item][sub_item] = session.request(
+                        "GET",
+                        f"{config_item}/{str(items_dict[item]['id'] if config_item != 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}",
+                        headers=HEADERS,
+                        auth=auth,
+                        data=PAYLOAD
+                    ).content.decode("utf-8", "ignore").strip()
 
         return sorted_items_dict
 
@@ -426,13 +421,14 @@ def get_auth_material():
     return env, auth
 
 
-def query(method: str, url: str, payload=None):
+def query(method: str, url: str, payload=None, log: bool = True):
     """
     Query the public API.
 
     :param method: method to use from [GET, POST, PUT]
     :param url: url to query after env_url/api/
     :param payload: payload to use for POST & PUT queries
+    :param log: whetherto log performed action in terminal or not
 
     :return:
     """
@@ -442,7 +438,10 @@ def query(method: str, url: str, payload=None):
 
     # query
     query = f"{env['url']}/api/{url}" if "http" not in url else f"{url}"
-    print(f"\nPerforming [{method}] {query}...\n")
+
+    if log:
+        print(f"\nPerforming [{method}] {query}...\n")
+
     query_result = session.request(
         method,
         query,

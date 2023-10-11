@@ -187,9 +187,9 @@ def save_items(config_item: str, items: dict, backup: bool = False):
         # save main object
         with open(f"{config_item}/{folder_name}/_object.json", "w") as item_config:
             json.dump(obj=items.get(item), fp=item_config, indent=4)
-            print(f"{config_item}: {folder_name} has been retrieved successfully. ") if not backup else print(f"{config_item}: {folder_name} has been backed up successfully. ")
+            # print(f"{config_item}: {folder_name} has been retrieved successfully. ") if not backup else print(f"{config_item}: {folder_name} has been backed up successfully. ")
 
-    print("") if items else None
+    print(f"{config_item} have been retrieved successfully. \n") if items else None
 
 
 def save_taxonomies(taxonomies):
