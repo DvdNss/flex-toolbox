@@ -14,11 +14,12 @@ import re
 
 import requests
 from requests.auth import HTTPBasicAuth
+from tqdm import tqdm
 
 from src.connect import get_default_account_id
 from src.env import get_default_env
 from src.pull.pull import save_items
-from src.utils import get_items, reformat_tabs, reformat_spaces
+from src.utils import get_items, reformat_tabs, reformat_spaces, get_auth_material
 
 # global variables
 PAYLOAD = ""
@@ -59,7 +60,8 @@ def push_command_func(args):
                 data = json.load(config_file)
 
             if args.config_item == 'actions' and data['objectType']['name'] == 'action':
-                push_item(config_item=args.config_item, item_name=item, item_config=data)
+                push_item(config_item=args.config_item, item_name=item, item_config=data,
+                          push_and_retry_failed_jobs=args.push_to_failed_jobs)
             elif args.config_item == 'jobs' and data['objectType']['name'] == 'job':
                 push_job(job_config=data)
             else:
@@ -70,7 +72,7 @@ def push_command_func(args):
             print(f"Cannot find folder for {item}.\n")
 
 
-def push_item(config_item: str, item_name: str, item_config: dict):
+def push_item(config_item: str, item_name: str, item_config: dict, restore: bool = False, push_and_retry_failed_jobs=False):
     """
     Push action for Flex.
 
