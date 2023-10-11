@@ -77,27 +77,27 @@ def push_item(config_item: str, item_name: str, item_config: dict):
     :param config_item: config entity
     :param item_name: item name
     :param item_config: item config
+    :param restore: whether it's coming from a restore command or not
+    :param push_and_retry_failed_jobs: whether to retry failed jobs or not
     :return:
     """
 
+    # vars
     payload = {}
     item_id = item_config['id']
     imports = []
     plugin = None
 
-    # retrieve default env
-    env = get_default_env()
+    # retrieve auth material
+    env, auth = get_auth_material()
 
-    # init. connection & auth with env API
-    auth = HTTPBasicAuth(username=env['username'], password=env['password'])
-
-    # build payload
+    # build payload from item config
     for field in ACTION_UPDATE_FIELDS:
         if field in item_config:
-            payload[field] = item_config[field]
+            payload[field] = item_config.get(field)
 
     # check if action already exists first
-    get_item = f"{env['url']}/api/{config_item};name={item_name}"
+    get_item = f"{env['url']}/api/{config_item};name={item_name};exactNameMatch=true"
     item = session.request("GET", get_item, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
     if 'errors' in item:
@@ -147,8 +147,9 @@ def push_item(config_item: str, item_name: str, item_config: dict):
         plugin = item.get(config_item)[0].get('pluginClass')
 
         # create backup
-        backup = get_items(config_item='actions', sub_items=['configuration'], filters=[f"id={item_id}"])
-        save_items(config_item='actions', items=backup, backup=True)
+        if not restore:
+            backup = get_items(config_item='actions', sub_items=['configuration'], filters=[f"id={item_id}"])
+            save_items(config_item='actions', items=backup, backup=True)
 
         # update action
         update_action_request = f"{env['url']}/api/{config_item}/{item_id}"
@@ -239,11 +240,14 @@ def push_item(config_item: str, item_name: str, item_config: dict):
                 raise Exception(
                     f"\n\nError while sending {update_configuration_request}. \nError message: {update_configuration['errors']['error']}\n")
 
-            print(f"{config_item}: {item_name} has been pushed successfully to {env['url']}.\n")
+            print(f"{config_item}: {item_name} has been pushed successfully to {env['url']}.\n") if not restore else \
+                print(f"{config_item}: {item_name} has been restored successfully in {env['url']}.\n")
 
     # push config
     if os.path.isfile(f"{config_item}/{item_name}/configuration.json"):
         with open(f"{config_item}/{item_name}/configuration.json", 'r') as config_json:
+
+            # build payload
             payload = json.load(config_json)
 
             # update configuration
@@ -256,13 +260,28 @@ def push_item(config_item: str, item_name: str, item_config: dict):
                 raise Exception(
                     f"\n\nError while sending {update_configuration_request}. \nError message: {update_configuration['errors']['error']}\n")
 
-            print(f"{config_item}: {item_name} has been pushed successfully to {env['url']}.\n")
-
+            print(f"{config_item}: {item_name} has been pushed successfully to {env['url']}.\n") if not restore else \
+                print(f"{config_item}: {item_name} has been restored successfully in {env['url']}.\n")
     print("---")
 
     # get updated action
     updated_action = get_items(config_item='actions', filters=[f"id={item_id}"])
     save_items(config_item='actions', items=updated_action)
+    print("---")
+
+    # push to failed jobs if needed
+    if push_and_retry_failed_jobs:
+        failed_jobs = get_items(config_item="jobs", filters=[f"name={item_name}", "exactNameMatch=true", "status=Failed"])
+
+        for failed_job in tqdm(failed_jobs, desc="Pushing to failed jobs and retrying them"):
+            push_script_request = f"{env['url']}/api/jobs/{failed_jobs.get(failed_job).get('id')}/configuration"
+            push_script = session.request("PUT", push_script_request, headers=HEADERS, auth=auth,
+                                          data=json.dumps(payload)).json()
+
+            # retry job
+            retry_job_request = f"{env['url']}/api/jobs/{failed_jobs.get(failed_job).get('id')}/actions"
+            session.request("POST", retry_job_request, headers=HEADERS, auth=auth,
+                            data=json.dumps({"action": "retry"})).json()
 
 
 def push_job(job_config: dict):
@@ -390,8 +409,8 @@ def push_job(job_config: dict):
 
     # retry job
     retry_job_request = f"{env['url']}/api/jobs/{job_id}/actions"
-    retry_job = session.request("POST", retry_job_request, headers=HEADERS, auth=auth,
-                                data=json.dumps({"action": "retry"})).json()
+    session.request("POST", retry_job_request, headers=HEADERS, auth=auth,
+                    data=json.dumps({"action": "retry"})).json()
 
     print(f"jobs: {job['name']} [{job_id}] has been pushed successfully to {env['url']} and has been retried.\n")
 

@@ -68,6 +68,12 @@ FLEX_ITEMS_PUSH = ['accounts', 'actions', 'assets', 'collections', 'eventHandler
                    'workflows',
                    'workspaces']
 
+FLEX_ITEMS_RESTORE = ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
+                      'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources',
+                      'roles', 'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions',
+                      'userDefinedObjectTypes', 'users', 'variants', 'variants', 'wizards', 'workflowDefinitions',
+                      'workflows', 'workspaces']
+
 
 class PluginType(Enum):
     """ Enum of plugin types. """

@@ -408,3 +408,51 @@ def dig_for_tags_and_taxonomies(entries, tags: List, taxonomies: List):
         # recursive
         elif "children" in entry:
             dig_for_tags_and_taxonomies(entries=entry["children"], tags=tags, taxonomies=taxonomies)
+
+
+def get_auth_material():
+    """
+    Returns auth material: env & auth.
+
+    :return:
+    """
+
+    # retrieve default env
+    env = get_default_env()
+
+    # init. connection & auth with env API
+    auth = HTTPBasicAuth(username=env['username'], password=env['password'])
+
+    return env, auth
+
+
+def query(method: str, url: str, payload=None):
+    """
+    Query the public API.
+
+    :param method: method to use from [GET, POST, PUT]
+    :param url: url to query after env_url/api/
+    :param payload: payload to use for POST & PUT queries
+
+    :return:
+    """
+
+    # auth material
+    env, auth = get_auth_material()
+
+    # query
+    query = f"{env['url']}/api/{url}" if "http" not in url else f"{url}"
+    print(f"\nPerforming [{method}] {query}...\n")
+    query_result = session.request(
+        method,
+        query,
+        headers=HEADERS,
+        auth=auth,
+        data=json.dumps(payload) if payload else None
+    ).json()
+
+    # exception handler
+    if 'errors' in query_result:
+        raise Exception(f"\n\nError while sending {query}. \nError message: {query_result['errors']['error']}\n ")
+
+    return query_result

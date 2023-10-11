@@ -13,7 +13,7 @@
 
 import argparse
 
-from VARIABLES import FLEX_ITEMS_PULL, FLEX_ITEMS_LIST, FLEX_ITEMS_PUSH
+from VARIABLES import FLEX_ITEMS_PULL, FLEX_ITEMS_LIST, FLEX_ITEMS_PUSH, FLEX_ITEMS_RESTORE
 from src.connect import connect_command_func
 from src.create_action import create_action_command_func
 from src.create_workflow import create_workflow_command_func
@@ -21,6 +21,8 @@ from src.env import env_command_func
 from src.list import list_command_func
 from src.pull.pull import pull_command_func
 from src.push import push_command_func
+from src.query import query_command_func
+from src.restore import restore_command_func
 
 if __name__ == "__main__":
     # parser
@@ -44,15 +46,15 @@ if __name__ == "__main__":
     list_command.add_argument('--filters', type=str, nargs="*", help="Search by text")
     list_command.set_defaults(func=list_command_func)
 
-    # create_action
-    create_action_command = subparsers.add_parser('create_action', help='Create action')
-    create_action_command.add_argument('name', type=str, help='Name of the action')
-    create_action_command.set_defaults(func=create_action_command_func)
-
-    # create_workflow
-    create_workflow_command = subparsers.add_parser('create_workflow', help='Create workflow')
-    create_workflow_command.add_argument('name', type=str, help='Name of the workflow')
-    create_workflow_command.set_defaults(func=create_workflow_command_func)
+    # # create_action
+    # create_action_command = subparsers.add_parser('create_action', help='Create action')
+    # create_action_command.add_argument('name', type=str, help='Name of the action')
+    # create_action_command.set_defaults(func=create_action_command_func)
+    #
+    # # create_workflow
+    # create_workflow_command = subparsers.add_parser('create_workflow', help='Create workflow')
+    # create_workflow_command.add_argument('name', type=str, help='Name of the workflow')
+    # create_workflow_command.set_defaults(func=create_workflow_command_func)
 
     # pull
     pull_command = subparsers.add_parser('pull', help='Pull config items from Flex')
@@ -64,8 +66,29 @@ if __name__ == "__main__":
     pull_command = subparsers.add_parser('push', help='Push config items to Flex')
     pull_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_PUSH, help='Config item to push')
     pull_command.add_argument('item_names', type=str, nargs='*', help='Items to push')
-    pull_command.add_argument('--all', type=bool, help='Whether to push all config items or not')
+    pull_command.add_argument('--push_to_failed_jobs', type=bool, default=False)
+    # pull_command.add_argument('--all', type=bool, help='Whether to push all config items or not')
     pull_command.set_defaults(func=push_command_func)
+
+    # restore
+    restore_command = subparsers.add_parser('restore', help='Restore config items')
+    restore_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_RESTORE, help='Config item to restore')
+    restore_command.add_argument('item_name', type=str, help='Item to restore')
+    restore_command.add_argument('backup', type=str, help='Backup to restore')
+    restore_command.set_defaults(func=restore_command_func)
+
+    # query
+    query_command = subparsers.add_parser('query', help='Query API')
+    query_command.add_argument('method', type=str, choices=['GET', 'POST', 'PUT'], default='GET')
+    query_command.add_argument('url', type=str, help='Query to send')
+    query_command.add_argument('--payload', type=str, help='File to use as payload')
+    query_command.set_defaults(func=query_command_func)
+
+    # delete
+    # destroy
+    # cancel
+    # compare
+    # sync
 
     args = parser.parse_args()
     args.func(args)

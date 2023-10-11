@@ -21,6 +21,16 @@
   ```shell
   ftbx env
   ```
+  
+* query anything
+  ```shell
+  # GET
+  ftbx query GET actions/410 # same as below
+  ftbx query GET https://master.cs-sandbox.flex.cs.dalet.cloud/api/actions/410
+  
+  # POST/PUT
+  ftbx query PUT actions/410/configuration --payload payload.json
+  ```
 
 * list config items (workflowDefinitions, actions..) and their ids
   ```shell
@@ -62,4 +72,12 @@
   
   # Push job
   ftbx push jobs 294036
+  
+  # push action to failed jobs and retry them
+  ftbx push actions check-end-node-wf --push_to_failed_jobs true
+  ```
+  
+* restore backup (in config_item/item_name/backup)
+  ```shell
+  ftbx restore actions set-tech-metadata-dpx "2023-10-10 15h53m43s"
   ```
