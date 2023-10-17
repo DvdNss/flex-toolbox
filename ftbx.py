@@ -63,12 +63,12 @@ if __name__ == "__main__":
     pull_command.set_defaults(func=pull_command_func)
 
     # push
-    pull_command = subparsers.add_parser('push', help='Push config items to Flex')
-    pull_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_PUSH, help='Config item to push')
-    pull_command.add_argument('item_names', type=str, nargs='*', help='Items to push')
-    pull_command.add_argument('--push_to_failed_jobs', type=bool, default=False)
-    # pull_command.add_argument('--all', type=bool, help='Whether to push all config items or not')
-    pull_command.set_defaults(func=push_command_func)
+    push_command = subparsers.add_parser('push', help='Push config items to Flex')
+    push_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_PUSH, help='Config item to push')
+    push_command.add_argument('item_names', type=str, nargs='*', help='Items to push')
+    push_command.add_argument('--push_to_failed_jobs', type=bool, default=False)
+    # push_command.add_argument('--all', type=bool, help='Whether to push all config items or not')
+    push_command.set_defaults(func=push_command_func)
 
     # restore
     restore_command = subparsers.add_parser('restore', help='Restore config items')
