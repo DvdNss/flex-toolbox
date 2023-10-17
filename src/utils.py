@@ -185,9 +185,6 @@ def get_surrounding_items(config_item: str, items: dict, sub_items: List[str]):
     :return:
     """
 
-    # auth material
-    env, auth = get_auth_material()
-
     for item in tqdm(items, desc="Retrieving jobs ['asset', 'workflow']"):
 
         # asset
