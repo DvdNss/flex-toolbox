@@ -193,9 +193,7 @@ def get_surrounding_items(config_item: str, items: dict, sub_items: List[str]):
         # asset
         try:
             asset_id = items.get(item).get('asset').get('id')
-            asset_request = f"{env['url']}/api/assets/{asset_id};includeMetadata=true"
-            # print(f"\nPerforming [GET] {env['url']}/api/assets/{asset_id};includeMetadata=true...")
-            asset = session.request("GET", asset_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
+            asset = query(method="GET", url=f"assets/{asset_id};includeMetadata=true", log=False)
             items[item]['asset'] = asset
         except:
             pass
@@ -203,15 +201,10 @@ def get_surrounding_items(config_item: str, items: dict, sub_items: List[str]):
         # workflow
         try:
             workflow_id = items.get(item).get('workflow').get('id')
-            workflow_request = f"{env['url']}/api/workflows/{workflow_id}"
-            # print(f"\nPerforming [GET] {env['url']}/api/workflows/{workflow_id}...")
-            workflow_instance = session.request("GET", workflow_request, headers=HEADERS, auth=auth,
-                                                data=PAYLOAD).json()
-            variables_request = f"{env['url']}/api/workflows/{workflow_id}/variables"
-            # print(f"\nPerforming [GET] {env['url']}/api/workflows/{workflow_id}/variables...")
-            variables = session.request("GET", variables_request, headers=HEADERS, auth=auth,
-                                        data=PAYLOAD).json()
-            items[item]['workflow']['variables'] = variables
+            workflow_instance = query(method="GET", url=f"workflows/{workflow_id}", log=False)
+            workflow_variables = query(method="GET", url=f"workflows/{workflow_id}/variables", log=False)
+            items[item]['workflow'] = workflow_instance
+            items[item]['workflow']['variables'] = workflow_variables
         except:
             pass
 

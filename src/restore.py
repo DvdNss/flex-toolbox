@@ -11,16 +11,7 @@
 import json
 import os
 
-import requests
-
-from src.push import push_item, push_job
-
-# global variables
-PAYLOAD = ""
-HEADERS = {'Content-Type': 'application/vnd.nativ.mio.v1+json'}
-
-# init. session
-session = requests.Session()
+from src.push import push_item
 
 
 def restore_command_func(args):

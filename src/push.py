@@ -12,16 +12,12 @@ import json
 import os
 import re
 
-import requests
 from tqdm import tqdm
 
 from src.connect import get_default_account_id
-from src.pull.pull import save_items
+from src.pull import save_items
 from src.utils import get_items, reformat_tabs, reformat_spaces, get_auth_material, query
 
-# global variables
-PAYLOAD = ""
-HEADERS = {'Content-Type': 'application/vnd.nativ.mio.v1+json'}
 ACTION_UPDATE_FIELDS = [
     'accountId',
     'allowedAutoRetryAttempts',
@@ -39,9 +35,6 @@ ACTION_UPDATE_FIELDS = [
     'useLatestAvailableVersion',
     'visibilityIds'
 ]
-
-# init. session
-session = requests.Session()
 
 
 def push_command_func(args):
@@ -231,7 +224,10 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
 
     # push to failed jobs if needed
     if push_and_retry_failed_jobs:
-        failed_jobs = get_items(config_item="jobs", filters=[f"name={item_name}", "exactNameMatch=true", "status=Failed"])
+
+        # retrieve failed jobs for given item
+        failed_jobs = get_items(config_item="jobs",
+                                filters=[f"name={item_name}", "exactNameMatch=true", "status=Failed"])
 
         for failed_job in tqdm(failed_jobs, desc="Pushing to failed jobs and retrying them"):
             # push script

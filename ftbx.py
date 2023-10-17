@@ -19,7 +19,7 @@ from src.create_action import create_action_command_func
 from src.create_workflow import create_workflow_command_func
 from src.env import env_command_func
 from src.list import list_command_func
-from src.pull.pull import pull_command_func
+from src.pull import pull_command_func
 from src.push import push_command_func
 from src.query import query_command_func
 from src.restore import restore_command_func

@@ -12,16 +12,7 @@ import datetime
 import json
 from typing import List
 
-import requests
-
 from src.utils import create_folder, get_tags_and_taxonomies, get_items, get_taxonomies, get_surrounding_items
-
-# global variables
-PAYLOAD = ""
-HEADERS = {'Content-Type': 'application/vnd.nativ.mio.v1+json'}
-
-# init. session
-session = requests.Session()
 
 
 def pull_command_func(args):

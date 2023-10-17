@@ -12,16 +12,8 @@ import json
 from typing import List
 
 import pandas as pd
-import requests
 
 from src.utils import get_items, get_tags_and_taxonomies, get_taxonomies
-
-# global variables
-PAYLOAD = ""
-HEADERS = {'Content-Type': 'application/vnd.nativ.mio.v1+json'}
-
-# init. session
-session = requests.Session()
 
 
 def list_command_func(args):
