@@ -35,8 +35,6 @@ def restore_command_func(args):
 
         if args.config_item == 'actions' and data['objectType']['name'] == 'action':
             push_item(config_item=args.config_item, item_name=args.item_name, item_config=data, restore=True)
-        elif args.config_item == 'jobs' and data['objectType']['name'] == 'job':
-            push_job(job_config=data)
         else:
             print(f'Cannot restore backup {args.item}/backup/{args.backup} since it is not an action.\n')
 

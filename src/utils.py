@@ -148,20 +148,23 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
         for item in tqdm(sorted_items_dict, desc=f"Retrieving {config_item} {sub_items}"):
             for sub_item in sub_items:
 
-                if sub_item != "body":
-                    sorted_items_dict[item][sub_item] = query(
-                        method="GET",
-                        url=f"{config_item}/{str(items_dict[item]['id'] if config_item != 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}",
-                        log=False
-                    )
-                else:
-                    sorted_items_dict[item][sub_item] = session.request(
-                        "GET",
-                        f"{config_item}/{str(items_dict[item]['id'] if config_item != 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}",
-                        headers=HEADERS,
-                        auth=auth,
-                        data=PAYLOAD
-                    ).content.decode("utf-8", "ignore").strip()
+                try: # try bcz some metadata are sometimes empty :)
+                    if sub_item != "body":
+                        sorted_items_dict[item][sub_item] = query(
+                            method="GET",
+                            url=f"{config_item}/{str(items_dict[item]['id'] if config_item != 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}",
+                            log=False
+                        )
+                    else:
+                        sorted_items_dict[item][sub_item] = session.request(
+                            "GET",
+                            f"{config_item}/{str(items_dict[item]['id'] if config_item != 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}",
+                            headers=HEADERS,
+                            auth=auth,
+                            data=PAYLOAD
+                        ).content.decode("utf-8", "ignore").strip()
+                except:
+                    pass
 
         return sorted_items_dict
 
@@ -182,11 +185,8 @@ def get_surrounding_items(config_item: str, items: dict, sub_items: List[str]):
     :return:
     """
 
-    # retrieve default env
-    env = get_default_env()
-
-    # init. connection & auth with env API
-    auth = HTTPBasicAuth(username=env['username'], password=env['password'])
+    # auth material
+    env, auth = get_auth_material()
 
     for item in tqdm(items, desc="Retrieving jobs ['asset', 'workflow']"):
 
