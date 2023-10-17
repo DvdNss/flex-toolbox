@@ -13,7 +13,8 @@
 
 import argparse
 
-from VARIABLES import FLEX_ITEMS_PULL, FLEX_ITEMS_LIST, FLEX_ITEMS_PUSH, FLEX_ITEMS_RESTORE
+from VARIABLES import FLEX_ITEMS_PULL, FLEX_ITEMS_LIST, FLEX_ITEMS_PUSH, FLEX_ITEMS_RESTORE, FLEX_ITEMS_COMPARE
+from src.compare import compare_command_func
 from src.connect import connect_command_func
 from src.create_action import create_action_command_func
 from src.create_workflow import create_workflow_command_func
@@ -83,6 +84,13 @@ if __name__ == "__main__":
     query_command.add_argument('url', type=str, help='Query to send')
     query_command.add_argument('--payload', type=str, help='File to use as payload')
     query_command.set_defaults(func=query_command_func)
+
+    # compare
+    compare_command = subparsers.add_parser('compare', help='Compare a config item against several environments')
+    compare_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_COMPARE, help='Config item to compare')
+    compare_command.add_argument('item_name', type=str, help='Item to compare')
+    compare_command.add_argument('environments', type=str, nargs='*', help='Environments')
+    compare_command.set_defaults(func=compare_command_func)
 
     # delete
     # destroy

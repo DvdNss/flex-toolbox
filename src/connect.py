@@ -12,7 +12,7 @@
 import requests
 from requests.auth import HTTPBasicAuth
 
-from src.env import read_environments_json, add_or_update_environments_json, get_default_env
+from src.env import read_environments_json, add_or_update_environments_json, get_env
 
 # global variables
 PAYLOAD = ""
@@ -100,7 +100,7 @@ def get_default_account_id():
     """
 
     # retrieve default env
-    env = get_default_env()
+    env = get_env()
 
     # init. connection & auth with env API
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])

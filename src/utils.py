@@ -17,7 +17,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 from tqdm import tqdm
 
-from src.env import get_default_env
+from src.env import get_env
 
 # global variables
 PAYLOAD = ""
@@ -71,14 +71,15 @@ def create_folder(folder_name: str, ignore_error: bool = False):
         return False
 
 
-def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = [], prefix: str = 'api') -> dict:
+def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = [],
+              environment: str = "default") -> dict:
     """
     Get items from an env using public API.
 
+    :param environment: environment to get the items from
     :param config_item: item to retrieve from API (ex: workflows, accounts..)
     :param sub_items: sub items to retrieve for item_name
     :param filters: filters to apply
-    :param prefix: prefix to apply in the request URL
 
     :return: dict['item_name': {item_config}]
     """
@@ -95,12 +96,13 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
                 filters[idx] = "fql=" + urllib.parse.quote(filter.replace("fql=", ""))
 
     # retrieve auth material
-    env, auth = get_auth_material()
+    env, auth = get_auth_material(environment=environment)
 
     # get total count
     test_query_result = query(
         method="GET",
         url=f"{config_item}{';' + ';'.join(filters) if filters else ''}",
+        environment=environment
     )
 
     # retrieve totalCount
@@ -116,6 +118,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
             items_batch = query(
                 method="GET",
                 url=f"{config_item};offset={str(offset)}{';' + ';'.join(filters) if filters else ''}",
+                environment=environment,
                 log=False
             )
 
@@ -153,12 +156,13 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
                         sorted_items_dict[item][sub_item] = query(
                             method="GET",
                             url=f"{config_item}/{str(items_dict[item]['id'] if config_item != 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}",
+                            environment=environment,
                             log=False
                         )
                     else:
                         sorted_items_dict[item][sub_item] = session.request(
                             "GET",
-                            f"{config_item}/{str(items_dict[item]['id'] if config_item != 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}",
+                            f"{env['url']}/api/{config_item}/{str(items_dict[item]['id'] if config_item != 'collections' else str(items_dict.get(item).get('uuid')))}/{sub_item}",
                             headers=HEADERS,
                             auth=auth,
                             data=PAYLOAD
@@ -223,7 +227,7 @@ def get_taxonomies(filters: List[str]):
                 filters[idx] = "fql=" + urllib.parse.quote(filter.replace("fql=", ""))
 
     # retrieve default env
-    env = get_default_env()
+    env = get_env()
 
     # init. connection & auth with env API
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])
@@ -307,7 +311,7 @@ def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
     tags = []
 
     # retrieve default env
-    env = get_default_env()
+    env = get_env()
 
     # init. connection & auth with env API
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])
@@ -395,7 +399,7 @@ def dig_for_tags_and_taxonomies(entries, tags: List, taxonomies: List):
             dig_for_tags_and_taxonomies(entries=entry["children"], tags=tags, taxonomies=taxonomies)
 
 
-def get_auth_material():
+def get_auth_material(environment: str = "default"):
     """
     Returns auth material: env & auth.
 
@@ -403,7 +407,7 @@ def get_auth_material():
     """
 
     # retrieve default env
-    env = get_default_env()
+    env = get_env(environment=environment)
 
     # init. connection & auth with env API
     auth = HTTPBasicAuth(username=env['username'], password=env['password'])
@@ -411,10 +415,11 @@ def get_auth_material():
     return env, auth
 
 
-def query(method: str, url: str, payload=None, log: bool = True):
+def query(method: str, url: str, payload=None, log: bool = True, environment: str = "default"):
     """
     Query the public API.
 
+    :param environment: env to query
     :param method: method to use from [GET, POST, PUT]
     :param url: url to query after env_url/api/
     :param payload: payload to use for POST & PUT queries
@@ -424,7 +429,7 @@ def query(method: str, url: str, payload=None, log: bool = True):
     """
 
     # auth material
-    env, auth = get_auth_material()
+    env, auth = get_auth_material(environment=environment)
 
     # query
     query = f"{env['url']}/api/{url}" if "http" not in url else f"{url}"

@@ -50,29 +50,30 @@ DEFAULT_GROOVY_SCRIPT = "import com.ooyala.flex.plugins.PluginCommand\n\nclass s
 FLEX_ITEMS_PULL = ['all', 'accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
                    'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
                    'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions',
-                   'userDefinedObjectTypes', 'users', 'variants', 'variants', 'wizards', 'workflowDefinitions',
+                   'userDefinedObjectTypes', 'users', 'variants', 'wizards', 'workflowDefinitions',
                    'workflows',
                    'workspaces']
 
 FLEX_ITEMS_LIST = ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
                    'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
-                   'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions',
-                   'userDefinedObjectTypes', 'users', 'variants', 'variants', 'wizards', 'workflowDefinitions',
-                   'workflows',
-                   'workspaces']
+                   'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions', 'userDefinedObjectTypes',
+                   'users', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']
 
 FLEX_ITEMS_PUSH = ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
                    'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
-                   'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions',
-                   'userDefinedObjectTypes', 'users', 'variants', 'variants', 'wizards', 'workflowDefinitions',
-                   'workflows',
-                   'workspaces']
+                   'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions', 'userDefinedObjectTypes',
+                   'users', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']
 
 FLEX_ITEMS_RESTORE = ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
                       'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources',
                       'roles', 'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions',
-                      'userDefinedObjectTypes', 'users', 'variants', 'variants', 'wizards', 'workflowDefinitions',
-                      'workflows', 'workspaces']
+                      'userDefinedObjectTypes', 'users', 'variants', 'wizards', 'workflowDefinitions', 'workflows',
+                      'workspaces']
+
+FLEX_ITEMS_COMPARE = ['accounts', 'actions', 'eventHandlers', 'groups', 'messageTemplates', 'metadataDefinitions',
+                      'objectTypes', 'profiles', 'quotas', 'resources', 'roles', 'tagCollections', 'taskDefinitions',
+                      'taxonomies', 'timedActions', 'userDefinedObjectTypes', 'users', 'variants', 'wizards',
+                      'workflowDefinitions', 'workspaces']
 
 
 class PluginType(Enum):

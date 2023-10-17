@@ -68,13 +68,15 @@ def read_environments_json():
     return environments
 
 
-def get_default_env():
+def get_env(environment: str = "default"):
     """
     Return default environment.
+
+    :param environment: environment to get from config
 
     :return:
     """
 
     environments = read_environments_json()
 
-    return environments['environments']['default']
+    return environments['environments'][environment]
