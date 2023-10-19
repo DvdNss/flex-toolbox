@@ -5,7 +5,7 @@
     AUTHOR: David NAISSE
     DATE: September 13, 2023
 
-    DESCRIPTION: TODO
+    DESCRIPTION: environment file functions
     
 """
 import json
