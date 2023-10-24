@@ -16,8 +16,6 @@ import argparse
 from VARIABLES import FLEX_ITEMS_PULL, FLEX_ITEMS_LIST, FLEX_ITEMS_PUSH, FLEX_ITEMS_RESTORE, FLEX_ITEMS_COMPARE
 from src.compare import compare_command_func
 from src.connect import connect_command_func
-from src.create_action import create_action_command_func
-from src.create_workflow import create_workflow_command_func
 from src.env import env_command_func
 from src.list import list_command_func
 from src.pull import pull_command_func
@@ -88,15 +86,13 @@ if __name__ == "__main__":
     # compare
     compare_command = subparsers.add_parser('compare', help='Compare a config item against several environments')
     compare_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_COMPARE, help='Config item to compare')
-    compare_command.add_argument('item_name', type=str, help='Item to compare')
     compare_command.add_argument('environments', type=str, nargs='*', help='Environments')
+    compare_command.add_argument('--filters', type=str, nargs='*', help='Filters to apply')
     compare_command.set_defaults(func=compare_command_func)
 
-    # delete
-    # destroy
-    # cancel
-    # compare
-    # sync
+    # todo:
+    #     cancel
+    #     sync
 
     args = parser.parse_args()
     args.func(args)

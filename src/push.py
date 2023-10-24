@@ -46,15 +46,36 @@ def push_command_func(args):
         # if path exists
         if os.path.isdir(f"{args.config_item}/{item}"):
 
-            # check if is action
+            # get obj
             with open(f"{args.config_item}/{item}/_object.json", 'r') as config_file:
                 data = json.load(config_file)
 
+            # action
             if args.config_item == 'actions' and data['objectType']['name'] == 'action':
                 push_item(config_item=args.config_item, item_name=item, item_config=data,
                           push_and_retry_failed_jobs=args.push_to_failed_jobs)
+            # job
             elif args.config_item == 'jobs' and data['objectType']['name'] == 'job':
                 push_job(job_config=data)
+
+            # todo:
+            #     eventHandlers
+            #     groups
+            #     messageTemplates
+            #     metadataDefinitions
+            #     profiles
+            #     resources
+            #     roles
+            #     tagCollections
+            #     taskDefinitions
+            #     taxonomies
+            #     timedActions
+            #     userDefinedObjectTypes
+            #     variants
+            #     wizards
+            #     workflowDefinitions
+            #     workspaces
+
             else:
                 print(f'Cannot push action {item} since it is not an action.\n')
 

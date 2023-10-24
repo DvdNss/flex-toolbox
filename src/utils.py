@@ -443,7 +443,12 @@ def query(method: str, url: str, payload=None, log: bool = True, environment: st
         headers=HEADERS,
         auth=auth,
         data=json.dumps(payload) if payload else None
-    ).json()
+    )
+
+    try:
+        query_result = query_result.json()
+    except Exception as ex:
+        raise Exception(f"{ex}: {query_result}")
 
     # exception handler
     if 'errors' in query_result:

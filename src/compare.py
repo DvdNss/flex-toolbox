@@ -10,7 +10,6 @@
 """
 import json
 
-import numpy as np
 import pandas as pd
 
 from src.utils import get_items
@@ -20,35 +19,139 @@ def compare_command_func(args):
     """Action on pull command. """
 
     if len(args.environments) >= 2:
-        compare_items(config_item=args.config_item, item_name=args.item_name, environments=args.environments)
+        # compare_items(config_item=args.config_item, environments=args.environments, filters=args.filters)
+        compare_item(config_item=args.config_item, environments=args.environments, filters=args.filters,
+                     sub_items=['configuration'])
+        # todo:
+        #   - compare all items for a config item
+        #   - add more granular compare with config and sub_items
     else:
         print(
             f"Cannot compare {args.config_item} if number of environments provided is less than 2 (provided: {args.environments}). ")
 
 
-def compare_items(config_item: str, item_name: str, environments: list, local: bool = False, sub_items: list = []):
+#
+# def compare_items(config_item: str, environments: list, filters: list = []):
+#     """
+#     Compare items between envs.
+#
+#     :param config_item: config item
+#     :param environments: list of envs
+#     :param filters: filters to apply
+#     :return:
+#     """
+#
+#     if config_item == 'accounts':
+#         sorted_items = get_items(config_item=config_item, sub_items=['metadata', 'properties'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'actions':
+#         sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'assets':
+#         sorted_items = get_items(config_item=config_item, sub_items=['metadata'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'collections':
+#         sorted_items = get_items(config_item=config_item, sub_items=['metadata'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'eventHandlers':
+#         sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'events':
+#         sorted_items = get_items(config_item=config_item, filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'groups':
+#         sorted_items = get_items(config_item=config_item, sub_items=['members'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'jobs':
+#         sorted_items = get_items(config_item=config_item, sub_items=['configuration', 'history'], filters=filters)
+#         sorted_items = get_surrounding_items(config_item=config_item, items=sorted_items,
+#                                              sub_items=['asset', 'workflow'])
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'messageTemplates':
+#         sorted_items = get_items(config_item=config_item, sub_items=['body'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'metadataDefinitions':
+#         sorted_items = get_items(config_item=config_item, sub_items=['definition'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'objectTypes':
+#         sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'profiles':
+#         sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'quotas':
+#         sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'resources':
+#         sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'roles':
+#         sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'tagCollections':
+#         # no way to retrieve tags from API directly, so bypassing by reading tags from MD DEFs
+#         # NOTE: Will only retrieve tags that are used by MD DEFs
+#         print("\nRetrieving tagCollections from Metadata Definitions as "
+#               "it is not possible to list them directly from the API...\nPlease note that only tagCollections that are used"
+#               " in metadata definitions will be retrieved.")
+#         metadata_definitions = get_items(config_item="metadataDefinitions", sub_items=['definition'])
+#         sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['tagCollections'])
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'taskDefinitions':
+#         sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'tasks':
+#         sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'taxonomies':
+#         taxonomies = get_taxonomies(filters=filters)
+#         save_taxonomies(taxonomies=taxonomies)
+#     elif config_item == 'timedActions':
+#         sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'userDefinedObjectTypes':
+#         sorted_items = get_items(config_item=config_item, sub_items=['hierarchy', 'relationships'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'users':
+#         sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'variants':
+#         sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'wizards':
+#         sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'workflowDefinitions':
+#         sorted_items = get_items(config_item=config_item, sub_items=['structure'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'workflows':
+#         sorted_items = get_items(config_item=config_item, sub_items=['variables', 'jobs'], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+#     elif config_item == 'workspaces':
+#         sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+#         save_items(config_item=config_item, items=sorted_items)
+
+
+def compare_item(config_item: str, filters: list, environments: list, local: bool = False, sub_items: list = []):
     """
     Compare items between environments.
 
     :param sub_items: sub items
     :param local: whether to use local comparison or not
     :param config_item: config item (ex: actions, workflowDefinitions)
-    :param item_name: item name (ex: update-asset-metadata)
+    :param filters: filters to apply
     :param environments: envs (ex: customer-dev, customer-stg, customer-prod)
     :return:
     """
 
     cmp = {}
 
-    keys_to_pop = ['id', 'uuid', 'objectType', 'externalIds', 'href', 'type', 'icons', 'created', 'lastModified',
-                   'visibility', 'owner', 'createdBy', 'account', 'revision']
-
     # get item from envs
     for env in environments:
         item = get_items(
             config_item=config_item,
             sub_items=sub_items,
-            filters=[f"name={item_name}", 'exactNameMatch=true', 'limit=1'],
+            filters=filters,
             environment=env
         )
 
@@ -60,13 +163,6 @@ def compare_items(config_item: str, item_name: str, environments: list, local: b
             item['pluginClass'] = item['pluginClass'].split(".")[-1]
         except:
             pass
-
-        # pop useless keys
-        for key_to_pop in keys_to_pop:
-            try:
-                item.pop(key_to_pop)
-            except:
-                pass
 
         cmp[env] = item
 
@@ -87,46 +183,53 @@ def compare_items(config_item: str, item_name: str, environments: list, local: b
 
 
 def create_comparison_dataframe(comparison_dict):
-    """
-    Create comparison dataframe
-
-    :param comparison_dict:
-    :return:
-    """
-
-    # get environment names
+    # Get environment names
     env_names = list(comparison_dict.keys())
 
-    # create empty DataFrame
+    # Create an empty DataFrame
     df = pd.DataFrame(columns=env_names)
 
-    # iterate through keys in the reference environment
-    reference_env = env_names[0]
-    for key, value in comparison_dict[reference_env].items():
+    def process_key_value(prefix, value, env):
         if isinstance(value, dict):
             for sub_key, sub_value in value.items():
-                df.at[key + '.' + sub_key, reference_env] = sub_value
+                new_prefix = prefix + '.' + sub_key if prefix else sub_key
+                process_key_value(new_prefix, sub_value, env)
         else:
-            df.at[key, reference_env] = value
+            df.at[prefix, env] = value
 
-    # iterate through non-reference environment
+    for env in env_names:
+        environment_dict = comparison_dict[env]
+        process_key_value("", environment_dict, env)
+
+    # Replace non-reference environment values with 'x' or '/!\' as needed
+    reference_env = env_names[0]
     for env in env_names[1:]:
-        for key, value in comparison_dict[env].items():
-            if isinstance(value, dict):
-                for sub_key, sub_value in value.items():
-                    if key in comparison_dict[reference_env] and sub_key in comparison_dict[reference_env][key]:
-                        reference_value = comparison_dict[reference_env].get(key, {}).get(sub_key)
-                    else:
-                        reference_value = np.nan
-                    if sub_value != reference_value:
-                        df.at[key + '.' + sub_key, env] = sub_value
-                    else:
-                        df.at[key + '.' + sub_key, env] = 'NULL'
+        for prefix in df.index:
+            reference_value = df.at[prefix, reference_env]
+            # replace code otherwise unreadable
+            if isinstance(reference_value, str) and (
+                    '\r' in reference_value or '\t' in reference_value or '\n' in reference_value):
+                df.at[prefix, reference_env] = "<CODE>"
+            # check sync
+            if df.at[prefix, env] == reference_value:
+                df.at[prefix, env] = 'x'
             else:
-                reference_value = comparison_dict[reference_env].get(key)
-                if value != reference_value:
-                    df.at[key, env] = value
-                else:
-                    df.at[key, env] = 'x'
+                if isinstance(df.at[prefix, env], str) and (
+                        '\r' in df.at[prefix, env] or '\t' in df.at[prefix, env] or '\n' in df.at[prefix, env]):
+                    df.at[prefix, env] = '/!\\'
+                if '.import' in prefix:
+                    df.at[prefix, env] = '/!\\'
+            # replace imports otherwise unreadable
+            if '.import' in prefix:
+                df.at[prefix, reference_env] = '<IMPORTS>'
+
+    # Keys to remove from the DataFrame
+    keys_to_pop = [r'id', r'objectType', r'externalIds', r'href', r'icons', r'created', r'lastModified',
+                   r'visibility', r'owner', r'createdBy', r'account', r'revision', r'createdBy',
+                   r'configuration.definition', r'deleted']
+
+    # Remove rows with keys matching regular expressions
+    for key in keys_to_pop:
+        df = df[~df.index.str.contains(key, regex=True)]
 
     return df
