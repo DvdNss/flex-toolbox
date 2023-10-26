@@ -17,9 +17,19 @@
   # Alias
   ftbx connect "dalet-sandbox"
   ```
+  
+  ```shell
+  # Output
+  Successfully connected to https://portal.dev.archive.warnerbros.com - this environment is now your default environment.
+  ```
 * show default env
   ```shell
   ftbx env
+  ```
+  
+  ```shell
+  # Output
+  Current default environment is https://portal.dev.archive.warnerbros.com - user: dnaisse.
   ```
   
 * query anything
@@ -30,6 +40,13 @@
   
   # POST/PUT
   ftbx query PUT actions/410/configuration --payload payload.json
+  ```
+  
+  ```shell
+  # Output
+  Performing [GET] https://portal.dev.archive.warnerbros.com/api/actions/28938...
+
+  Result of the query has been saved in query.json for your best convenience. 
   ```
 
 * list config items (workflowDefinitions, actions..) and their ids
@@ -43,11 +60,28 @@
   # List 5 jobs in a failed status
   ftbx list jobs --filters status=Failed limit=5
   ```
-  > available items are: ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
-              'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
-              'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions',
-              'userDefinedObjectTypes', 'users', 'variants', 'wizards', 'workflowDefinitions', 'workflows',
-              'workspaces']
+  
+  ```shell
+  # Output
+  Performing [GET] https://portal.dev.archive.warnerbros.com/api/actions;type=script;limit=10...
+
+  Retrieving actions: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.46it/s]
+  Retrieving actions []: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 10/10 [00:00<?, ?it/s]
+
+                     name                   id    type.name                       pluginClass
+  1          action-modified-test-script  1874308   script   tv.nativ.mio.plugins.actions.script.GroovyScriptCommand
+  2    create-placeholder-sequence-group  1856453   script   tv.nativ.mio.plugins.actions.script.GroovyScriptCommand
+  3   delete-asset-from-bm-event-handler  1856600   script   tv.nativ.mio.plugins.actions.script.GroovyScriptCommand
+  4                   prepare-delete-udo  2026696   script    tv.nativ.mio.plugins.actions.jef.JEFActionProxyCommand
+  5                 sc-create-collection  1863345   script    tv.nativ.mio.plugins.actions.jef.JEFActionProxyCommand
+  6                sc-sharing-collection  1863346   script    tv.nativ.mio.plugins.actions.jef.JEFActionProxyCommand
+  7                                 test  2338482   script   tv.nativ.mio.plugins.actions.script.GroovyScriptCommand
+  8                update-gatorsky-to-in  1856601   script   tv.nativ.mio.plugins.actions.script.GroovyScriptCommand
+  9                   wamo-purge-trigger  1917236   script   tv.nativ.mio.plugins.actions.script.GroovyScriptCommand
+  10                 wamo-query-aws-sign  1837898   script   tv.nativ.mio.plugins.actions.script.GroovyScriptCommand
+
+  Results of the query have been saved as list.json for your best convenience.
+  ```
 
 * pull items
   ```shell
@@ -80,4 +114,45 @@
 * restore backup (in config_item/item_name/backup)
   ```shell
   ftbx restore actions set-tech-metadata-dpx "2023-10-10 15h53m43s"
+  ```
+  
+* compare items
+  ```shell
+  ftbx compare actions wb-dev wb-stg wb-prod --filters name=set-tech-metadata-dpx
+  ```
+  
+  ```shell
+  # Output
+  Performing [GET] https://portal.dev.archive.warnerbros.com/api/actions;name=check-end-node-wf...
+
+  Retrieving actions: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  4.43it/s]
+  Retrieving actions ['configuration']: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  4.70it/s]
+    
+  Performing [GET] https://vault.stg.archive.warnerbros.com/api/actions;name=check-end-node-wf...
+    
+  Retrieving actions: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  4.12it/s]
+  Retrieving actions ['configuration']: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.58it/s] 
+    
+  Performing [GET] https://vault.archive.warnerbros.com/api/actions;name=check-end-node-wf...
+    
+  Retrieving actions: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  4.72it/s]
+  Retrieving actions ['configuration']: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  4.89it/s] 
+    
+                                                        wb-dev            wb-stg wb-prod
+  name                                                  check-end-node-wf     x       x
+  displayName                                           check-end-node-wf     x       x
+  description                                                               NaN       x
+  enabled                                                            True     x       x
+  type.name                                                      decision     x       x
+  type.displayName                                               Decision     x       x
+  type.category                                                  Workflow     x       x
+  pluginClass                                ScriptedMultiDecisionCommand     x       x
+  pluginVersion                                                     1.0.0     x     NaN
+  latestPluginVersion                                               1.0.0     x     NaN
+  useLatestAvailableVersion                                          True     x     NaN
+  runRuleExpression                                                         NaN       x
+  supportsAutoRetry                                                 False     x       x
+  concurrentJobsLimit                                                   0     x       x
+  configuration.instance.script_type.script                        <CODE>   /!\     /!\
+
   ```
