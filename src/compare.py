@@ -10,9 +10,11 @@
 """
 import json
 
+import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
-from src.utils import get_items
+from src.utils import get_items, create_folder
 
 
 def compare_command_func(args):
@@ -20,8 +22,8 @@ def compare_command_func(args):
 
     if len(args.environments) >= 2:
         # compare_items(config_item=args.config_item, environments=args.environments, filters=args.filters)
-        compare_item(config_item=args.config_item, environments=args.environments, filters=args.filters,
-                     sub_items=['configuration'])
+        compare_items(config_item=args.config_item, environments=args.environments, filters=args.filters,
+                      sub_items=['configuration'])
         # todo:
         #   - compare all items for a config item
         #   - add more granular compare with config and sub_items
@@ -132,7 +134,7 @@ def compare_command_func(args):
 #         save_items(config_item=config_item, items=sorted_items)
 
 
-def compare_item(config_item: str, filters: list, environments: list, local: bool = False, sub_items: list = []):
+def compare_items(config_item: str, filters: list, environments: list, local: bool = False, sub_items: list = []):
     """
     Compare items between environments.
 
@@ -145,32 +147,41 @@ def compare_item(config_item: str, filters: list, environments: list, local: boo
     """
 
     cmp = {}
+    tmp_compare = {}
+    df = None
+
+    # create compare folder
+    create_folder(folder_name="compare", ignore_error=True)
 
     # get item from envs
     for env in environments:
-        item = get_items(
+        items = get_items(
             config_item=config_item,
             sub_items=sub_items,
             filters=filters,
-            environment=env
+            environment=env,
+            id_in_keys=False,
         )
 
-        # from depth = 2 to depth =1
-        item = item[list(item.keys())[0]]
+        cmp[env] = items
 
-        # pluginClass is very long, so shortening it
-        try:
-            item['pluginClass'] = item['pluginClass'].split(".")[-1]
-        except:
-            pass
+    print("")
 
-        cmp[env] = item
+    # create df for each item
+    for item in tqdm(cmp.get(environments[0]), desc="Comparing items"):
+        tmp_compare = {}
+        for env in environments:
+            tmp_compare[env] = cmp.get(env).get(item)
 
-    # create dataframe
-    df = create_comparison_dataframe(cmp)
-    pd.set_option('display.colheader_justify', 'center')
-    pd.set_option('display.max_colwidth', None)
-    pd.set_option('display.max_rows', None)
+        # create dataframe
+        df = create_comparison_dataframe(tmp_compare)
+        pd.set_option('display.colheader_justify', 'center')
+        pd.set_option('display.max_colwidth', None)
+        pd.set_option('display.max_rows', None)
+
+        # save df
+        if not check_all_x_or_nan(df):
+            df.to_csv(f"compare/{item}.tsv", sep='\t')
 
     # display
     print("")
@@ -180,9 +191,17 @@ def compare_item(config_item: str, filters: list, environments: list, local: boo
     # save JSON file
     with open("compare.json", 'w') as comparison_file:
         json.dump(cmp, comparison_file, indent=4)
+        print(f"\nDifferences have been saved to compare/<{config_item}_name>.tsv for your best convenience.")
 
 
 def create_comparison_dataframe(comparison_dict):
+    """
+    Create comparison dataframe.
+
+    :param comparison_dict:
+    :return:
+    """
+
     # Get environment names
     env_names = list(comparison_dict.keys())
 
@@ -201,7 +220,6 @@ def create_comparison_dataframe(comparison_dict):
         environment_dict = comparison_dict[env]
         process_key_value("", environment_dict, env)
 
-    # Replace non-reference environment values with 'x' or '/!\' as needed
     reference_env = env_names[0]
     for env in env_names[1:]:
         for prefix in df.index:
@@ -223,13 +241,28 @@ def create_comparison_dataframe(comparison_dict):
             if '.import' in prefix:
                 df.at[prefix, reference_env] = '<IMPORTS>'
 
-    # Keys to remove from the DataFrame
+    # keys to remove
     keys_to_pop = [r'id', r'objectType', r'externalIds', r'href', r'icons', r'created', r'lastModified',
                    r'visibility', r'owner', r'createdBy', r'account', r'revision', r'createdBy',
-                   r'configuration.definition', r'deleted']
+                   r'configuration.definition', r'deleted', r'pluginVersion', r'configuration.instance.recipients',
+                   r'isExpression', r'description', r'key', r'secret', r'username', r'password', r'url']
 
-    # Remove rows with keys matching regular expressions
     for key in keys_to_pop:
         df = df[~df.index.str.contains(key, regex=True)]
 
     return df
+
+
+def check_all_x_or_nan(df):
+    """
+    Check whether all columns (2+) are 'x' or 'NaN'.
+
+    :param df:
+    :return:
+    """
+
+    # Select columns 2 or more (0-based index)
+    selected_columns = df.iloc[:, 1:]
+
+    # Check if all values in the selected columns are "x" or "NaN"
+    return all(selected_columns.apply(lambda col: col.isin(['x', np.nan, None]).all()))

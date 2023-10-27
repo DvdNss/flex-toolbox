@@ -12,6 +12,7 @@ import json
 from typing import List
 
 import pandas as pd
+from tqdm import tqdm
 
 from src.utils import get_items, get_tags_and_taxonomies, get_taxonomies
 
@@ -19,15 +20,16 @@ from src.utils import get_items, get_tags_and_taxonomies, get_taxonomies
 def list_command_func(args):
     """Action on list command. """
 
-    list_items(config_item=args.config_item, filters=args.filters)
+    list_items(config_item=args.config_item, filters=args.filters, post_filters=args.post_filters)
 
 
-def list_items(config_item: str, filters: List[str] = []) -> bool:
+def list_items(config_item: str, filters: List[str] = [], post_filters: List[str] = []) -> bool:
     """
     List items ids.
 
     :param config_item: item to retrieve from API (ex: workflows, accounts..)
     :param filters: filters to apply
+    :param post_filters: post retrieval filters
 
     :return: True if succeeds, False if fails
     """
@@ -41,7 +43,7 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
         log_fields = ['name', 'id']
     elif config_item == 'actions':
         sorted_items = get_items(config_item=config_item, filters=filters)
-        log_fields = ['name', 'id', 'type.name', 'pluginClass']
+        log_fields = ['name', 'id', 'type.name']
     elif config_item == 'assets':
         sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'variant.name', 'variant.id']
@@ -130,6 +132,66 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
 
     print("")
 
+    # post-filters processing
+    for post_filter in tqdm(post_filters, desc=f"Checking post filters {post_filters}"):
+        # operator
+        operator = None
+        for op in ['!=', '>=', '<=', '~', '=', '<', '>']:
+            if op in post_filter:
+                operator = op
+                break
+
+        if not operator:
+            print(f"Couldn't find operator for [{post_filter}], skipping...")
+        else:
+            key, value = post_filter.split(operator)
+            key = key.strip()
+            value = value.strip()
+
+            filtered_items = {}
+            for item in sorted_items:
+                if key in sorted_items[item]:
+                    item_value = sorted_items[item][key]
+
+                    try:
+                        item_value = int(item_value)
+                    except:
+                        pass
+
+                    try:
+                        value = int(value)
+                    except:
+                        pass
+
+                    if operator == '=':
+                        if item_value == value:
+                            filtered_items[item] = sorted_items[item]
+                    elif operator == '!=':
+                        if item_value != value:
+                            filtered_items[item] = sorted_items[item]
+                    elif operator == '>=':
+                        if item_value >= value:
+                            filtered_items[item] = sorted_items[item]
+                    elif operator == '<=':
+                        if item_value <= value:
+                            filtered_items[item] = sorted_items[item]
+                    elif operator == '<':
+                        if item_value < value:
+                            filtered_items[item] = sorted_items[item]
+                    elif operator == '>':
+                        if item_value > value:
+                            filtered_items[item] = sorted_items[item]
+                    elif operator == '~':
+                        if value in item_value:
+                            filtered_items[item] = sorted_items[item]
+
+            # Replace sorted_items with filtered_items for the next post_filter
+            sorted_items = filtered_items
+            log_fields.append(key)
+
+    if post_filters:
+        print("")
+
     # taxonomies are handled differently because the API response is different
     if taxonomies:
         rows = []
@@ -198,6 +260,6 @@ def list_items(config_item: str, filters: List[str] = []) -> bool:
         # empty results from API
         else:
             print(f"No {config_item} found for the given parameters. ")
-        print("")
+            print("")
 
     return True

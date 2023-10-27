@@ -72,7 +72,7 @@ def create_folder(folder_name: str, ignore_error: bool = False):
 
 
 def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = [],
-              environment: str = "default") -> dict:
+              environment: str = "default", id_in_keys: bool = True) -> dict:
     """
     Get items from an env using public API.
 
@@ -80,6 +80,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
     :param config_item: item to retrieve from API (ex: workflows, accounts..)
     :param sub_items: sub items to retrieve for item_name
     :param filters: filters to apply
+    :param id_in_keys: whether to put ID in resulting dict keys
 
     :return: dict['item_name': {item_config}]
     """
@@ -134,8 +135,12 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
         # item name formatting in resulting dict
         try:
             if config_item != "collections":
-                for item in items:
-                    items_dict[f"{item['name']} [{item['id']}]"] = item  # item_name: item_config
+                if id_in_keys:
+                    for item in items:
+                        items_dict[f"{item['name']} [{item['id']}]"] = item  # item_name: item_config
+                else:
+                    for item in items:
+                        items_dict[f"{item['name']}"] = item
             else:
                 for item in items:
                     items_dict[f"{item['name']} [{item['uuid']}]"] = item  # collection_name: collection_config

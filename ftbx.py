@@ -43,6 +43,7 @@ if __name__ == "__main__":
     list_command = subparsers.add_parser('list', help='List config items from env')
     list_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_LIST, help='Config item to list')
     list_command.add_argument('--filters', type=str, nargs="*", help="Search by text")
+    list_command.add_argument('--post_filters', type=str, nargs="*", help="Post retrieval filters")
     list_command.set_defaults(func=list_command_func)
 
     # # create_action
