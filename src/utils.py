@@ -8,6 +8,7 @@
     DESCRIPTION: functions that are used across the project
     
 """
+import datetime
 import json
 import os
 import urllib.parse
@@ -25,6 +26,77 @@ HEADERS = {'Content-Type': 'application/vnd.nativ.mio.v1+json'}
 
 # init. session
 session = requests.Session()
+
+
+def apply_post_retrieval_filters(items, filters):
+    """
+    Apply post-API-retrieval filters to some config items.
+
+    :param filters: custom post-processing filters
+    :param items: config items dict
+    :return:
+    """
+
+    # post-filters processing
+    for post_filter in tqdm(filters, desc=f"Applying post filters {filters}"):
+        # operator
+        operator = None
+        for op in ['!=', '>=', '<=', '~', '=', '<', '>']:
+            if op in post_filter:
+                operator = op
+                break
+
+        if not operator:
+            print(f"Couldn't find operator for [{post_filter}], skipping...")
+        else:
+            key, value = post_filter.split(operator)
+            key = key
+            value = value
+
+            filtered_items = {}
+            for item in items:
+
+                # get nested value
+                item_value = get_nested_value(items[item], key)
+
+                # convert to int
+                try:
+                    item_value = int(item_value)
+                except:
+                    pass
+
+                try:
+                    value = int(value)
+                except:
+                    pass
+
+                # switch
+                if operator == '=':
+                    if item_value == value:
+                        filtered_items[item] = items[item]
+                elif operator == '!=':
+                    if item_value != value:
+                        filtered_items[item] = items[item]
+                elif operator == '>=':
+                    if item_value >= value:
+                        filtered_items[item] = items[item]
+                elif operator == '<=':
+                    if item_value <= value:
+                        filtered_items[item] = items[item]
+                elif operator == '<':
+                    if item_value < value:
+                        filtered_items[item] = items[item]
+                elif operator == '>':
+                    if item_value > value:
+                        filtered_items[item] = items[item]
+                elif operator == '~':
+                    if isinstance(item_value, str) and value in item_value:
+                        filtered_items[item] = items[item]
+
+            # Replace sorted_items with filtered_items for the next post_filter
+            items = filtered_items
+
+    return items
 
 
 def reformat_tabs(match):
@@ -182,6 +254,300 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
         print(f"No {config_item} found for the given parameters. ")
 
         return {}
+
+
+def get_full_items(config_item, filters, post_filters: List = [], save: bool = False):
+    """
+    Get full config items, including sub items, with filters.
+
+    :param config_item: config item
+    :param filters: filters to apply (from Flex API)
+    :param post_filters: custom post-processing filters
+    :param save: whether to save the items or not
+    :return:
+    """
+
+    # init possible outputs
+    sorted_items = None
+    taxonomies = None
+    post_processed_sorted_items = None
+
+    # switch case
+    if config_item == 'accounts':
+        sorted_items = get_items(config_item=config_item, sub_items=['metadata', 'properties'], filters=filters)
+    elif config_item == 'actions':
+        sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+    elif config_item == 'assets':
+        sorted_items = get_items(config_item=config_item, sub_items=['metadata'], filters=filters)
+    elif config_item == 'collections':
+        sorted_items = get_items(config_item=config_item, sub_items=['metadata'], filters=filters)
+    elif config_item == 'eventHandlers':
+        sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+    elif config_item == 'events':
+        sorted_items = get_items(config_item=config_item, filters=filters)
+    elif config_item == 'groups':
+        sorted_items = get_items(config_item=config_item, sub_items=['members'], filters=filters)
+    elif config_item == 'jobs':
+        sorted_items = get_items(config_item=config_item, sub_items=['configuration', 'history'], filters=filters)
+        sorted_items = get_surrounding_items(config_item=config_item, items=sorted_items,
+                                             sub_items=['asset', 'workflow'])
+    elif config_item == 'messageTemplates':
+        sorted_items = get_items(config_item=config_item, sub_items=['body'], filters=filters)
+    elif config_item == 'metadataDefinitions':
+        sorted_items = get_items(config_item=config_item, sub_items=['definition'], filters=filters)
+    elif config_item == 'objectTypes':
+        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+    elif config_item == 'profiles':
+        sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+    elif config_item == 'quotas':
+        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+    elif config_item == 'resources':
+        sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+    elif config_item == 'roles':
+        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+    elif config_item == 'tagCollections':
+        # no way to retrieve tags from API directly, so bypassing by reading tags from MD DEFs
+        # NOTE: Will only retrieve tags that are used by MD DEFs
+        print("\nRetrieving tagCollections from Metadata Definitions as "
+              "it is not possible to list them directly from the API...\nPlease note that only tagCollections that are used"
+              " in metadata definitions will be retrieved.")
+        metadata_definitions = get_items(config_item="metadataDefinitions", sub_items=['definition'])
+        sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['tagCollections'])
+    elif config_item == 'taskDefinitions':
+        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+    elif config_item == 'tasks':
+        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+    elif config_item == 'taxonomies':
+        taxonomies = get_taxonomies(filters=filters)
+    elif config_item == 'timedActions':
+        sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+    elif config_item == 'userDefinedObjectTypes':
+        sorted_items = get_items(config_item=config_item, sub_items=['hierarchy', 'relationships'], filters=filters)
+    elif config_item == 'users':
+        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+    elif config_item == 'variants':
+        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+    elif config_item == 'wizards':
+        sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+    elif config_item == 'workflowDefinitions':
+        sorted_items = get_items(config_item=config_item, sub_items=['structure'], filters=filters)
+    elif config_item == 'workflows':
+        sorted_items = get_items(config_item=config_item, sub_items=['variables', 'jobs'], filters=filters)
+    elif config_item == 'workspaces':
+        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+
+    # post-processing, not available for taxonomies
+    if sorted_items:
+        post_processed_sorted_items = apply_post_retrieval_filters(items=sorted_items, filters=post_filters)
+
+    # save if asked to
+    if save and config_item == 'taxonomies':
+        save_taxonomies(taxonomies=taxonomies)
+    elif save and config_item != 'taxonomies':
+        save_items(config_item=config_item, items=post_processed_sorted_items)
+
+    # taxonomies handled differently
+    if config_item == 'taxonomies':
+        return taxonomies
+    else:
+        return post_processed_sorted_items
+
+
+def save_items(config_item: str, items: dict, backup: bool = False):
+    """
+    Save Flex items to JSON
+
+    :param config_item: config item
+    :param items: dict of items
+    :param backup: whether item is backup or not
+    :return:
+    """
+
+    # parent folder
+    create_folder(folder_name=config_item, ignore_error=True)
+    now = datetime.datetime.now().strftime("%Y-%m-%d %Hh%Mm%Ss")
+
+    print("")
+
+    # folder for each config
+    for item in items:
+
+        # folder's name
+        if config_item == 'events':
+            folder_name = f"{items.get(item).get('id')}"
+        elif config_item == 'jobs' or config_item == 'tasks' or config_item == 'workflows':
+            folder_name = f"{items.get(item).get('id')}".replace("/", "").replace(":", "")
+        else:
+            folder_name = f"{items.get(item).get('name')}".replace("/", "").replace(":", "")
+
+        # create object folder
+        create_folder(folder_name=f"{config_item}/{folder_name}", ignore_error=True)
+        create_folder(folder_name=f"{config_item}/{folder_name}/backup", ignore_error=True)
+
+        if backup:
+            create_folder(folder_name=f"{config_item}/{folder_name}/backup/{now}", ignore_error=True)
+            folder_name = f"{folder_name}/backup/{now}"
+
+        # save subfields in other files
+        if 'configuration' in items.get(item) and items.get(item).get('configuration').get('instance'):
+            # if groovy script
+            if 'script-contents' in items.get(item).get('configuration').get('instance'):
+                create_script(item_name=f"{config_item}/{folder_name}", item_config=items.get(item))
+            elif 'internal-script' in items.get(item).get('configuration').get('instance'):
+                create_script(item_name=f"{config_item}/{folder_name}", item_config=items.get(item))
+            elif 'script_type' in items.get(item).get('configuration').get('instance'):
+                create_script(item_name=f"{config_item}/{folder_name}", item_config=items.get(item))
+            else:
+                with open(f"{config_item}/{folder_name}/configuration.json", "w") as item_config:
+                    json.dump(obj=items.get(item).get('configuration').get('instance'), fp=item_config, indent=4)
+                    items.get(item).pop('configuration')
+
+        if 'asset' in items.get(item) and items.get(item).get('asset'):
+            with open(f"{config_item}/{folder_name}/asset.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('asset'), fp=item_config, indent=4)
+                items.get(item).pop('asset')
+
+        if 'workflowInstance' in items.get(item) and items.get(item).get('workflowInstance'):
+            with open(f"{config_item}/{folder_name}/workflowInstance.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('workflowInstance'), fp=item_config, indent=4)
+                items.get(item).pop('workflowInstance')
+
+        if 'definition' in items.get(item) and items.get(item).get('definition').get('definition'):
+            with open(f"{config_item}/{folder_name}/definition.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('definition').get('definition'), fp=item_config, indent=4)
+                items.get(item).pop('definition')
+
+        if 'body' in items.get(item) and items.get(item).get('body'):
+            with open(f"{config_item}/{folder_name}/body.txt", "w") as item_config:
+                item_config.write(items.get(item).get('body'))
+                items.get(item).pop('body')
+
+        if 'workflow' in items.get(item) and items.get(item).get('workflow'):
+            with open(f"{config_item}/{folder_name}/workflow.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('workflow'), fp=item_config, indent=4)
+                items.get(item).pop('workflow')
+
+        if 'properties' in items.get(item) and items.get(item).get('properties').get('accountProperties'):
+            with open(f"{config_item}/{folder_name}/properties.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('properties').get('accountProperties'), fp=item_config, indent=4)
+                items.get(item).pop('properties')
+
+        if 'references' in items.get(item) and items.get(item).get('references').get('objects'):
+            with open(f"{config_item}/{folder_name}/references.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('references').get('objects'), fp=item_config, indent=4)
+                items.get(item).pop('references')
+
+        if 'metadata' in items.get(item) and items.get(item).get('metadata').get('instance'):
+            with open(f"{config_item}/{folder_name}/metadata.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('metadata').get('instance'), fp=item_config, indent=4)
+                items.get(item).pop('metadata')
+
+        if 'fileInformation' in items.get(item) and items.get(item).get('fileInformation'):
+            with open(f"{config_item}/{folder_name}/fileInformation.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('fileInformation'), fp=item_config, indent=4)
+                items.get(item).pop('fileInformation')
+
+        if 'assetContext' in items.get(item) and items.get(item).get('assetContext'):
+            with open(f"{config_item}/{folder_name}/assetContext.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('assetContext'), fp=item_config, indent=4)
+                items.get(item).pop('assetContext')
+
+        if 'members' in items.get(item) and items.get(item).get('members').get('users'):
+            with open(f"{config_item}/{folder_name}/members.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('members').get('users'), fp=item_config, indent=4)
+                items.get(item).pop('members')
+
+        if 'role' in items.get(item) and items.get(item).get('role'):
+            with open(f"{config_item}/{folder_name}/role.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('role'), fp=item_config, indent=4)
+                items.get(item).pop('role')
+
+        if 'permissions' in items.get(item) and items.get(item).get('permissions'):
+            with open(f"{config_item}/{folder_name}/permissions.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('permissions'), fp=item_config, indent=4)
+                items.get(item).pop('permissions')
+
+        if 'hierarchy' in items.get(item) and items.get(item).get('hierarchy'):
+            with open(f"{config_item}/{folder_name}/hierarchy.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('hierarchy'), fp=item_config, indent=4)
+                items.get(item).pop('hierarchy')
+
+        if 'structure' in items.get(item) and items.get(item).get('structure'):
+            with open(f"{config_item}/{folder_name}/structure.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('structure'), fp=item_config, indent=4)
+                items.get(item).pop('structure')
+
+        if 'variables' in items.get(item) and items.get(item).get('variables'):
+            with open(f"{config_item}/{folder_name}/variables.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('variables'), fp=item_config, indent=4)
+                items.get(item).pop('variables')
+
+        if 'jobs' in items.get(item) and items.get(item).get('jobs').get('jobs'):
+            with open(f"{config_item}/{folder_name}/jobs.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('jobs').get('jobs'), fp=item_config, indent=4)
+                items.get(item).pop('jobs')
+
+        if 'history' in items.get(item) and items.get(item).get('history'):
+            history = items.get(item).get('history').copy()
+            for idx, logs in enumerate(history.get('events')):
+                history.get('events')[idx].pop('object')
+                history.get('events')[idx].pop('user')
+            with open(f"{config_item}/{folder_name}/history.json", "w") as item_config:
+                json.dump(obj=items.get(item).get('history'), fp=item_config, indent=4)
+                items.get(item).pop('history')
+
+        try:
+            if 'relationships' in items.get(item) and items.get(item).get('relationships').get('relationships'):
+                with open(f"{config_item}/{folder_name}/relationships.json", "w") as item_config:
+                    json.dump(obj=items.get(item).get('relationships').get('relationships'), fp=item_config, indent=4)
+                    items.get(item).pop('relationships')
+        except:
+            pass
+
+        # save main object
+        with open(f"{config_item}/{folder_name}/_object.json", "w") as item_config:
+            json.dump(obj=items.get(item), fp=item_config, indent=4)
+            # print(f"{config_item}: {folder_name} has been retrieved successfully. ") if not backup else print(f"{config_item}: {folder_name} has been backed up successfully. ")
+
+    print(f"{config_item} have been retrieved successfully. \n") if items else None
+
+
+def save_taxonomies(taxonomies):
+    """
+    Save taxonomies.
+
+    :param taxonomies:
+    :return:
+    """
+
+    # create parent folder
+    create_folder(folder_name="taxonomies", ignore_error=True)
+
+    print("")
+
+    for idx, taxonomy in enumerate(taxonomies):
+        # create taxonomy folder
+        create_folder(folder_name=f"taxonomies/{taxonomy.get('name')}", ignore_error=True)
+
+        # save taxonomy
+        with open(f"taxonomies/{taxonomy.get('name')}/_object.json", "w") as item_config:
+            json.dump(obj=taxonomies[idx], fp=item_config, indent=4)
+            print(f"taxonomies: {taxonomy.get('name')} has been retrieved successfully. ")
+
+    print("") if taxonomies else None
+
+
+def get_nested_value(obj, keys):
+    """
+    Get nested value for a given key separater by '.'
+    """
+
+    for key in keys.split('.'):
+        if isinstance(obj, dict) and key in obj:
+            obj = obj[key]
+        else:
+            return None
+    return obj
 
 
 def get_surrounding_items(config_item: str, items: dict, sub_items: List[str]):
@@ -460,3 +826,57 @@ def query(method: str, url: str, payload=None, log: bool = True, environment: st
         raise Exception(f"\n\nError while sending {query}. \nError message: {query_result['errors']['error']}\n ")
 
     return query_result
+
+
+def create_script(item_name, item_config):
+    """
+    Create groovy script with according imports and plugins.
+
+    :param item_name: script name
+    :param item_config: script config
+    :return:
+    """
+
+    imports = ["import com.ooyala.flex.plugins.PluginCommand\n"]
+    script = "class Script extends PluginCommand {\n\t<&code>\n}"
+
+    # jef
+    try:
+        imports.extend(['import ' + imp['value'] + '\n' for imp in
+                        item_config['configuration']['instance']['internal-script']['script-import']])
+    except:
+        pass
+
+    try:
+        imports.extend(['import ' + imp['value'] + '\n' for imp in
+                        item_config['configuration']['instance']['imports']['import']])
+    except:
+        pass
+
+    # groovy decision
+    try:
+        script = script.replace("<&code>",
+                                item_config['configuration']['instance']['script_type']['script'][:-2].replace("\n",
+                                                                                                               "\n    ") + "\n\t}")
+    except:
+        pass
+
+    try:
+        script = script.replace("<&code>",
+                                item_config['configuration']['instance']['internal-script']['script-content'][
+                                :-2].replace("\n", "\n    ") + "\n\t}")
+    except:
+        pass
+
+    # groovy script
+    try:
+        script = script.replace("<&code>",
+                                item_config['configuration']['instance']['script-contents']['script'][:-2].replace("\n",
+                                                                                                                   "\n    ") + "\n\t}")
+    except:
+        script = script.replace("<&code>", "")
+
+    content = f"{''.join(imports)}\n{script}"
+
+    with open(f"{item_name}/script.groovy", "w") as groovy_file:
+        groovy_file.write(content)

@@ -12,9 +12,8 @@ import json
 from typing import List
 
 import pandas as pd
-from tqdm import tqdm
 
-from src.utils import get_items, get_tags_and_taxonomies, get_taxonomies
+from src.utils import get_full_items, apply_post_retrieval_filters
 
 
 def list_command_func(args):
@@ -34,170 +33,88 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
     :return: True if succeeds, False if fails
     """
 
-    sorted_items = {}
-    taxonomies = []
+    # init displayed content
     log_fields = []
 
+    # get items
+    sorted_items = get_full_items(config_item=config_item, filters=filters, post_filters=post_filters)
+
+    # switch case
     if config_item == 'accounts':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'actions':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'type.name']
     elif config_item == 'assets':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'variant.name', 'variant.id']
     elif config_item == 'collections':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'uuid']
     elif config_item == 'eventHandlers':
-        sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
         log_fields = ['name', 'id', 'configuration.instance.action-config.name',
                       'configuration.instance.action-config.id']
     elif config_item == 'events':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['time', 'id', 'eventType', 'message']
     elif config_item == 'groups':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'role.name', 'role.id']
     elif config_item == 'jobs':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'status', 'actionType.name', 'asset.id', 'workflow.id']
     elif config_item == 'messageTemplates':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'metadataDefinitions':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'objectTypes':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'profiles':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'type']
     elif config_item == 'quotas':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'resources':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'resourceType', 'resourceSubType', 'status']
     elif config_item == 'roles':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'tagCollections':
-        # no way to retrieve tags from API directly, so bypassing by reading tags from MD DEFs
-        # NOTE: Will only retrieve tags that are used by MD DEFs
-        print("\nRetrieving tagCollections from Metadata Definitions as "
-              "it is not possible to list them directly from the API...\nPlease note that only tagCollections that are used"
-              " in metadata definitions will be retrieved.")
-        metadata_definitions = get_items(config_item="metadataDefinitions", sub_items=['definition'])
-        sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['tagCollections'])
         log_fields = ['name', 'id']
     elif config_item == 'taskDefinitions':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'tasks':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'status', 'asset.name', 'asset.id']
     elif config_item == 'taxonomies':
-        taxonomies = get_taxonomies(filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'timedActions':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'status', 'interval']
     elif config_item == 'userDefinedObjectTypes':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'users':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['displayName', 'id', 'userType', 'email', 'lastLoggedIn']
     elif config_item == 'variants':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'defaultMetadataDefinition.displayName', 'defaultMetadataDefinition.id']
     elif config_item == 'wizards':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'workflowDefinitions':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', ]
     elif config_item == 'workflows':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id', 'status', 'asset.name', 'asset.id']
     elif config_item == 'workspaces':
-        sorted_items = get_items(config_item=config_item, filters=filters)
         log_fields = ['name', 'id']
     elif config_item == 'all':
         print("This command is not avaiable. ")
         quit()
 
+    # add post_filters to displayed data if not script (otherwise unreadable)
+    if post_filters:
+        for post_filter in post_filters:
+            if "script" not in post_filter:
+                log_fields.append(post_filter)
+
+    # readability
     print("")
 
-    # post-filters processing
-    for post_filter in tqdm(post_filters, desc=f"Checking post filters {post_filters}"):
-        # operator
-        operator = None
-        for op in ['!=', '>=', '<=', '~', '=', '<', '>']:
-            if op in post_filter:
-                operator = op
-                break
-
-        if not operator:
-            print(f"Couldn't find operator for [{post_filter}], skipping...")
-        else:
-            key, value = post_filter.split(operator)
-            key = key.strip()
-            value = value.strip()
-
-            filtered_items = {}
-            for item in sorted_items:
-                if key in sorted_items[item]:
-                    item_value = sorted_items[item][key]
-
-                    try:
-                        item_value = int(item_value)
-                    except:
-                        pass
-
-                    try:
-                        value = int(value)
-                    except:
-                        pass
-
-                    if operator == '=':
-                        if item_value == value:
-                            filtered_items[item] = sorted_items[item]
-                    elif operator == '!=':
-                        if item_value != value:
-                            filtered_items[item] = sorted_items[item]
-                    elif operator == '>=':
-                        if item_value >= value:
-                            filtered_items[item] = sorted_items[item]
-                    elif operator == '<=':
-                        if item_value <= value:
-                            filtered_items[item] = sorted_items[item]
-                    elif operator == '<':
-                        if item_value < value:
-                            filtered_items[item] = sorted_items[item]
-                    elif operator == '>':
-                        if item_value > value:
-                            filtered_items[item] = sorted_items[item]
-                    elif operator == '~':
-                        if value in item_value:
-                            filtered_items[item] = sorted_items[item]
-
-            # Replace sorted_items with filtered_items for the next post_filter
-            sorted_items = filtered_items
-            log_fields.append(key)
-
-    if post_filters:
-        print("")
-
+    # convert to dataframe and display
     # taxonomies are handled differently because the API response is different
-    if taxonomies:
+    if config_item == 'taxonomies':
         rows = []
         columns = log_fields
         columns.append('taxons [id]')
-        for idx, taxonomy in enumerate(taxonomies):
+        for idx, taxonomy in enumerate(sorted_items):
             row = [taxonomy['name'], taxonomy['id']]
             if 'childTaxons' in taxonomy:
                 child_taxons = []
@@ -218,11 +135,11 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
 
         # save result as JSON for further details
         with open('list.json', 'w') as result_file:
-            json.dump(taxonomies, result_file, indent=4)
-            print("\nResults of the query (with nested taxons) have been saved as list.json for your best convenience.")
+            json.dump(sorted_items, result_file, indent=4)
+            print(
+                "\nResults of the query (with nested taxons) have been saved as list.json for your best convenience.\n")
 
     else:
-        # convert to dataframe and display
         rows = []
         columns = log_fields
         if sorted_items:
@@ -255,11 +172,10 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
             # save result as JSON for further details
             with open('list.json', 'w') as result_file:
                 json.dump(sorted_items, result_file, indent=4)
-                print("\nResults of the query have been saved as list.json for your best convenience.")
+                print("\nResults of the query have been saved as list.json for your best convenience.\n")
 
         # empty results from API
         else:
-            print(f"No {config_item} found for the given parameters. ")
-            print("")
+            print(f"No {config_item} found for the given parameters.\n")
 
     return True

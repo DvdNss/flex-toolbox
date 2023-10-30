@@ -60,6 +60,7 @@ if __name__ == "__main__":
     pull_command = subparsers.add_parser('pull', help='Pull config items from Flex')
     pull_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_PULL, help='Config item to pull')
     pull_command.add_argument('--filters', type=str, nargs='*', help='Filters to apply')
+    pull_command.add_argument('--post_filters', type=str, nargs="*", help="Post retrieval filters")
     pull_command.set_defaults(func=pull_command_func)
 
     # push
