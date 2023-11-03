@@ -103,7 +103,11 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
     if post_filters:
         for post_filter in post_filters:
             if "script" not in post_filter:
-                log_fields.append(post_filter)
+                for op in ['!=', '>=', '<=', '~', '=', '<', '>']:
+                    if op in post_filter:
+                        post_filter = post_filter.split(op)[0]
+                        log_fields.append(post_filter)
+                        break
 
     # readability
     print("")

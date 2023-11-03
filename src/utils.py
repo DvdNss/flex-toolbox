@@ -18,6 +18,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 from tqdm import tqdm
 
+import VARIABLES
 from src.env import get_env
 
 # global variables
@@ -186,7 +187,6 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
 
         # sequentially get all items (batch_size at a time)
         for _ in tqdm(range(0, int(total_count / batch_size) + 1), desc=f"Retrieving {config_item}"):
-
             # get batch of items from API
             items_batch = query(
                 method="GET",
@@ -228,7 +228,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
         for item in tqdm(sorted_items_dict, desc=f"Retrieving {config_item} {sub_items}"):
             for sub_item in sub_items:
 
-                try: # try bcz some metadata are sometimes empty :)
+                try:  # try bcz some metadata are sometimes empty :)
                     if sub_item != "body":
                         sorted_items_dict[item][sub_item] = query(
                             method="GET",
@@ -256,6 +256,68 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
         return {}
 
 
+def enumerate_sub_items(config_item: str):
+    """
+    Returns the list of sub items for a given config item.
+
+    :param config_item: config item
+    :return:
+    """
+
+    if config_item == 'accounts':
+        return VARIABLES.ACCOUNTS_SUB_ITEMS
+    elif config_item == 'actions':
+        return VARIABLES.ACTIONS_SUB_ITEMS
+    elif config_item == 'assets':
+        return VARIABLES.ASSETS_SUB_ITEMS
+    elif config_item == 'collections':
+        return VARIABLES.COLLECTIONS_SUB_ITEMS
+    elif config_item == 'eventHandlers':
+        return VARIABLES.EVENT_HANDLERS_SUB_ITEMS
+    elif config_item == 'events':
+        return VARIABLES.EVENTS_SUB_ITEMS
+    elif config_item == 'groups':
+        return VARIABLES.GROUPS_SUB_ITEMS
+    elif config_item == 'jobs':
+        return VARIABLES.JOBS_SUB_ITEMS
+    elif config_item == 'messageTemplates':
+        return VARIABLES.MESSAGE_TEMPLATES_SUB_ITEMS
+    elif config_item == 'metadataDefinitions':
+        return VARIABLES.METADATA_DEFINITIONS_SUB_ITEMS
+    elif config_item == 'objectTypes':
+        return VARIABLES.OBJECT_TYPES_SUB_ITEMS
+    elif config_item == 'profiles':
+        return VARIABLES.PROFILES_SUB_ITEMS
+    elif config_item == 'quotas':
+        return VARIABLES.QUOTAS_SUB_ITEMS
+    elif config_item == 'resources':
+        return VARIABLES.RESOURCES_SUB_ITEMS
+    elif config_item == 'roles':
+        return VARIABLES.ROLES_SUB_ITEMS
+    elif config_item == 'tagCollections':
+        return VARIABLES.TAG_COLLECTIONS_SUB_ITEMS
+    elif config_item == 'taskDefinitions':
+        return VARIABLES.TASK_DEFINITIONS_SUB_ITEMS
+    elif config_item == 'tasks':
+        return VARIABLES.TASKS_SUB_ITEMS
+    elif config_item == 'timedActions':
+        return VARIABLES.TIMED_ACTIONS_SUB_ITEMS
+    elif config_item == 'userDefinedObjectTypes':
+        return VARIABLES.USER_DEFINED_OBJECT_TYPES_SUB_ITEMS
+    elif config_item == 'users':
+        return VARIABLES.USERS_SUB_ITEMS
+    elif config_item == 'variants':
+        return VARIABLES.VARIANTS_SUB_ITEMS
+    elif config_item == 'wizards':
+        return VARIABLES.WIZARDS_SUB_ITEMS
+    elif config_item == 'workflowDefinitions':
+        return VARIABLES.WORKFLOW_DEFINITIONS_SUB_ITEMS
+    elif config_item == 'workflows':
+        return VARIABLES.WORKFLOWS_SUB_ITEMS
+    elif config_item == 'workspaces':
+        return VARIABLES.WORKSPACES_SUB_ITEMS
+
+
 def get_full_items(config_item, filters, post_filters: List = [], save: bool = False):
     """
     Get full config items, including sub items, with filters.
@@ -272,85 +334,99 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
     taxonomies = None
     post_processed_sorted_items = None
 
+    # define sub items
+    sub_items = enumerate_sub_items(config_item=config_item)
+
     # switch case
     if config_item == 'accounts':
-        sorted_items = get_items(config_item=config_item, sub_items=['metadata', 'properties'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'actions':
-        sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'assets':
-        sorted_items = get_items(config_item=config_item, sub_items=['metadata'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'collections':
-        sorted_items = get_items(config_item=config_item, sub_items=['metadata'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'eventHandlers':
-        sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'events':
-        sorted_items = get_items(config_item=config_item, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'groups':
-        sorted_items = get_items(config_item=config_item, sub_items=['members'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'jobs':
-        sorted_items = get_items(config_item=config_item, sub_items=['configuration', 'history'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
         sorted_items = get_surrounding_items(config_item=config_item, items=sorted_items,
                                              sub_items=['asset', 'workflow'])
     elif config_item == 'messageTemplates':
-        sorted_items = get_items(config_item=config_item, sub_items=['body'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items,
+                                 filters=filters)
     elif config_item == 'metadataDefinitions':
-        sorted_items = get_items(config_item=config_item, sub_items=['definition'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items,
+                                 filters=filters)
     elif config_item == 'objectTypes':
-        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'profiles':
-        sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'quotas':
-        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'resources':
-        sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'roles':
-        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'tagCollections':
         # no way to retrieve tags from API directly, so bypassing by reading tags from MD DEFs
         # NOTE: Will only retrieve tags that are used by MD DEFs
         print("\nRetrieving tagCollections from Metadata Definitions as "
               "it is not possible to list them directly from the API...\nPlease note that only tagCollections that are used"
               " in metadata definitions will be retrieved.")
-        metadata_definitions = get_items(config_item="metadataDefinitions", sub_items=['definition'])
+        metadata_definitions = get_items(config_item="metadataDefinitions",
+                                         sub_items=VARIABLES.TAG_COLLECTIONS_SUB_ITEMS)
         sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['tagCollections'])
     elif config_item == 'taskDefinitions':
-        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items,
+                                 filters=filters)
     elif config_item == 'tasks':
-        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'taxonomies':
         taxonomies = get_taxonomies(filters=filters)
     elif config_item == 'timedActions':
-        sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'userDefinedObjectTypes':
-        sorted_items = get_items(config_item=config_item, sub_items=['hierarchy', 'relationships'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items,
+                                 filters=filters)
     elif config_item == 'users':
-        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'variants':
-        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'wizards':
-        sorted_items = get_items(config_item=config_item, sub_items=['configuration'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'workflowDefinitions':
-        sorted_items = get_items(config_item=config_item, sub_items=['structure'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items,
+                                 filters=filters)
     elif config_item == 'workflows':
-        sorted_items = get_items(config_item=config_item, sub_items=['variables', 'jobs'], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
     elif config_item == 'workspaces':
-        sorted_items = get_items(config_item=config_item, sub_items=[], filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
 
     # post-processing, not available for taxonomies
-    if sorted_items:
+    if sorted_items and post_filters:
         post_processed_sorted_items = apply_post_retrieval_filters(items=sorted_items, filters=post_filters)
 
     # save if asked to
     if save and config_item == 'taxonomies':
         save_taxonomies(taxonomies=taxonomies)
     elif save and config_item != 'taxonomies':
-        save_items(config_item=config_item, items=post_processed_sorted_items)
+        if post_processed_sorted_items:
+            save_items(config_item=config_item, items=post_processed_sorted_items)
+        else:
+            save_items(config_item=config_item, items=sorted_items)
 
     # taxonomies handled differently
     if config_item == 'taxonomies':
         return taxonomies
-    else:
+    elif post_processed_sorted_items:
         return post_processed_sorted_items
+    else:
+        return sorted_items
 
 
 def save_items(config_item: str, items: dict, backup: bool = False):

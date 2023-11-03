@@ -59,6 +59,12 @@
   
   # List 5 jobs in a failed status
   ftbx list jobs --filters status=Failed limit=5
+  
+  # List script that contains "createJob"
+  ftbx list actions --filters "type=script" --post_filters "configuration.instance.script-contents.script~createJob"
+  
+  # List actions with concurrency > 0
+  ftbx list actions --post_filters "concurrencyJobsLimit>0"
   ```
   
   ```shell
@@ -97,6 +103,9 @@
   
   # Pull **ALL**
   ftbx pull all
+  
+  # Pull actions where script contains "context.asset.id"
+  ftbx pull actions --post_filters "configuration.instance.script-contents.script~context.asset.id" 
   ```
   
 * push items

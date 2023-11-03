@@ -47,6 +47,7 @@ WORKFLOW_CONFIG = {
 
 DEFAULT_GROOVY_SCRIPT = "import com.ooyala.flex.plugins.PluginCommand\n\nclass script extends PluginCommand {\n\tdef execute(){\n\t\t// your code here\n\t}\n}"
 
+# COMMANDS CONFIG ITEMS
 FLEX_ITEMS_PULL = ['all', 'accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
                    'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
                    'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions',
@@ -75,50 +76,31 @@ FLEX_ITEMS_COMPARE = ['accounts', 'actions', 'eventHandlers', 'groups', 'message
                       'taxonomies', 'timedActions', 'userDefinedObjectTypes', 'users', 'variants', 'wizards',
                       'workflowDefinitions', 'workspaces']
 
-
-class PluginType(Enum):
-    """ Enum of plugin types. """
-    addToGroup: str = "Add to Group"
-    addToIMP: str = "Add to IMP"
-    analyze: str = "Analyze"
-    archive: str = "Archive"
-    cancel: str = "Cancel"
-    checksum: str = "Checksum"
-    copy: str = "Copy"
-    createObject: str = "Create Object"
-    createProxy: str = "Create Proxy"
-    decision: str = "Decision"
-    delete: str = "Delete"
-    deleteArchive: str = "Delete Archive"
-    deliver: str = "Deliver"
-    export: str = "Export"
-    extract: str = "Extract"
-    importObject: str = "Import"
-    ingest: str = "Ingest"
-    launch: str = "Launch"
-    message: str = "Message"
-    modifyRelationship: str = "Modify Relationship"
-    move: str = "Move"
-    permission: str = "Permission"
-    publish: str = "Publish"
-    publishPlayer: str = "Publish Player"
-    purge: str = "Purge"
-    qualityControl: str = "Quality Control"
-    reImport: str = "ReImport"
-    rename: str = "Rename"
-    rePublish: str = "Republish"
-    rePublishPlayer: str = "Republish Player"
-    restore: str = "Restore"
-    restoreArchive: str = "Restore Archive"
-    script: str = "Script"
-    setMetaDef: str = "Set Meta. Def"
-    setMetadata: str = "Set Metadata"
-    startSession: str = "Start Session"
-    stopSession: str = "Stop Session"
-    touch: str = "Touch"
-    transcode: str = "Transcode"
-    unarchive: str = "Unarchive"
-    unpublish: str = "Unpublish"
-    unpublishPlayer: str = "Unpublish Player"
-    validate: str = "Validate"
-    wait: str = "Wait"
+# CONFIG ITEMS SUB ITEMS
+ACCOUNTS_SUB_ITEMS = ['metadata', 'properties']
+ACTIONS_SUB_ITEMS = ['configuration']
+ASSETS_SUB_ITEMS = ['metadata']
+COLLECTIONS_SUB_ITEMS = ['metadata']
+EVENT_HANDLERS_SUB_ITEMS = ['configuration']
+EVENTS_SUB_ITEMS = []
+GROUPS_SUB_ITEMS = ['members']
+JOBS_SUB_ITEMS = ['configuration', 'history']
+MESSAGE_TEMPLATES_SUB_ITEMS = ['body']
+METADATA_DEFINITIONS_SUB_ITEMS = ['definition']
+OBJECT_TYPES_SUB_ITEMS = []
+PROFILES_SUB_ITEMS = ['configuration']
+QUOTAS_SUB_ITEMS = []
+RESOURCES_SUB_ITEMS = ['configuration']
+ROLES_SUB_ITEMS = []
+TAG_COLLECTIONS_SUB_ITEMS = []
+TASK_DEFINITIONS_SUB_ITEMS = []
+TASKS_SUB_ITEMS = []
+TAXONOMIES_SUB_ITEMS = []
+TIMED_ACTIONS_SUB_ITEMS = ['configuration']
+USER_DEFINED_OBJECT_TYPES_SUB_ITEMS = ['hierarchy', 'relationships']
+USERS_SUB_ITEMS = []
+VARIANTS_SUB_ITEMS = []
+WIZARDS_SUB_ITEMS = ['configuration']
+WORKFLOW_DEFINITIONS_SUB_ITEMS = ['structure']
+WORKFLOWS_SUB_ITEMS = ['variables', 'jobs']
+WORKSPACES_SUB_ITEMS = []
