@@ -145,15 +145,18 @@ def create_folder(folder_name: str, ignore_error: bool = False):
 
 
 def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = [],
-              environment: str = "default", id_in_keys: bool = True) -> dict:
+              environment: str = "default", id_in_keys: bool = True, with_dependencies: bool = False,
+              log: bool = True) -> dict:
     """
     Get items from an env using public API.
 
+    :param log: whether to log
     :param environment: environment to get the items from
     :param config_item: item to retrieve from API (ex: workflows, accounts..)
     :param sub_items: sub items to retrieve for item_name
     :param filters: filters to apply
     :param id_in_keys: whether to put ID in resulting dict keys
+    :param with_dependencies: whether to also retrieve item's dependencies
 
     :return: dict['item_name': {item_config}]
     """
@@ -176,7 +179,8 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
     test_query_result = query(
         method="GET",
         url=f"{config_item}{';' + ';'.join(filters) if filters else ''}",
-        environment=environment
+        environment=environment,
+        log=log
     )
 
     # retrieve totalCount
@@ -186,7 +190,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
     if total_count != 0:
 
         # sequentially get all items (batch_size at a time)
-        for _ in tqdm(range(0, int(total_count / batch_size) + 1), desc=f"Retrieving {config_item}"):
+        for _ in tqdm(range(0, int(total_count / batch_size) + 1), desc=f"Retrieving {config_item}", disable=not log):
             # get batch of items from API
             items_batch = query(
                 method="GET",
@@ -225,7 +229,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
         sorted_items_dict = {i: items_dict[i] for i in sorted(list(items_dict.keys()), key=lambda s: s.casefold())}
 
         # get all items sub_items from API
-        for item in tqdm(sorted_items_dict, desc=f"Retrieving {config_item} {sub_items}"):
+        for item in tqdm(sorted_items_dict, desc=f"Retrieving {config_item} {sub_items}", disable=not log):
             for sub_item in sub_items:
 
                 try:  # try bcz some metadata are sometimes empty :)
@@ -246,6 +250,12 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
                         ).content.decode("utf-8", "ignore").strip()
                 except:
                     pass
+
+        # find dependencies if config
+        if with_dependencies and 'configuration' in sub_items:
+            for item in tqdm(sorted_items_dict, desc=f"Retrieving {config_item} dependencies", disable=not log):
+                # find deps
+                find_and_pull_dependencies(json_config=sorted_items_dict[item]['configuration']['instance'])
 
         return sorted_items_dict
 
@@ -318,7 +328,8 @@ def enumerate_sub_items(config_item: str):
         return VARIABLES.WORKSPACES_SUB_ITEMS
 
 
-def get_full_items(config_item, filters, post_filters: List = [], save: bool = False):
+def get_full_items(config_item, filters, post_filters: List = [], save: bool = False, with_dependencies: bool = False,
+                   log: bool = True):
     """
     Get full config items, including sub items, with filters.
 
@@ -326,6 +337,8 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
     :param filters: filters to apply (from Flex API)
     :param post_filters: custom post-processing filters
     :param save: whether to save the items or not
+    :param with_dependencies: whether to also retrieve dependencies
+    :param log: whether to log
     :return:
     """
 
@@ -339,39 +352,52 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
 
     # switch case
     if config_item == 'accounts':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'actions':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'assets':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'collections':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'eventHandlers':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'events':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'groups':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'jobs':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
         sorted_items = get_surrounding_items(config_item=config_item, items=sorted_items,
                                              sub_items=['asset', 'workflow'])
     elif config_item == 'messageTemplates':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items,
-                                 filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'metadataDefinitions':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items,
-                                 filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'objectTypes':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'profiles':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'quotas':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'resources':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'roles':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'tagCollections':
         # no way to retrieve tags from API directly, so bypassing by reading tags from MD DEFs
         # NOTE: Will only retrieve tags that are used by MD DEFs
@@ -382,30 +408,37 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
                                          sub_items=VARIABLES.TAG_COLLECTIONS_SUB_ITEMS)
         sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['tagCollections'])
     elif config_item == 'taskDefinitions':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items,
-                                 filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'tasks':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'taxonomies':
         taxonomies = get_taxonomies(filters=filters)
     elif config_item == 'timedActions':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'userDefinedObjectTypes':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items,
-                                 filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'users':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'variants':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'wizards':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'workflowDefinitions':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items,
-                                 filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'workflows':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
     elif config_item == 'workspaces':
-        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters)
+        sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
+                                 with_dependencies=with_dependencies, log=log)
 
     # post-processing, not available for taxonomies
     if sorted_items and post_filters:
@@ -416,9 +449,9 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
         save_taxonomies(taxonomies=taxonomies)
     elif save and config_item != 'taxonomies':
         if post_processed_sorted_items:
-            save_items(config_item=config_item, items=post_processed_sorted_items)
+            save_items(config_item=config_item, items=post_processed_sorted_items, log=log)
         else:
-            save_items(config_item=config_item, items=sorted_items)
+            save_items(config_item=config_item, items=sorted_items, log=log)
 
     # taxonomies handled differently
     if config_item == 'taxonomies':
@@ -429,13 +462,14 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
         return sorted_items
 
 
-def save_items(config_item: str, items: dict, backup: bool = False):
+def save_items(config_item: str, items: dict, backup: bool = False, log: bool = True):
     """
     Save Flex items to JSON
 
     :param config_item: config item
     :param items: dict of items
     :param backup: whether item is backup or not
+    :param log: whether to log
     :return:
     """
 
@@ -443,7 +477,7 @@ def save_items(config_item: str, items: dict, backup: bool = False):
     create_folder(folder_name=config_item, ignore_error=True)
     now = datetime.datetime.now().strftime("%Y-%m-%d %Hh%Mm%Ss")
 
-    print("")
+    print("") if log else None
 
     # folder for each config
     for item in items:
@@ -585,7 +619,7 @@ def save_items(config_item: str, items: dict, backup: bool = False):
             json.dump(obj=items.get(item), fp=item_config, indent=4)
             # print(f"{config_item}: {folder_name} has been retrieved successfully. ") if not backup else print(f"{config_item}: {folder_name} has been backed up successfully. ")
 
-    print(f"{config_item} have been retrieved successfully. \n") if items else None
+    print(f"{config_item} have been retrieved successfully. \n") if items and log else None
 
 
 def save_taxonomies(taxonomies):
@@ -657,6 +691,53 @@ def get_surrounding_items(config_item: str, items: dict, sub_items: List[str]):
             pass
 
     return items
+
+
+def find_and_pull_dependencies(json_config: {}):
+    """
+    Find dependencies and create them if they do not exist.
+
+    :return:
+    """
+
+    # find dependencies
+    dependencies = find_nested_dependencies(json_config)
+
+    for dependency in dependencies:
+
+        # get dependency info
+        tmp = json_config.copy()
+        for subpath in dependency.split("."):
+            tmp = tmp.get(subpath).copy()
+
+        # fetch dependency
+        get_full_items(config_item=f"{tmp.get('type')}s", filters=[f"name={tmp.get('name')}", "exactNameMatch=true"],
+                       save=True, log=False)
+
+    return dependencies
+
+
+def find_nested_dependencies(data, parent_key='', separator='.'):
+    """
+    Find dependencies in a JSON item config.
+
+    :param data:
+    :param parent_key:
+    :param separator:
+    :return:
+    """
+
+    paths = []
+
+    for key, value in data.items():
+        new_key = f"{parent_key}{separator}{key}" if parent_key else key
+
+        if isinstance(value, dict):
+            if "id" in value:
+                paths.append(new_key)
+            paths.extend(find_nested_dependencies(value, new_key, separator))
+
+    return paths
 
 
 def get_taxonomies(filters: List[str]):
@@ -933,7 +1014,7 @@ def create_script(item_name, item_config):
     try:
         script = script.replace("<&code>",
                                 item_config['configuration']['instance']['script_type']['script'][:-2].replace("\n",
-                                                                                                               "\n    ") + "\n\t}")
+                                                                                                               "\n\t") + "\n\t}")
     except:
         pass
 
@@ -948,7 +1029,7 @@ def create_script(item_name, item_config):
     try:
         script = script.replace("<&code>",
                                 item_config['configuration']['instance']['script-contents']['script'][:-2].replace("\n",
-                                                                                                                   "\n    ") + "\n\t}")
+                                                                                                                   "\n\t") + "\n\t}")
     except:
         script = script.replace("<&code>", "")
 

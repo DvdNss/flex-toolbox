@@ -18,7 +18,7 @@ def pull_command_func(args):
     """Action on pull command. """
 
     if args.config_item != "all":
-        get_full_items(config_item=args.config_item, filters=args.filters, post_filters=args.post_filters, save=True)
+        get_full_items(config_item=args.config_item, filters=args.filters, post_filters=args.post_filters, with_dependencies=True, save=True)
     else:
         pull_all()
 

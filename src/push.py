@@ -24,7 +24,6 @@ ACTION_UPDATE_FIELDS = [
     'autoRetryInterval',
     'concurrentJobsLimit',
     'description',
-    'externalIds',
     'name',
     'priority',
     'redoAction',
@@ -57,6 +56,10 @@ def push_command_func(args):
             # job
             elif args.config_item == 'jobs' and data['objectType']['name'] == 'job':
                 push_job(job_config=data)
+
+            # event handlers
+            elif args.config_item == 'eventHandlers' and data['objectType']['name'] == 'event-handler':
+                push_item(config_item=args.config_item, item_name=item, item_config=data)
 
             # todo:
             #     eventHandlers
@@ -114,28 +117,34 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
     item = query(method="GET", url=f"{config_item};name={item_name};exactNameMatch=true", log=False)
     total_count = item['totalCount']
 
-    # action doesn't exist, create it
+    # item doesn't exist, create it
     if total_count == 0:
 
         # set action parameters
         payload['pluginClass'] = item_config['pluginClass']
         plugin = item_config['pluginClass']
 
-        if plugin == "tv.nativ.mio.plugins.actions.jef.JEFActionProxyCommand":
+        # plugin uuid if JEF
+        if plugin in ["tv.nativ.mio.plugins.actions.jef.JEFActionProxyCommand",
+                      "tv.nativ.mio.plugins.eventhandlers.jef.JefEventHandlerProxy"]:
             payload['pluginUuid'] = item_config['pluginUuid']
 
-        payload['type'] = item_config['type']['name']
+        # type only if action
+        if config_item == 'actions':
+            payload['type'] = item_config['type']['name']
+
         payload['visibilityIds'] = [get_default_account_id()]
         payload['accountId'] = get_default_account_id()
 
-        # create action
+        # create item
         create_item = query(method="POST", url=f"{config_item}", payload=payload)
         item_id = create_item['id']
 
-        # enable action
-        query(method="POST", url=f"{config_item}/{item_id}/actions", payload={"action": "enable"}, log=False)
+        # enable item
+        if config_item in ['actions']:
+            query(method="POST", url=f"{config_item}/{item_id}/actions", payload={"action": "enable"}, log=False)
 
-    # action exists, update it
+    # item exists, update it
     elif total_count == 1:
 
         item_id = item.get(config_item)[0].get('id')
@@ -143,10 +152,10 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
 
         # create backup
         if not restore:
-            backup = get_items(config_item='actions', sub_items=['configuration'], filters=[f"id={item_id}"])
-            save_items(config_item='actions', items=backup, backup=True)
+            backup = get_items(config_item=config_item, sub_items=['configuration'], filters=[f"id={item_id}"])
+            save_items(config_item=config_item, items=backup, backup=True)
 
-        # update action
+        # update item
         query(method="PUT", url=f"{config_item}/{item_id}", payload=payload)
 
     # push script
