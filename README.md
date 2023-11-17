@@ -1,3 +1,7 @@
+#### Requirements
+
+- Python 3.9
+
 #### Commands
 
 * add environment to config
