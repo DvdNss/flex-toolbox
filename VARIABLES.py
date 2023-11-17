@@ -8,8 +8,10 @@
     DESCRIPTION: variables file
 
 """
-from enum import Enum
+# PATHS
+ENV_FILE_PATH = "C:\\Users\\dvdna\\PycharmProjects\\flex_toolbox\\environments.json"
 
+# DEFAULT CONFIGS
 ACTION_CONFIG = {
     "accountId": 0,
     "allowedAutoRetryAttempts": "",
@@ -52,8 +54,7 @@ FLEX_ITEMS_PULL = ['all', 'accounts', 'actions', 'assets', 'collections', 'event
                    'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
                    'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions',
                    'userDefinedObjectTypes', 'users', 'variants', 'wizards', 'workflowDefinitions',
-                   'workflows',
-                   'workspaces']
+                   'workflows', 'workspaces']
 
 FLEX_ITEMS_LIST = ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
                    'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
@@ -102,5 +103,5 @@ USERS_SUB_ITEMS = []
 VARIANTS_SUB_ITEMS = []
 WIZARDS_SUB_ITEMS = ['configuration']
 WORKFLOW_DEFINITIONS_SUB_ITEMS = ['structure']
-WORKFLOWS_SUB_ITEMS = ['variables', 'jobs']
+WORKFLOWS_SUB_ITEMS = ['jobs']
 WORKSPACES_SUB_ITEMS = []

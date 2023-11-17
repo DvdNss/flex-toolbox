@@ -104,8 +104,17 @@
   # Pull **ALL**
   ftbx pull all
   
+  # Pull all actions without deps
+  ftbx pull actions --with_dependencies false
+  
   # Pull actions where script contains "context.asset.id"
   ftbx pull actions --post_filters "configuration.instance.script-contents.script~context.asset.id" 
+  
+  # Pull workflows (variables and jobs come by default)
+  ftbx pull workflows --filters "id=978324"
+  
+  # Pull workflows without vars and jobs
+  ftbx pull workflows --filters "id=978324" "includeVariables=false" "includeJobs=false"
   ```
   
 * push items

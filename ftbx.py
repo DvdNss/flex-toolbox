@@ -12,6 +12,7 @@
 """
 
 import argparse
+from distutils.util import strtobool
 
 from VARIABLES import FLEX_ITEMS_PULL, FLEX_ITEMS_LIST, FLEX_ITEMS_PUSH, FLEX_ITEMS_RESTORE, FLEX_ITEMS_COMPARE
 from src.compare import compare_command_func
@@ -60,6 +61,7 @@ if __name__ == "__main__":
     pull_command = subparsers.add_parser('pull', help='Pull config items from Flex')
     pull_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_PULL, help='Config item to pull')
     pull_command.add_argument('--filters', type=str, nargs='*', help='Filters to apply')
+    pull_command.add_argument('--with_dependencies', type=lambda x: bool(strtobool(x)), help='Whether to retrieve items dependencies', default=True)
     pull_command.add_argument('--post_filters', type=str, nargs="*", help="Post retrieval filters")
     pull_command.set_defaults(func=pull_command_func)
 
@@ -93,6 +95,7 @@ if __name__ == "__main__":
     compare_command.set_defaults(func=compare_command_func)
 
     # todo:
+    #     env in command
     #     cancel
     #     sync
 

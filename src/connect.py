@@ -87,7 +87,7 @@ def connect(url_or_alias: str, username: str = None, password: str = None):
 
     # test connection and default if successful
     ping(env=env['url'], username=env['username'], password=env['password'])
-    add_or_update_environments_json(env=env['url'], username=env['username'], password=env['password'], isDefault=True)
+    add_or_update_environments_json(env=env['url'], username=env['username'], password=env['password'], is_default=True)
 
     return True
 

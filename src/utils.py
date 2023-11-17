@@ -29,17 +29,18 @@ HEADERS = {'Content-Type': 'application/vnd.nativ.mio.v1+json'}
 session = requests.Session()
 
 
-def apply_post_retrieval_filters(items, filters):
+def apply_post_retrieval_filters(items, filters, log: bool = True):
     """
     Apply post-API-retrieval filters to some config items.
 
     :param filters: custom post-processing filters
     :param items: config items dict
+    :param log: log or not
     :return:
     """
 
     # post-filters processing
-    for post_filter in tqdm(filters, desc=f"Applying post filters {filters}"):
+    for post_filter in tqdm(filters, desc=f"Applying post filters {filters}", disable=not log):
         # operator
         operator = None
         for op in ['!=', '>=', '<=', '~', '=', '<', '>']:
@@ -376,7 +377,7 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log)
         sorted_items = get_surrounding_items(config_item=config_item, items=sorted_items,
-                                             sub_items=['asset', 'workflow'])
+                                             sub_items=['asset', 'workflow'], log=log)
     elif config_item == 'messageTemplates':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log)
@@ -434,6 +435,14 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log)
     elif config_item == 'workflows':
+        # retrieve variables by default
+        filters.append("includeVariables=true") if "includeVariables=false" not in filters else None
+        # mute jobs if asked to
+        # todo: rework includeJobs and includeVariables?
+        if any(f in filters for f in ["includeJobs=false", "includeJobs=False"]):
+            sub_items.remove("jobs")
+            filters.remove("includeJobs=false") if "includeJobs=false" in filters else None
+            filters.remove("includeJobs=False") if "includeJobs=False" in filters else None
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log)
     elif config_item == 'workspaces':
@@ -660,17 +669,18 @@ def get_nested_value(obj, keys):
     return obj
 
 
-def get_surrounding_items(config_item: str, items: dict, sub_items: List[str]):
+def get_surrounding_items(config_item: str, items: dict, sub_items: List[str], log: bool = True):
     """
     Get surrounding items of a config item.
 
+    :param log:
     :param config_item: config item
     :param items: items to get the sub_items of
     :param sub_items: surrounding items to get
     :return:
     """
 
-    for item in tqdm(items, desc="Retrieving jobs ['asset', 'workflow']"):
+    for item in tqdm(items, desc="Retrieving jobs ['asset', 'workflow']", disable=not log):
 
         # asset
         try:
@@ -708,11 +718,16 @@ def find_and_pull_dependencies(json_config: {}):
         # get dependency info
         tmp = json_config.copy()
         for subpath in dependency.split("."):
-            tmp = tmp.get(subpath).copy()
+            # index of list
+            if subpath.isdigit():
+                tmp = tmp[int(subpath)]
+            else:
+                tmp = tmp.get(subpath).copy()
 
         # fetch dependency
-        get_full_items(config_item=f"{tmp.get('type')}s", filters=[f"name={tmp.get('name')}", "exactNameMatch=true"],
-                       save=True, log=False)
+        config_item = kebab_to_camel_case(tmp.get('type'))
+        get_full_items(config_item=config_item, filters=[f"name={tmp.get('name')}", "exactNameMatch=true"], save=True,
+                       log=False)
 
     return dependencies
 
@@ -737,10 +752,13 @@ def find_nested_dependencies(data, parent_key='', separator='.'):
                 paths.append(new_key)
             paths.extend(find_nested_dependencies(value, new_key, separator))
 
+        if isinstance(value, list):
+            paths.extend(find_nested_dependencies(value[0], new_key + ".0", separator))
+
     return paths
 
 
-def get_taxonomies(filters: List[str]):
+def get_taxonomies(filters: List[str], log: bool = True):
     """
     Get taxonomies from public API
 
@@ -762,7 +780,7 @@ def get_taxonomies(filters: List[str]):
 
     # get total count
     taxonomies_request = f"{env['url']}/api/taxonomies{';' + ';'.join(filters) if filters else ''}"
-    print(f"\nPerforming [GET] {env['url']}/api/taxonomies{';' + ';'.join(filters) if filters else ''}...")
+    print(f"\nPerforming [GET] {env['url']}/api/taxonomies{';' + ';'.join(filters) if filters else ''}...") if log else None
     taxonomies = session.request("GET", taxonomies_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
 
     enabled_taxonomies = []
@@ -1021,7 +1039,7 @@ def create_script(item_name, item_config):
     try:
         script = script.replace("<&code>",
                                 item_config['configuration']['instance']['internal-script']['script-content'][
-                                :-2].replace("\n", "\n    ") + "\n\t}")
+                                :-2].replace("\n", "\n\t") + "\n\t}")
     except:
         pass
 
@@ -1037,3 +1055,20 @@ def create_script(item_name, item_config):
 
     with open(f"{item_name}/script.groovy", "w") as groovy_file:
         groovy_file.write(content)
+
+    return content
+
+
+def kebab_to_camel_case(string):
+    """
+    Kebab to Camel Case.
+
+    :param string: string to convert
+    :return:
+    """
+
+    words = string.split('-')
+    camel_case_words = [words[0]] + [word.capitalize() for word in words[1:]]
+    camel_case = ''.join(camel_case_words)
+
+    return camel_case + 's'
