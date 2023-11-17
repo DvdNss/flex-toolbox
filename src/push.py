@@ -62,34 +62,8 @@ def push_command_func(args):
                     elif args.config_item == 'eventHandlers' and data['objectType']['name'] == 'event-handler':
                         push_item(config_item=args.config_item, item_name=item, item_config=data)
 
-                        # todo:
-                        #     eventHandlers
-                        #     groups
-                        #     messageTemplates
-                        #     metadataDefinitions
-                        #     profiles
-                        #     resources
-                        #     roles
-                        #     tagCollections
-                        #     taskDefinitions
-                        #     taxonomies
-                        #     timedActions
-                        #     userDefinedObjectTypes
-                        #     variants
-                        #     wizards
-                        #     workflowDefinitions
-                        #     workspaces
-
-                        else:
-                            print(f'Cannot push action {item} since it is not an action.\n')
-
-    # for item in args.item_names:
-    #
-    #
-    #
-    #     # path doesn't exist
-    #     else:
-    #         print(f"Cannot find folder for {item}.\n")
+    else:
+        print(f'Cannot push action {item} since it is not an action.\n')
 
 
 def push_item(config_item: str, item_name: str, item_config: dict, restore: bool = False, push_and_retry_failed_jobs=False):
