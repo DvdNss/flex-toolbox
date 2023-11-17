@@ -40,7 +40,8 @@ def push_command_func(args):
     """Action on push command. """
 
     # iterate over items to push
-    for item in args.item_names:
+    # todo: temp fix
+    item = " ".join(args.item_names)
 
         # if path exists
         if os.path.isdir(f"{args.config_item}/{item}"):
@@ -79,12 +80,16 @@ def push_command_func(args):
             #     workflowDefinitions
             #     workspaces
 
-            else:
-                print(f'Cannot push action {item} since it is not an action.\n')
-
-        # path doesn't exist
         else:
-            print(f"Cannot find folder for {item}.\n")
+            print(f'Cannot push action {item} since it is not an action.\n')
+
+    # for item in args.item_names:
+    #
+    #
+    #
+    #     # path doesn't exist
+    #     else:
+    #         print(f"Cannot find folder for {item}.\n")
 
 
 def push_item(config_item: str, item_name: str, item_config: dict, restore: bool = False, push_and_retry_failed_jobs=False):
