@@ -2,10 +2,7 @@
 /.idea/
 *.json
 *.csv
-/actions/
-/accounts/
-/assets/
 /*/
 !/src/
-test*.py
+!/tests/
 *.bat
