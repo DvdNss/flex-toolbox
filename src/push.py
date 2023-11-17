@@ -50,17 +50,13 @@ def push_command_func(args):
         with open(f"{args.config_item}/{item}/_object.json", 'r') as config_file:
             data = json.load(config_file)
 
-            # action
-            if args.config_item == 'actions' and data['objectType']['name'] == 'action':
-                push_item(config_item=args.config_item, item_name=item, item_config=data,
-                          push_and_retry_failed_jobs=args.push_to_failed_jobs)
-                # job
-                elif args.config_item == 'jobs' and data['objectType']['name'] == 'job':
-                    push_job(job_config=data)
-
-                    # event handlers
-                    elif args.config_item == 'eventHandlers' and data['objectType']['name'] == 'event-handler':
-                        push_item(config_item=args.config_item, item_name=item, item_config=data)
+        if args.config_item == 'actions' and data['objectType']['name'] == 'action':
+            push_item(config_item=args.config_item, item_name=item, item_config=data,
+                      push_and_retry_failed_jobs=args.push_to_failed_jobs)
+        elif args.config_item == 'jobs' and data['objectType']['name'] == 'job':
+            push_job(job_config=data)
+        elif args.config_item == 'eventHandlers' and data['objectType']['name'] == 'event-handler':
+            push_item(config_item=args.config_item, item_name=item, item_config=data)
 
     else:
         print(f'Cannot push action {item} since it is not an action.\n')
