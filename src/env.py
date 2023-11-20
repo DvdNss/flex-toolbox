@@ -38,7 +38,7 @@ def add_or_update_environments_json(env, username, password, is_default: bool = 
     environments = read_environments_json(env_file_path=env_file_path)
 
     # update
-    environments['environments'][env if not is_default else "default"] = {
+    environments['environments'][env.replace('https://', '') if not is_default else "default"] = {
         "url": env,
         "username": username,
         "password": password,
@@ -48,7 +48,7 @@ def add_or_update_environments_json(env, username, password, is_default: bool = 
     with open(env_file_path, "w") as environments_file:
         json.dump(environments, environments_file, indent=4)
 
-    return environments['environments'][env if not is_default else "default"]
+    return environments['environments'][env.replace('https://', '') if not is_default else "default"]
 
 
 def read_environments_json(env_file_path: str = VARIABLES.ENV_FILE_PATH):
@@ -85,3 +85,18 @@ def get_env(environment: str = "default"):
     environments = read_environments_json()
 
     return environments['environments'][environment]
+
+
+def get_default_env_alias(env_file_path: str = VARIABLES.ENV_FILE_PATH):
+    """
+    Get default env alias.
+    """
+
+    environments = read_environments_json(env_file_path=env_file_path)['environments']
+    url = environments['default']['url']
+    environments.pop("default")
+
+    for env_key, env in environments.items():
+        if "url" in env and env["url"] == url:
+            return env_key if "https://" not in env_key else env_key.replace('https://', '')
+    raise IndexError(f"Cannot find environment with url {url} in environments.json. ")

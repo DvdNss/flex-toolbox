@@ -13,6 +13,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 
 from src.env import read_environments_json, add_or_update_environments_json, get_env
+from src.utils import query
 
 # global variables
 PAYLOAD = ""
@@ -28,13 +29,14 @@ def connect_command_func(args):
     connect(url_or_alias=args.env_url, username=args.username, password=args.password)
 
 
-def ping(env: str, username: str, password: str):
+def ping(env: str, username: str, password: str, log: bool = True):
     """
     Ping Flex env with credentials.
 
     :param env: env url
     :param username: username
     :param password: password
+    :param log: whether to log
     :return:
     """
 
@@ -49,16 +51,17 @@ def ping(env: str, username: str, password: str):
         print(f"ERROR: {response['errors']['error']}")
         raise Exception(response["errors"]["error"])
     else:
-        print(f"Successfully connected to {env} - this environment is now your default environment.")
+        print(f"Successfully connected to {env} - this environment is now your default environment.") if log else None
 
 
-def connect(url_or_alias: str, username: str = None, password: str = None):
+def connect(url_or_alias: str, username: str = None, password: str = None, log: bool = True):
     """
-    Connects to a Flex env with url or alias only by ready environments.json
+    Connects to a Flex env with url or alias only by reading environments.json
 
-    :param url_or_alias: url or alias of the env
+    :param url_or_alias: url or alias of the env (can be a shortened version)
     :param username: username (optional)
     :param password: password (optional)
+    :param log: whether to log
     :return:
     """
 
@@ -79,39 +82,32 @@ def connect(url_or_alias: str, username: str = None, password: str = None):
 
     # if env is not registered and no username/password provided
     if not env and not password and not username:
-        print(f"Unable to recognize environment, please check the information is correct or provide username/password.")
+        print(f"Unable to recognize environment {env}, please check the information and username/password are correct.")
         return False
     # if env not registered but username and password provided
     elif not env and password and username:
         env = add_or_update_environments_json(env=url_or_alias, username=username, password=password)
 
     # test connection and default if successful
-    ping(env=env['url'], username=env['username'], password=env['password'])
+    ping(env=env['url'], username=env['username'], password=env['password'], log=log)
     add_or_update_environments_json(env=env['url'], username=env['username'], password=env['password'], is_default=True)
 
     return True
 
 
-def get_default_account_id():
+def get_default_account_id(environment: str = "default"):
     """
     Retrieve account id for the default env.
 
     :return:
     """
 
-    # retrieve default env
-    env = get_env()
-
-    # init. connection & auth with env API
-    auth = HTTPBasicAuth(username=env['username'], password=env['password'])
-
     # get default account id
     try:
-        accounts_query = f"{env['url']}/api/accounts;limit=1;offset=0"
-        accounts = session.request("GET", accounts_query, headers=HEADERS, auth=auth, data=PAYLOAD).json()['accounts']
-        account = accounts[0]['id']
+        accounts = query(method="GET", url="accounts;limit=1", log=False, environment=environment)['accounts']
+        account_id = accounts[0]['id']
 
-        return account
+        return account_id
     except:
         print(f"Failed to retrieve default account.")
         return 0

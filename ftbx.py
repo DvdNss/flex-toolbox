@@ -34,6 +34,8 @@ if __name__ == "__main__":
     env_command.set_defaults(func=env_command_func)
 
     # connect
+    # todo: alias in command
+    # todo: readme update
     connect_command = subparsers.add_parser('connect', help='Connect to a Flex env')
     connect_command.add_argument('env_url', type=str, help='URL of the Flex environment ')
     connect_command.add_argument('username', type=str, nargs='?', help='Flex username ')
@@ -45,6 +47,7 @@ if __name__ == "__main__":
     list_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_LIST, help='Config item to list')
     list_command.add_argument('--filters', type=str, nargs="*", help="Search by text")
     list_command.add_argument('--post_filters', type=str, nargs="*", help="Post retrieval filters")
+    list_command.add_argument('--env', type=str, help="Post retrieval filters", default="default")
     list_command.set_defaults(func=list_command_func)
 
     # # create_action
@@ -61,19 +64,24 @@ if __name__ == "__main__":
     pull_command = subparsers.add_parser('pull', help='Pull config items from Flex')
     pull_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_PULL, help='Config item to pull')
     pull_command.add_argument('--filters', type=str, nargs='*', help='Filters to apply')
-    pull_command.add_argument('--with_dependencies', type=lambda x: bool(strtobool(x)), help='Whether to retrieve items dependencies', default=True)
+    pull_command.add_argument('--with_dependencies', type=lambda x: bool(strtobool(x)),
+                              help='Whether to retrieve items dependencies', default=True)
     pull_command.add_argument('--post_filters', type=str, nargs="*", help="Post retrieval filters")
+    pull_command.add_argument('--from', dest="from_", type=str, nargs="*", help="Environments to pull items from")
     pull_command.set_defaults(func=pull_command_func)
 
     # push
     push_command = subparsers.add_parser('push', help='Push config items to Flex')
     push_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_PUSH, help='Config item to push')
     push_command.add_argument('item_names', type=str, nargs='*', help='Items to push')
+    push_command.add_argument('--from', dest="from_", type=str, default="default", )
+    push_command.add_argument('--to', type=str, nargs='*', default=["default"])
     push_command.add_argument('--push_to_failed_jobs', type=bool, default=False)
     # push_command.add_argument('--all', type=bool, help='Whether to push all config items or not')
     push_command.set_defaults(func=push_command_func)
 
     # restore
+    # todo: env
     restore_command = subparsers.add_parser('restore', help='Restore config items')
     restore_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_RESTORE, help='Config item to restore')
     restore_command.add_argument('item_name', type=str, help='Item to restore')
@@ -84,6 +92,7 @@ if __name__ == "__main__":
     query_command = subparsers.add_parser('query', help='Query API')
     query_command.add_argument('method', type=str, choices=['GET', 'POST', 'PUT'], default='GET')
     query_command.add_argument('url', type=str, help='Query to send')
+    query_command.add_argument('--env', type=str, help='Environment to query', default="default")
     query_command.add_argument('--payload', type=str, help='File to use as payload')
     query_command.set_defaults(func=query_command_func)
 
@@ -95,7 +104,6 @@ if __name__ == "__main__":
     compare_command.set_defaults(func=compare_command_func)
 
     # todo:
-    #     env in command
     #     cancel
     #     sync
 

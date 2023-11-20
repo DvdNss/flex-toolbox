@@ -95,20 +95,20 @@
 
 * pull items
   ```shell
-  # Pull **ALL** actions
+  # Pull **ALL** actions from default env
   ftbx pull actions
   
-  # Pull actions matching a filter (several filters can be selected)
+  # Pull default env actions matching a filter (several filters can be selected)
   ftbx pull actions --filters name=action_name
   ftbx pull actions --filters id=309
   ftbx pull actions --filters enabled=true
   ftbx pull actions --filters type=script
   ftbx pull actions --filters type=script enabled=true
   
-  # Pull **ALL**
+  # Pull **ALL** from default env
   ftbx pull all
   
-  # Pull all actions without deps
+  # Pull all default env actions without deps
   ftbx pull actions --with_dependencies false
   
   # Pull actions where script contains "context.asset.id"
@@ -119,6 +119,9 @@
   
   # Pull workflows without vars and jobs
   ftbx pull workflows --filters "id=978324" "includeVariables=false" "includeJobs=false"
+  
+  # Pull actions from several envs at the same time
+  ftbx pull actions --envs "wb-dev" "wb-stg" "wb-prod" --filters "name=set-asset-metadata"
   ```
   
 * push items

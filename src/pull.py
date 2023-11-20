@@ -10,6 +10,8 @@
 """
 import json
 
+from src.connect import connect
+from src.env import read_environments_json
 from src.utils import create_folder, get_tags_and_taxonomies, get_items, get_taxonomies, get_full_items, save_items, \
     save_taxonomies
 
@@ -17,10 +19,22 @@ from src.utils import create_folder, get_tags_and_taxonomies, get_items, get_tax
 def pull_command_func(args):
     """Action on pull command. """
 
-    if args.config_item != "all":
-        get_full_items(config_item=args.config_item, filters=args.filters, post_filters=args.post_filters, with_dependencies=args.with_dependencies, save=True)
+    # if list of envs provided
+    if args.from_:
+        default_env_before_command = read_environments_json()['environments']['default']
+        for env in args.from_:
+            connected_successfully = connect(url_or_alias=env, log=False)
+            if connected_successfully and args.config_item != "all":
+                get_full_items(config_item=args.config_item, filters=args.filters, post_filters=args.post_filters, with_dependencies=args.with_dependencies, save=True)
+            elif connected_successfully and args.config_item == "all":
+                pull_all()
+        connect(url_or_alias=default_env_before_command['url'], log=False)
+    # default env
     else:
-        pull_all()
+        if args.config_item != "all":
+            get_full_items(config_item=args.config_item, filters=args.filters, post_filters=args.post_filters, with_dependencies=args.with_dependencies, save=True)
+        else:
+            pull_all()
 
 
 def pull_all() -> bool:
