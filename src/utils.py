@@ -262,7 +262,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
 
     else:
 
-        print(f"No {config_item} found for the given parameters. ")
+        print(f"No {config_item} found for the given parameters. ") if log else None
 
         return {}
 
