@@ -34,7 +34,7 @@ def query_command_func(args):
         payload = None
 
     # query
-    query_result = query(args.method, args.url, payload)
+    query_result = query(method=args.method, url=args.url, payload=payload, environment=args.env)
 
     # save
     with open("query.json", "w") as query_result_file:

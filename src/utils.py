@@ -19,7 +19,7 @@ from requests.auth import HTTPBasicAuth
 from tqdm import tqdm
 
 import VARIABLES
-from src.env import get_env
+from src.env import get_env, get_default_env_alias
 
 # global variables
 PAYLOAD = ""
@@ -330,7 +330,7 @@ def enumerate_sub_items(config_item: str):
 
 
 def get_full_items(config_item, filters, post_filters: List = [], save: bool = False, with_dependencies: bool = False,
-                   log: bool = True):
+                   log: bool = True, environment: str = "default"):
     """
     Get full config items, including sub items, with filters.
 
@@ -340,6 +340,7 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
     :param save: whether to save the items or not
     :param with_dependencies: whether to also retrieve dependencies
     :param log: whether to log
+    :param environment: environment
     :return:
     """
 
@@ -354,51 +355,51 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
     # switch case
     if config_item == 'accounts':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'actions':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'assets':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'collections':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'eventHandlers':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'events':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'groups':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'jobs':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
         sorted_items = get_surrounding_items(config_item=config_item, items=sorted_items,
-                                             sub_items=['asset', 'workflow'], log=log)
+                                             sub_items=['asset', 'workflow'], log=log, environment=environment)
     elif config_item == 'messageTemplates':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'metadataDefinitions':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'objectTypes':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'profiles':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'quotas':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'resources':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'roles':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'tagCollections':
         # no way to retrieve tags from API directly, so bypassing by reading tags from MD DEFs
         # NOTE: Will only retrieve tags that are used by MD DEFs
@@ -406,34 +407,35 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
               "it is not possible to list them directly from the API...\nPlease note that only tagCollections that are used"
               " in metadata definitions will be retrieved.")
         metadata_definitions = get_items(config_item="metadataDefinitions",
-                                         sub_items=VARIABLES.TAG_COLLECTIONS_SUB_ITEMS)
-        sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['tagCollections'])
+                                         sub_items=VARIABLES.TAG_COLLECTIONS_SUB_ITEMS, environment=environment)
+        sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['tagCollections'],
+                                               environment=environment)
     elif config_item == 'taskDefinitions':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'tasks':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'taxonomies':
-        taxonomies = get_taxonomies(filters=filters)
+        taxonomies = get_taxonomies(filters=filters, environment=environment)
     elif config_item == 'timedActions':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'userDefinedObjectTypes':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'users':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'variants':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'wizards':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'workflowDefinitions':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'workflows':
         # retrieve variables by default
         filters.append("includeVariables=true") if "includeVariables=false" not in filters else None
@@ -444,10 +446,10 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
             filters.remove("includeJobs=false") if "includeJobs=false" in filters else None
             filters.remove("includeJobs=False") if "includeJobs=False" in filters else None
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'workspaces':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
-                                 with_dependencies=with_dependencies, log=log)
+                                 with_dependencies=with_dependencies, log=log, environment=environment)
 
     # post-processing, not available for taxonomies
     if sorted_items and post_filters:
@@ -455,7 +457,7 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
 
     # save if asked to
     if save and config_item == 'taxonomies':
-        save_taxonomies(taxonomies=taxonomies)
+        save_taxonomies(taxonomies=taxonomies, environment=environment)
     elif save and config_item != 'taxonomies':
         if post_processed_sorted_items:
             save_items(config_item=config_item, items=post_processed_sorted_items, log=log)
@@ -471,7 +473,7 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
         return sorted_items
 
 
-def save_items(config_item: str, items: dict, backup: bool = False, log: bool = True):
+def save_items(config_item: str, items: dict, backup: bool = False, log: bool = True, environment: str = "default"):
     """
     Save Flex items to JSON
 
@@ -479,11 +481,16 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
     :param items: dict of items
     :param backup: whether item is backup or not
     :param log: whether to log
+    :param environment: environment
     :return:
     """
 
+    # env folder
+    environment = get_default_env_alias() if environment == "default" else environment
+
     # parent folder
-    create_folder(folder_name=config_item, ignore_error=True)
+    create_folder(folder_name=f"{environment}", ignore_error=True)
+    create_folder(folder_name=f"{environment}/{config_item}", ignore_error=True)
     now = datetime.datetime.now().strftime("%Y-%m-%d %Hh%Mm%Ss")
 
     print("") if log else None
@@ -500,109 +507,109 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
             folder_name = f"{items.get(item).get('name')}".replace("/", "").replace(":", "")
 
         # create object folder
-        create_folder(folder_name=f"{config_item}/{folder_name}", ignore_error=True)
-        create_folder(folder_name=f"{config_item}/{folder_name}/backup", ignore_error=True)
+        create_folder(folder_name=f"{environment}/{config_item}/{folder_name}", ignore_error=True)
+        create_folder(folder_name=f"{environment}/{config_item}/{folder_name}/backup", ignore_error=True)
 
         if backup:
-            create_folder(folder_name=f"{config_item}/{folder_name}/backup/{now}", ignore_error=True)
+            create_folder(folder_name=f"{environment}/{config_item}/{folder_name}/backup/{now}", ignore_error=True)
             folder_name = f"{folder_name}/backup/{now}"
 
         # save subfields in other files
         if 'configuration' in items.get(item) and items.get(item).get('configuration').get('instance'):
             # if groovy script
             if 'script-contents' in items.get(item).get('configuration').get('instance'):
-                create_script(item_name=f"{config_item}/{folder_name}", item_config=items.get(item))
+                create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
             elif 'internal-script' in items.get(item).get('configuration').get('instance'):
-                create_script(item_name=f"{config_item}/{folder_name}", item_config=items.get(item))
+                create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
             elif 'script_type' in items.get(item).get('configuration').get('instance'):
-                create_script(item_name=f"{config_item}/{folder_name}", item_config=items.get(item))
+                create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
             else:
-                with open(f"{config_item}/{folder_name}/configuration.json", "w") as item_config:
+                with open(f"{environment}/{config_item}/{folder_name}/configuration.json", "w") as item_config:
                     json.dump(obj=items.get(item).get('configuration').get('instance'), fp=item_config, indent=4)
                     items.get(item).pop('configuration')
 
         if 'asset' in items.get(item) and items.get(item).get('asset'):
-            with open(f"{config_item}/{folder_name}/asset.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/asset.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('asset'), fp=item_config, indent=4)
                 items.get(item).pop('asset')
 
         if 'workflowInstance' in items.get(item) and items.get(item).get('workflowInstance'):
-            with open(f"{config_item}/{folder_name}/workflowInstance.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/workflowInstance.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('workflowInstance'), fp=item_config, indent=4)
                 items.get(item).pop('workflowInstance')
 
         if 'definition' in items.get(item) and items.get(item).get('definition').get('definition'):
-            with open(f"{config_item}/{folder_name}/definition.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/definition.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('definition').get('definition'), fp=item_config, indent=4)
                 items.get(item).pop('definition')
 
         if 'body' in items.get(item) and items.get(item).get('body'):
-            with open(f"{config_item}/{folder_name}/body.txt", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/body.txt", "w") as item_config:
                 item_config.write(items.get(item).get('body'))
                 items.get(item).pop('body')
 
         if 'workflow' in items.get(item) and items.get(item).get('workflow'):
-            with open(f"{config_item}/{folder_name}/workflow.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/workflow.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('workflow'), fp=item_config, indent=4)
                 items.get(item).pop('workflow')
 
         if 'properties' in items.get(item) and items.get(item).get('properties').get('accountProperties'):
-            with open(f"{config_item}/{folder_name}/properties.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/properties.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('properties').get('accountProperties'), fp=item_config, indent=4)
                 items.get(item).pop('properties')
 
         if 'references' in items.get(item) and items.get(item).get('references').get('objects'):
-            with open(f"{config_item}/{folder_name}/references.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/references.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('references').get('objects'), fp=item_config, indent=4)
                 items.get(item).pop('references')
 
         if 'metadata' in items.get(item) and items.get(item).get('metadata').get('instance'):
-            with open(f"{config_item}/{folder_name}/metadata.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/metadata.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('metadata').get('instance'), fp=item_config, indent=4)
                 items.get(item).pop('metadata')
 
         if 'fileInformation' in items.get(item) and items.get(item).get('fileInformation'):
-            with open(f"{config_item}/{folder_name}/fileInformation.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/fileInformation.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('fileInformation'), fp=item_config, indent=4)
                 items.get(item).pop('fileInformation')
 
         if 'assetContext' in items.get(item) and items.get(item).get('assetContext'):
-            with open(f"{config_item}/{folder_name}/assetContext.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/assetContext.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('assetContext'), fp=item_config, indent=4)
                 items.get(item).pop('assetContext')
 
         if 'members' in items.get(item) and items.get(item).get('members').get('users'):
-            with open(f"{config_item}/{folder_name}/members.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/members.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('members').get('users'), fp=item_config, indent=4)
                 items.get(item).pop('members')
 
         if 'role' in items.get(item) and items.get(item).get('role'):
-            with open(f"{config_item}/{folder_name}/role.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/role.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('role'), fp=item_config, indent=4)
                 items.get(item).pop('role')
 
         if 'permissions' in items.get(item) and items.get(item).get('permissions'):
-            with open(f"{config_item}/{folder_name}/permissions.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/permissions.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('permissions'), fp=item_config, indent=4)
                 items.get(item).pop('permissions')
 
         if 'hierarchy' in items.get(item) and items.get(item).get('hierarchy'):
-            with open(f"{config_item}/{folder_name}/hierarchy.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/hierarchy.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('hierarchy'), fp=item_config, indent=4)
                 items.get(item).pop('hierarchy')
 
         if 'structure' in items.get(item) and items.get(item).get('structure'):
-            with open(f"{config_item}/{folder_name}/structure.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/structure.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('structure'), fp=item_config, indent=4)
                 items.get(item).pop('structure')
 
         if 'variables' in items.get(item) and items.get(item).get('variables'):
-            with open(f"{config_item}/{folder_name}/variables.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/variables.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('variables'), fp=item_config, indent=4)
                 items.get(item).pop('variables')
 
         if 'jobs' in items.get(item) and items.get(item).get('jobs').get('jobs'):
-            with open(f"{config_item}/{folder_name}/jobs.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/jobs.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('jobs').get('jobs'), fp=item_config, indent=4)
                 items.get(item).pop('jobs')
 
@@ -611,47 +618,51 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
             for idx, logs in enumerate(history.get('events')):
                 history.get('events')[idx].pop('object')
                 history.get('events')[idx].pop('user')
-            with open(f"{config_item}/{folder_name}/history.json", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/history.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('history'), fp=item_config, indent=4)
                 items.get(item).pop('history')
 
         try:
             if 'relationships' in items.get(item) and items.get(item).get('relationships').get('relationships'):
-                with open(f"{config_item}/{folder_name}/relationships.json", "w") as item_config:
+                with open(f"{environment}/{config_item}/{folder_name}/relationships.json", "w") as item_config:
                     json.dump(obj=items.get(item).get('relationships').get('relationships'), fp=item_config, indent=4)
                     items.get(item).pop('relationships')
         except:
             pass
 
         # save main object
-        with open(f"{config_item}/{folder_name}/_object.json", "w") as item_config:
+        with open(f"{environment}/{config_item}/{folder_name}/_object.json", "w") as item_config:
             json.dump(obj=items.get(item), fp=item_config, indent=4)
-            # print(f"{config_item}: {folder_name} has been retrieved successfully. ") if not backup else print(f"{config_item}: {folder_name} has been backed up successfully. ")
 
-    print(f"{config_item} have been retrieved successfully. \n") if items and log else None
+    print(f"{environment}/{config_item} have been retrieved successfully. \n") if items and log else None
 
 
-def save_taxonomies(taxonomies):
+def save_taxonomies(taxonomies, environment: str = "default"):
     """
     Save taxonomies.
 
-    :param taxonomies:
+    :param taxonomies: taxonomies
+    :param environment: environment
     :return:
     """
 
-    # create parent folder
-    create_folder(folder_name="taxonomies", ignore_error=True)
+    # get env url if default
+    environment = get_default_env_alias() if environment == "default" else environment
+
+    # create parent folders
+    create_folder(folder_name=f"{environment}", ignore_error=True)
+    create_folder(folder_name=f"{environment}/taxonomies", ignore_error=True)
 
     print("")
 
     for idx, taxonomy in enumerate(taxonomies):
         # create taxonomy folder
-        create_folder(folder_name=f"taxonomies/{taxonomy.get('name')}", ignore_error=True)
+        create_folder(folder_name=f"{environment}/taxonomies/{taxonomy.get('name')}", ignore_error=True)
 
         # save taxonomy
-        with open(f"taxonomies/{taxonomy.get('name')}/_object.json", "w") as item_config:
+        with open(f"{environment}/taxonomies/{taxonomy.get('name')}/_object.json", "w") as item_config:
             json.dump(obj=taxonomies[idx], fp=item_config, indent=4)
-            print(f"taxonomies: {taxonomy.get('name')} has been retrieved successfully. ")
+            print(f"{environment}/taxonomies: {taxonomy.get('name')} has been retrieved successfully. ")
 
     print("") if taxonomies else None
 
@@ -669,7 +680,8 @@ def get_nested_value(obj, keys):
     return obj
 
 
-def get_surrounding_items(config_item: str, items: dict, sub_items: List[str], log: bool = True):
+def get_surrounding_items(config_item: str, items: dict, sub_items: List[str], log: bool = True,
+                          environment: str = "default"):
     """
     Get surrounding items of a config item.
 
@@ -677,6 +689,7 @@ def get_surrounding_items(config_item: str, items: dict, sub_items: List[str], l
     :param config_item: config item
     :param items: items to get the sub_items of
     :param sub_items: surrounding items to get
+    :param environment: environment
     :return:
     """
 
@@ -685,7 +698,8 @@ def get_surrounding_items(config_item: str, items: dict, sub_items: List[str], l
         # asset
         try:
             asset_id = items.get(item).get('asset').get('id')
-            asset = query(method="GET", url=f"assets/{asset_id};includeMetadata=true", log=False)
+            asset = query(method="GET", url=f"assets/{asset_id};includeMetadata=true", log=False,
+                          environment=environment)
             items[item]['asset'] = asset
         except:
             pass
@@ -693,8 +707,9 @@ def get_surrounding_items(config_item: str, items: dict, sub_items: List[str], l
         # workflow
         try:
             workflow_id = items.get(item).get('workflow').get('id')
-            workflow_instance = query(method="GET", url=f"workflows/{workflow_id}", log=False)
-            workflow_variables = query(method="GET", url=f"workflows/{workflow_id}/variables", log=False)
+            workflow_instance = query(method="GET", url=f"workflows/{workflow_id}", log=False, environment=environment)
+            workflow_variables = query(method="GET", url=f"workflows/{workflow_id}/variables", log=False,
+                                       environment=environment)
             items[item]['workflow'] = workflow_instance
             items[item]['workflow']['variables'] = workflow_variables
         except:
@@ -758,11 +773,13 @@ def find_nested_dependencies(data, parent_key='', separator='.'):
     return paths
 
 
-def get_taxonomies(filters: List[str], log: bool = True):
+def get_taxonomies(filters: List[str], log: bool = True, environment: str = "default"):
     """
     Get taxonomies from public API
 
+    :param environment: environment
     :param filters: filters to apply
+    :param log: whether to log
     :return:
     """
 
@@ -772,16 +789,9 @@ def get_taxonomies(filters: List[str], log: bool = True):
             if "fql=" in filter:
                 filters[idx] = "fql=" + urllib.parse.quote(filter.replace("fql=", ""))
 
-    # retrieve default env
-    env = get_env()
-
-    # init. connection & auth with env API
-    auth = HTTPBasicAuth(username=env['username'], password=env['password'])
-
     # get total count
-    taxonomies_request = f"{env['url']}/api/taxonomies{';' + ';'.join(filters) if filters else ''}"
-    print(f"\nPerforming [GET] {env['url']}/api/taxonomies{';' + ';'.join(filters) if filters else ''}...") if log else None
-    taxonomies = session.request("GET", taxonomies_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
+    taxonomies = query(method="GET", url=f"taxonomies{';' + ';'.join(filters) if filters else ''}", log=log,
+                       environment=environment)
 
     enabled_taxonomies = []
     for idx, taxonomy in enumerate(taxonomies):
@@ -789,19 +799,18 @@ def get_taxonomies(filters: List[str], log: bool = True):
             enabled_taxonomies.append(taxonomies[idx])
 
     # get taxons
-    taxonomies = get_taxons(taxonomies=enabled_taxonomies, env=env, auth=auth)
+    taxonomies = get_taxons(taxonomies=enabled_taxonomies, environment=environment)
 
     return taxonomies
 
 
-def get_taxons(taxonomies: List[dict], env, auth, url: str = None):
+def get_taxons(taxonomies: List[dict], environment: str = "default", url: str = None):
     """
     Get taxonomies' taxons - recursively
 
     :param taxonomies: taxonomies
-    :param env: env
-    :param auth: auth
-    :param url: url to use
+    :param environment: environment
+    :param url: url
     :return:
     """
 
@@ -809,9 +818,9 @@ def get_taxons(taxonomies: List[dict], env, auth, url: str = None):
     for idx, taxonomy in enumerate(taxonomies):
 
         # build and send api call
-        root_taxons_request = f"{env['url']}/api/taxonomies/{taxonomy['id']}/taxons" if not url else url
-        taxonomies[idx]['childTaxons'] = session.request("GET", root_taxons_request, headers=HEADERS,
-                                                         auth=auth).json()
+        root_taxons_request = f"taxonomies/{taxonomy['id']}/taxons" if not url else url
+        taxonomies[idx]['childTaxons'] = query(method="GET", url=f"{root_taxons_request}", log=False, environment=environment)
+
         try:
             # for root taxons' children (childTaxons)
             for idx2, child_taxon in enumerate(taxonomies[idx]['childTaxons']):
@@ -821,8 +830,7 @@ def get_taxons(taxonomies: List[dict], env, auth, url: str = None):
                     if taxonomies[idx]['childTaxons'][idx2]['hasChildren']:
                         taxonomies[idx]['childTaxons'][idx2]['childTaxons'] = get_taxons(
                             taxonomies=[taxonomies[idx]['childTaxons'][idx2].copy()],
-                            env=env,
-                            auth=auth,
+                            environment=environment,
                             url=f"{root_taxons_request}/{taxonomies[idx]['childTaxons'][idx2]['id']}/taxons"
                         )[0]['childTaxons']['taxons']
         except:
@@ -834,8 +842,7 @@ def get_taxons(taxonomies: List[dict], env, auth, url: str = None):
                     if taxonomies[idx]['childTaxons']['taxons'][idx2]['hasChildren']:
                         taxonomies[idx]['childTaxons']['taxons'][idx2]['childTaxons'] = get_taxons(
                             taxonomies=[taxonomies[idx]['childTaxons']['taxons'][idx2].copy()],
-                            env=env,
-                            auth=auth,
+                            environment=environment,
                             url=f"{root_taxons_request.split('taxons/')[0]}taxons/{taxonomies[idx]['childTaxons']['taxons'][idx2]['id']}/taxons"
                         )[0]['childTaxons']['taxons']
 
@@ -843,7 +850,7 @@ def get_taxons(taxonomies: List[dict], env, auth, url: str = None):
 
 
 def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
-                            mode: List[str] = ['tagCollections', 'taxonomies']):
+                            mode: List[str] = ['tagCollections', 'taxonomies'], environment: str = "default"):
     """
     Get taxonomies and tags from metadata def configs.
 
@@ -855,12 +862,6 @@ def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
     # init. tax & tags
     taxonomies = []
     tags = []
-
-    # retrieve default env
-    env = get_env()
-
-    # init. connection & auth with env API
-    auth = HTTPBasicAuth(username=env['username'], password=env['password'])
 
     # fetch tax & tags
     for metadata_definition in metadata_definitions.keys():
@@ -877,8 +878,7 @@ def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
         tag_dict = dict()
         for tag in tqdm(set(tags), desc=f"Retrieving tags"):
             # Get tag collections
-            tag_request = f"{env['url']}/api/tagCollections/{tag}"
-            tag_collection = session.request("GET", tag_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
+            tag_collection = query(method="GET", url=f"tagCollections/{tag}", log=False, environment=environment)
             tag_dict[tag_collection['displayName']] = tag_collection
 
         # sort
@@ -889,8 +889,7 @@ def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
         tax_dict = dict()
         for tax in tqdm(set(taxonomies), desc=f"Retrieving taxonomies"):
             # get taxonomies
-            tax_request = f"{env['url']}/api/taxonomies/{tax}"
-            taxonomy = session.request("GET", tax_request, headers=HEADERS, auth=auth, data=PAYLOAD).json()
+            taxonomy = query(method="GET", url=f"taxonomies/{tax}", log=False, environment=environment)
             try:
                 tax_dict[taxonomy['displayName']] = taxonomy
             except:
@@ -991,14 +990,20 @@ def query(method: str, url: str, payload=None, log: bool = True, environment: st
         data=json.dumps(payload) if payload else None
     )
 
+    # response is json
     try:
         query_result = query_result.json()
     except Exception as ex:
-        raise Exception(f"{ex}: {query_result}")
+        # response is list
+        if isinstance(query_result, list):
+            pass
+        else:
+            raise Exception(f"{ex}: {query_result}")
 
     # exception handler
-    if 'errors' in query_result:
-        raise Exception(f"\n\nError while sending {query}. \nError message: {query_result['errors']['error']}\n ")
+    if isinstance(query_result, dict) and 'errors' in query_result:
+        raise Exception(
+            f"\n\nError while sending {query}. \nError message: {query_result['errors']['error']}\n ")
 
     return query_result
 

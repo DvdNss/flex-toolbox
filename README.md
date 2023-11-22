@@ -1,57 +1,65 @@
-#### Requirements
+# Requirements
 
-- Python 3.9
+#### [Python 3.9 (click here to download)](https://www.python.org/downloads/release/python-390/)
 
-#### Commands
+***
 
-* add environment to config
-  ```shell
-  ftbx connect "https://devstaging.flex.daletdemos.com" username password
-  ```
+# Commands
 
-* connect to a known environment (must be in `environments.json`)
-  ```shell
-  # Full URL
-  ftbx connect "https://devstaging.flex.daletdemos.com"
-  
-  # Partial URL
-  ftbx connect "daletdemos.com"
-  ftbx connect "devstaging.flex"
-  
-  # Alias
-  ftbx connect "dalet-sandbox"
-  ```
-  
-  ```shell
-  # Output
-  Successfully connected to https://portal.dev.archive.warnerbros.com - this environment is now your default environment.
-  ```
-* show default env
-  ```shell
-  ftbx env
-  ```
-  
-  ```shell
-  # Output
-  Current default environment is https://portal.dev.archive.warnerbros.com - user: dnaisse.
-  ```
-  
-* query anything
-  ```shell
-  # GET
-  ftbx query GET actions/410 # same as below
-  ftbx query GET https://master.cs-sandbox.flex.cs.dalet.cloud/api/actions/410
-  
-  # POST/PUT
-  ftbx query PUT actions/410/configuration --payload payload.json
-  ```
-  
-  ```shell
-  # Output
-  Performing [GET] https://portal.dev.archive.warnerbros.com/api/actions/28938...
+## Connection/Setup
 
-  Result of the query has been saved in query.json for your best convenience. 
-  ```
+---
+
+#### 1. Connect to a new environment
+```shell
+ftbx connect "https://devstaging.flex.daletdemos.com" "username" "password"
+```
+
+> Note: this will save the env configuration in `environments.json`, set the env as your default environment, and ping the env to check its connection.
+---
+#### 2. Connect to a known environment (must be in `environments.json`)
+```shell
+# environments.json:
+# "dalet-sandbox": {
+#     "url": "https://devstaging.flex.daletdemos.com",
+#     "username": "xxx",
+#     "password": "xxx"
+# }
+
+# Full URL
+ftbx connect "https://devstaging.flex.daletdemos.com"
+
+# Partial URL
+ftbx connect "daletdemos.com"
+ftbx connect "devstaging.flex"
+
+# Alias
+ftbx connect "dalet-sandbox"
+```
+---
+#### 3. Display default environment
+```shell
+ftbx env
+```
+
+## Raw Queries
+
+---
+
+#### 1. Query absolutely everything
+```shell
+# GET (commands below are the same)
+
+# Default env
+ftbx query GET "actions/410"
+# Full url
+ftbx query GET "https://master.cs-sandbox.flex.cs.dalet.cloud/api/actions/410"
+# Env alias
+ftbx query GET "actions/410" --env "cs-sbx"
+
+# POST/PUT (same args as above, plus --payload)
+ftbx query PUT "actions/410/configuration" --payload "payload.json"
+```
 
 * list config items (workflowDefinitions, actions..) and their ids
   ```shell
@@ -95,20 +103,20 @@
 
 * pull items
   ```shell
-  # Pull **ALL** actions
+  # Pull **ALL** actions from default env
   ftbx pull actions
   
-  # Pull actions matching a filter (several filters can be selected)
+  # Pull default env actions matching a filter (several filters can be selected)
   ftbx pull actions --filters name=action_name
   ftbx pull actions --filters id=309
   ftbx pull actions --filters enabled=true
   ftbx pull actions --filters type=script
   ftbx pull actions --filters type=script enabled=true
   
-  # Pull **ALL**
+  # Pull **ALL** from default env
   ftbx pull all
   
-  # Pull all actions without deps
+  # Pull all default env actions without deps
   ftbx pull actions --with_dependencies false
   
   # Pull actions where script contains "context.asset.id"
@@ -119,6 +127,9 @@
   
   # Pull workflows without vars and jobs
   ftbx pull workflows --filters "id=978324" "includeVariables=false" "includeJobs=false"
+  
+  # Pull actions from several envs at the same time
+  ftbx pull actions --envs "wb-dev" "wb-stg" "wb-prod" --filters "name=set-asset-metadata"
   ```
   
 * push items

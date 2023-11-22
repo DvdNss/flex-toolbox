@@ -13,19 +13,21 @@ from typing import List
 
 import pandas as pd
 
-from src.utils import get_full_items, apply_post_retrieval_filters
+from src.utils import get_full_items
 
 
 def list_command_func(args):
     """Action on list command. """
 
-    list_items(config_item=args.config_item, filters=args.filters, post_filters=args.post_filters)
+    list_items(config_item=args.config_item, filters=args.filters, post_filters=args.post_filters, environment=args.env)
 
 
-def list_items(config_item: str, filters: List[str] = [], post_filters: List[str] = []) -> bool:
+def list_items(config_item: str, filters: List[str] = [], post_filters: List[str] = [],
+               environment: str = "default") -> bool:
     """
     List items ids.
 
+    :param environment: environment
     :param config_item: item to retrieve from API (ex: workflows, accounts..)
     :param filters: filters to apply
     :param post_filters: post retrieval filters
@@ -37,7 +39,7 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
     log_fields = []
 
     # get items
-    sorted_items = get_full_items(config_item=config_item, filters=filters, post_filters=post_filters)
+    sorted_items = get_full_items(config_item=config_item, filters=filters, post_filters=post_filters, environment=environment)
 
     # switch case
     if config_item == 'accounts':

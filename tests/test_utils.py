@@ -5,7 +5,7 @@
     AUTHOR: David NAISSE
     DATE: November 13, 2023
 
-    DESCRIPTION: TODO
+    DESCRIPTION: tests for utils.py
     
 """
 import os
@@ -237,7 +237,7 @@ class TestUtils(TestCase):
 
         # test
         assert isinstance(accounts, dict) and (accounts.get(list(accounts.keys())[0]).get('objectType').get(
-            'name') == 'account' if len(list(accounts.keys())) != 0 else True)
+            'name') in ['account', 'master-account'] if len(list(accounts.keys())) != 0 else True)
 
     def test_get_full_items_actions(self):
         # ins
@@ -538,7 +538,7 @@ class TestUtils(TestCase):
 
     def test_get_full_items_user_defined_object_types(self):
         # ins
-        config_item, filters, post_filters, with_dependencies = "userDefinedObjectTypes", ['limit=1'], [], False
+        config_item, filters, post_filters, with_dependencies = "userDefinedObjectTypes", [], [], False
 
         # outs
         user_defined_object_types = get_full_items(
