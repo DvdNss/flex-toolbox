@@ -12,7 +12,7 @@
 import requests
 from requests.auth import HTTPBasicAuth
 
-from src.env import read_environments_json, add_or_update_environments_json, get_env
+from src.env import read_environments_json, add_or_update_environments_json
 from src.utils import query
 
 # global variables
@@ -26,7 +26,7 @@ session = requests.Session()
 def connect_command_func(args):
     """Action on connect command. """
 
-    connect(url_or_alias=args.env_url, username=args.username, password=args.password)
+    connect(url_or_alias=args.env_url, username=args.username, password=args.password, alias=args.alias)
 
 
 def ping(env: str, username: str, password: str, log: bool = True):
@@ -54,13 +54,14 @@ def ping(env: str, username: str, password: str, log: bool = True):
         print(f"Successfully connected to {env} - this environment is now your default environment.") if log else None
 
 
-def connect(url_or_alias: str, username: str = None, password: str = None, log: bool = True):
+def connect(url_or_alias: str, username: str = None, password: str = None, alias: str = None, log: bool = True):
     """
     Connects to a Flex env with url or alias only by reading environments.json
 
     :param url_or_alias: url or alias of the env (can be a shortened version)
     :param username: username (optional)
     :param password: password (optional)
+    :param alias: alias to use for env creation
     :param log: whether to log
     :return:
     """
@@ -86,7 +87,7 @@ def connect(url_or_alias: str, username: str = None, password: str = None, log: 
         return False
     # if env not registered but username and password provided
     elif not env and password and username:
-        env = add_or_update_environments_json(env=url_or_alias, username=username, password=password)
+        env = add_or_update_environments_json(env=url_or_alias, username=username, password=password, alias=alias)
 
     # test connection and default if successful
     ping(env=env['url'], username=env['username'], password=env['password'], log=log)

@@ -21,7 +21,7 @@ def env_command_func(args):
     print(f"Current default environment is {default_env['url']} - user: {default_env['username']}. ")
 
 
-def add_or_update_environments_json(env, username, password, is_default: bool = False,
+def add_or_update_environments_json(env, username, password, is_default: bool = False, alias: str = None,
                                     env_file_path: str = VARIABLES.ENV_FILE_PATH):
     """
     Add env to enrionments.json
@@ -29,6 +29,7 @@ def add_or_update_environments_json(env, username, password, is_default: bool = 
     :param env: env url
     :param username: username
     :param password: password
+    :param alias: alias for the env
     :param is_default: whether the env is default or not
     :param env_file_path: env file path
     :return:
@@ -38,7 +39,8 @@ def add_or_update_environments_json(env, username, password, is_default: bool = 
     environments = read_environments_json(env_file_path=env_file_path)
 
     # update
-    environments['environments'][env.replace('https://', '') if not is_default else "default"] = {
+    alias = alias if alias else env.replace('https://', '')
+    environments['environments'][alias if not is_default else "default"] = {
         "url": env,
         "username": username,
         "password": password,
@@ -48,7 +50,7 @@ def add_or_update_environments_json(env, username, password, is_default: bool = 
     with open(env_file_path, "w") as environments_file:
         json.dump(environments, environments_file, indent=4)
 
-    return environments['environments'][env.replace('https://', '') if not is_default else "default"]
+    return environments['environments'][alias if not is_default else "default"]
 
 
 def read_environments_json(env_file_path: str = VARIABLES.ENV_FILE_PATH):

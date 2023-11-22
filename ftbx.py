@@ -34,12 +34,12 @@ if __name__ == "__main__":
     env_command.set_defaults(func=env_command_func)
 
     # connect
-    # todo: alias in command
     # todo: readme update
     connect_command = subparsers.add_parser('connect', help='Connect to a Flex env')
-    connect_command.add_argument('env_url', type=str, help='URL of the Flex environment ')
-    connect_command.add_argument('username', type=str, nargs='?', help='Flex username ')
-    connect_command.add_argument('password', type=str, nargs='?', help='Flex password ')
+    connect_command.add_argument('env_url', type=str, help='URL of the Flex environment')
+    connect_command.add_argument('username', type=str, nargs='?', help='Flex username')
+    connect_command.add_argument('password', type=str, nargs='?', help='Flex password')
+    connect_command.add_argument('--alias', type=str, nargs='?', help='Env alias')
     connect_command.set_defaults(func=connect_command_func)
 
     # list
