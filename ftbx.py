@@ -34,7 +34,6 @@ if __name__ == "__main__":
     env_command.set_defaults(func=env_command_func)
 
     # connect
-    # todo: readme update
     connect_command = subparsers.add_parser('connect', help='Connect to a Flex env')
     connect_command.add_argument('env_url', type=str, help='URL of the Flex environment')
     connect_command.add_argument('username', type=str, nargs='?', help='Flex username')
