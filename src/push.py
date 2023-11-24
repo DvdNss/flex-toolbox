@@ -17,9 +17,9 @@ from tqdm import tqdm
 from src.connect import get_default_account_id
 from src.env import get_default_env_alias
 from src.pull import save_items
-from src.utils import get_items, reformat_tabs, reformat_spaces, get_auth_material, query, enumerate_sub_items
+from src.utils import get_items, reformat_tabs, reformat_spaces, query, enumerate_sub_items
 
-ACTION_UPDATE_FIELDS = [
+UPDATE_FIELDS = [
     'accountId',
     'allowedAutoRetryAttempts',
     'autoRetryInterval',
@@ -58,31 +58,14 @@ def push_command_func(args):
 
         # iterate over dest envs
         for dest_environment in dest_environments:
-            # actions
-            if args.config_item == 'actions' and data['objectType']['name'] == 'action':
-                push_item(
-                    config_item=args.config_item,
-                    item_name=item,
-                    item_config=data,
-                    push_and_retry_failed_jobs=args.push_to_failed_jobs,
-                    src_environment=src_environment,
-                    dest_environment=dest_environment
-                )
-            # jobs
-            elif args.config_item == 'jobs' and data['objectType']['name'] == 'job':
-                push_job(job_config=data)
-            # event handlers
-            elif args.config_item == 'eventHandlers' and data['objectType']['name'] == 'event-handler':
-                push_item(
-                    config_item=args.config_item,
-                    item_name=item,
-                    item_config=data,
-                    src_environment=src_environment,
-                    dest_environment=dest_environment
-                )
-            # not implemented yet
-            else:
-                print(f'Cannot push action {item} since it is not an action.\n')
+            push_item(
+                config_item=args.config_item,
+                item_name=item,
+                item_config=data,
+                push_and_retry_failed_jobs=args.push_to_failed_jobs,
+                src_environment=src_environment,
+                dest_environment=dest_environment
+            )
     else:
         print(f"Cannot find {src_environment}/{args.config_item}/{item}. Please check the information provided. ")
 
@@ -107,19 +90,29 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
     item_id = item_config['id']
     imports = []
     plugin = None
+    is_item_instance = False
 
     # build payload from item config
-    for field in ACTION_UPDATE_FIELDS:
+    for field in UPDATE_FIELDS:
         if field in item_config:
             payload[field] = item_config.get(field)
 
-    # check if action already exists first
-    item = query(method="GET", url=f"{config_item};name={item_name};exactNameMatch=true", log=False,
+    # id-based or name-based query
+    if config_item in ['jobs', 'workflows']:
+        query_content = f"id={item_id}"
+        is_item_instance = True
+    else:
+        query_content = f"name={item_name};exactNameMatch=true"
+
+    # check if item already exists first
+    item = query(method="GET", url=f"{config_item};{query_content}", log=False,
                  environment=dest_environment)
     total_count = item['totalCount']
 
     # item doesn't exist, create it
-    if total_count == 0:
+    if total_count == 0 and not is_item_instance:
+        # todo: taxonomies create
+        # todo: workflow create
 
         # set action parameters
         payload['pluginClass'] = item_config['pluginClass']
@@ -147,7 +140,7 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
                   environment=dest_environment)
 
     # item exists, update it
-    elif total_count == 1:
+    elif total_count == 1 and not is_item_instance:
 
         item_id = item.get(config_item)[0].get('id')
         plugin = item.get(config_item)[0].get('pluginClass')
@@ -190,12 +183,21 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
             if plugin == "tv.nativ.mio.plugins.actions.jef.JEFActionProxyCommand":
 
                 # script
-                payload = {
-                    "internal-script": {
-                        "script-content": script_content,
-                    },
-                    "execution-lock-type": exec_lock_type
-                }
+                if config_item != 'timedActions':
+                    payload = {
+                        "internal-script": {
+                            "script-content": script_content,
+                        },
+                        "execution-lock-type": exec_lock_type
+                    }
+                else:
+                    payload = {
+                        "internal-script": {
+                            "script-content": script_content,
+                        },
+                        "polling-time-period": item_config['configuration']['instance']['polling-time-period'],
+                        "execution-lock-type": exec_lock_type
+                    }
 
                 # imports
                 if imports:
@@ -213,7 +215,6 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
                 # imports
                 if imports:
                     payload['imports'] = {"import": imports}
-
             # groovy decision
             elif plugin == "tv.nativ.mio.plugins.actions.decision.ScriptedDecisionCommand" or \
                     "tv.nativ.mio.plugins.actions.decision.multi.ScriptedMultiDecisionCommand":
@@ -230,26 +231,38 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
                     payload['imports'] = {"import": imports}
 
             # update configuration
-            query(method="PUT", url=f"{config_item}/{item_id}/configuration", payload=payload, environment=dest_environment)
+            query(method="PUT", url=f"{config_item}/{item_id}/configuration", payload=payload,
+                  environment=dest_environment)
 
-            print(f"{src_environment}/{config_item}: {item_name} has been pushed successfully to {dest_environment}.\n") if not restore else \
-                print(f"{src_environment}/{config_item}: {item_name} has been restored successfully in {dest_environment}.\n")
+            print(
+                f"{src_environment}/{config_item}: {item_name} has been pushed successfully to {dest_environment}.\n") if not restore else \
+                print(
+                    f"{src_environment}/{config_item}: {item_name} has been restored successfully in {dest_environment}.\n")
 
     # push config
-    if os.path.isfile(f"{src_environment}/{config_item}/{item_name}/configuration.json"):
-        with open(f"{src_environment}/{config_item}/{item_name}/configuration.json", 'r') as config_json:
-            # build payload
-            payload = json.load(config_json)
+    for item_property in ['configuration', 'metadata', 'definition']:
+        if os.path.isfile(f"{src_environment}/{config_item}/{item_name}/{item_property}.json"):
+            with open(f"{src_environment}/{config_item}/{item_name}/{item_property}.json", 'r') as config_json:
+                # build payload
+                payload = json.load(config_json)
 
-            # update configuration
-            query(method="PUT", url=f"{config_item}/{item_id}/configuration", payload=payload, environment=dest_environment)
+                # update configuration
+                query(method="PUT", url=f"{config_item}/{item_id}/{item_property}", payload=payload,
+                      environment=dest_environment)
 
-            print(f"{src_environment}/{config_item}: {item_name} has been pushed successfully to {dest_environment}.\n") if not restore else \
-                print(f"{src_environment}/{config_item}: {item_name} has been restored successfully in {dest_environment}.\n")
+                print(
+                    f"{src_environment}/{config_item} [{item_property}]: {item_name} has been pushed successfully to {dest_environment}.\n") if not restore else \
+                    print(
+                        f"{src_environment}/{config_item} [{item_property}]: {item_name} has been restored successfully in {dest_environment}.\n")
     print("---")
 
+    # retry
+    if is_item_instance:
+        query(method="POST", url=f"{config_item}/{item_id}/actions", payload={"action": "retry"}, log=False)
+
     # get updated action
-    updated_item = get_items(config_item=config_item, sub_items=enumerate_sub_items(config_item=config_item), filters=[f"id={item_id}"], environment=dest_environment)
+    updated_item = get_items(config_item=config_item, sub_items=enumerate_sub_items(config_item=config_item),
+                             filters=[f"id={item_id}"], environment=dest_environment)
     save_items(config_item=config_item, items=updated_item, environment=dest_environment)
     print("---")
 
@@ -258,125 +271,14 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
 
         # retrieve failed jobs for given item
         failed_jobs = get_items(config_item="jobs",
-                                filters=[f"name={item_name}", "exactNameMatch=true", "status=Failed"], environment=dest_environment)
+                                filters=[f"name={item_name}", "exactNameMatch=true", "status=Failed"],
+                                environment=dest_environment)
 
         for failed_job in tqdm(failed_jobs, desc="Pushing to failed jobs and retrying them"):
             # push script
-            query(method="PUT", url=f"jobs/{failed_jobs.get(failed_job).get('id')}/configuration", payload=payload, environment=dest_environment)
+            query(method="PUT", url=f"jobs/{failed_jobs.get(failed_job).get('id')}/configuration", payload=payload,
+                  environment=dest_environment)
 
             # retry job
             query(method="POST", url=f"jobs/{failed_jobs.get(failed_job).get('id')}/actions",
                   payload={"action": "retry"}, environment=dest_environment)
-
-
-# todo
-def push_job(job_config: dict):
-    """
-        Push action for Flex.
-
-        :param job_config: job config
-        :return:
-        """
-
-    payload = {}
-    job_id = job_config['id']
-    imports = []
-
-    # get auth material
-    env, auth = get_auth_material()
-
-    # check job exists
-    job = query(method="GET", url=f"jobs/{job_id}")
-    job_id = job['id']
-    plugin = job['action']['pluginClass']
-
-    # push script
-    if os.path.isfile(f"jobs/{job_id}/script.groovy"):
-        with open(f"jobs/{job_id}/script.groovy", 'r') as groovy_file:
-            script_content = groovy_file.read().strip() \
-                .replace("import com.ooyala.flex.plugins.PluginCommand", "")
-
-            # get imports
-            for line in script_content.split("\n"):
-                if line.startswith("import") and "PluginCommand" not in line:
-                    imports.append({'value': line[7:], 'isExpression': False})
-                    script_content = script_content.replace(line, "")
-
-            # get code
-            last_char = script_content.rindex("}")
-            script_content = script_content[:last_char - 2].replace("class Script extends PluginCommand {",
-                                                                    "").strip() + "\n}"
-
-            # reformat \r, \t and \s in code
-            script_content = re.sub(r'\t{1,}', reformat_tabs, script_content)
-            script_content = re.sub(r' {4,}', reformat_spaces, script_content)
-
-            try:
-                exec_lock_type = job_config['configuration']['instance']['execution-lock-type']
-            except:
-                exec_lock_type = "NONE"
-
-            # jef
-            if plugin == "tv.nativ.mio.plugins.actions.jef.JEFActionProxyCommand":
-
-                # script
-                payload = {
-                    "internal-script": {
-                        "script-content": script_content,
-                    },
-                    "execution-lock-type": exec_lock_type
-                }
-
-                # imports
-                if imports:
-                    payload['internal-script']['script-import'] = imports
-            # groovy script
-            elif plugin == "tv.nativ.mio.plugins.actions.script.GroovyScriptCommand":
-
-                # payload
-                payload = {
-                    "script-contents": {
-                        "script": script_content,
-                    },
-                }
-
-                # imports
-                if imports:
-                    payload['imports'] = {"import": imports}
-
-            # groovy decision
-            elif plugin == "tv.nativ.mio.plugins.actions.decision.ScriptedDecisionCommand" or \
-                    "tv.nativ.mio.plugins.actions.decision.multi.ScriptedMultiDecisionCommand":
-
-                # payload
-                payload = {
-                    "script_type": {
-                        "script": script_content,
-                    },
-                }
-
-                # imports
-                if imports:
-                    payload['imports'] = {"import": imports}
-
-            # update script
-            query(method="PUT", url=f"jobs/{job_id}/configuration", payload=payload)
-
-    # push config
-    if os.path.isfile(f"jobs/{job_id}/configuration.json"):
-        with open(f"jobs/{job_id}/configuration.json", 'r') as config_json:
-            payload = json.load(config_json)
-
-            # update configuration
-            query(method="PUT", url=f"jobs/{job_id}/configuration", payload=payload)
-
-    # retry job
-    query(method="POST", url=f"jobs/{job_id}/actions", payload={"action": "retry"}, log=False)
-
-    print(f"jobs: {job['name']} [{job_id}] has been pushed successfully to {env['url']} and has been retried.\n")
-
-    print("---")
-
-    # get updated item
-    updated_job = get_items(config_item='jobs', filters=[f"id={job_id}"])
-    save_items(config_item='jobs', items=updated_job)

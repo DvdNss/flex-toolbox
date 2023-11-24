@@ -35,7 +35,7 @@ class TestUtils(TestCase):
             "configuration": {
                 "instance": {
                     "internal-script": {
-                        "script-content": "def execute() {\n\tcontext.logInfo('test')\n}",
+                        "script-content": "def execute() {\n    context.logInfo('test')\n}",
                         "script-import": [
                             {
                                 "value": "groovy.json.JsonSlurper"
@@ -55,7 +55,7 @@ class TestUtils(TestCase):
         os.removedirs(f"{item_name}")
 
         # test
-        expected = "import com.ooyala.flex.plugins.PluginCommand\nimport groovy.json.JsonSlurper\n\nclass Script extends PluginCommand {\n\tdef execute() {\n\t\tcontext.logInfo('test')\n\t}\n}"
+        expected = "import com.ooyala.flex.plugins.PluginCommand\nimport groovy.json.JsonSlurper\n\nclass Script extends PluginCommand {\n    def execute() {\n        context.logInfo('test')\n    }\n}"
         assert test_create == expected
 
     def test_query_valid(self):
