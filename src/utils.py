@@ -519,10 +519,13 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
             # if groovy script
             if 'script-contents' in items.get(item).get('configuration').get('instance'):
                 create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
+                items.get(item).get('configuration').get('instance').pop('script-contents')
             elif 'internal-script' in items.get(item).get('configuration').get('instance'):
                 create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
+                items.get(item).get('configuration').get('instance').pop('internal-script')
             elif 'script_type' in items.get(item).get('configuration').get('instance'):
                 create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
+                items.get(item).get('configuration').get('instance').pop('script_type')
             else:
                 with open(f"{environment}/{config_item}/{folder_name}/configuration.json", "w") as item_config:
                     json.dump(obj=items.get(item).get('configuration').get('instance'), fp=item_config, indent=2)
@@ -1027,7 +1030,7 @@ def create_script(item_name, item_config):
     """
 
     imports = ["import com.ooyala.flex.plugins.PluginCommand\n"]
-    script = "class Script extends PluginCommand {\n\t<&code>\n}"
+    script = "class Script extends PluginCommand {\n    <&code>\n}"
 
     # jef
     try:
