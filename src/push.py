@@ -175,12 +175,11 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
 
             # get code
             last_char = script_content.rindex("}")
-            script_content = script_content[:last_char - 2].replace("class Script extends PluginCommand {",
-                                                                    "").strip() + "\n}"
+            script_content = script_content[:last_char - 1].replace("class Script extends PluginCommand {", "")
 
-            # # reformat \r, \t and \s in code
-            # script_content = re.sub(r'\t{1,}', reformat_tabs, script_content)
-            # script_content = re.sub(r' {4,}', reformat_spaces, script_content)
+            # reformat \r, \t and \s in code
+            script_content = re.sub(r'\t{1,}', reformat_tabs, script_content)
+            script_content = re.sub(r' {4,}', reformat_spaces, script_content)
 
             try:
                 exec_lock_type = item_config['configuration']['instance']['execution-lock-type']
