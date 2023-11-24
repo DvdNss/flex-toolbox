@@ -407,7 +407,7 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
               "it is not possible to list them directly from the API...\nPlease note that only tagCollections that are used"
               " in metadata definitions will be retrieved.")
         metadata_definitions = get_items(config_item="metadataDefinitions",
-                                         sub_items=VARIABLES.TAG_COLLECTIONS_SUB_ITEMS, environment=environment)
+                                         sub_items=VARIABLES.METADATA_DEFINITIONS_SUB_ITEMS, environment=environment)
         sorted_items = get_tags_and_taxonomies(metadata_definitions=metadata_definitions, mode=['tagCollections'],
                                                environment=environment)
     elif config_item == 'taskDefinitions':
@@ -514,6 +514,9 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
             create_folder(folder_name=f"{environment}/{config_item}/{folder_name}/backup/{now}", ignore_error=True)
             folder_name = f"{folder_name}/backup/{now}"
 
+        # prevents commit loop
+        remove_last_modified_keys(items)
+
         # save subfields in other files
         if 'configuration' in items.get(item) and items.get(item).get('configuration').get('instance'):
             # if groovy script
@@ -547,7 +550,7 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
                 items.get(item).pop('definition')
 
         if 'body' in items.get(item) and items.get(item).get('body'):
-            with open(f"{environment}/{config_item}/{folder_name}/body.txt", "w") as item_config:
+            with open(f"{environment}/{config_item}/{folder_name}/body.html", "w") as item_config:
                 item_config.write(items.get(item).get('body'))
                 items.get(item).pop('body')
 
@@ -590,7 +593,7 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
             with open(f"{environment}/{config_item}/{folder_name}/role.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('role'), fp=item_config, indent=2)
                 items.get(item).pop('role')
-
+        # todo: convert permissions to dataframe
         if 'permissions' in items.get(item) and items.get(item).get('permissions'):
             with open(f"{environment}/{config_item}/{folder_name}/permissions.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('permissions'), fp=item_config, indent=2)
@@ -633,8 +636,6 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
         except:
             pass
 
-        remove_last_modified_keys(items)
-
         if 'lastPollTime' in items.get(item):
             items.get(item).pop("lastPollTime")
 
@@ -669,6 +670,9 @@ def save_taxonomies(taxonomies, environment: str = "default"):
     for idx, taxonomy in enumerate(taxonomies):
         # create taxonomy folder
         create_folder(folder_name=f"{environment}/taxonomies/{taxonomy.get('name')}", ignore_error=True)
+
+        # removed useless keys
+        remove_last_modified_keys(taxonomies)
 
         # save taxonomy
         with open(f"{environment}/taxonomies/{taxonomy.get('name')}/_object.json", "w") as item_config:

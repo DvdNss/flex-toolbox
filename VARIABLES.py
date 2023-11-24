@@ -50,7 +50,7 @@ WORKFLOW_CONFIG = {
 DEFAULT_GROOVY_SCRIPT = "import com.ooyala.flex.plugins.PluginCommand\n\nclass script extends PluginCommand {\n\tdef execute(){\n\t\t// your code here\n\t}\n}"
 
 # COMMANDS CONFIG ITEMS
-FLEX_ITEMS_PULL = ['all', 'accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
+FLEX_ITEMS_PULL = ['all', 'accounts', 'actions', 'assets', 'eventHandlers', 'events', 'groups', 'jobs',
                    'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
                    'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions',
                    'userDefinedObjectTypes', 'users', 'variants', 'wizards', 'workflowDefinitions',
@@ -61,16 +61,15 @@ FLEX_ITEMS_LIST = ['accounts', 'actions', 'assets', 'collections', 'eventHandler
                    'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions', 'userDefinedObjectTypes',
                    'users', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']
 
-FLEX_ITEMS_PUSH = ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
-                   'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources', 'roles',
-                   'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions', 'userDefinedObjectTypes',
+FLEX_ITEMS_PUSH = ['accounts', 'actions', 'eventHandlers', 'groups', 'jobs',
+                   'messageTemplates', 'metadataDefinitions', 'profiles', 'quotas', 'resources', 'roles',
+                   'taskDefinitions', 'taxonomies', 'timedActions', 'userDefinedObjectTypes',
                    'users', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']
 
-FLEX_ITEMS_RESTORE = ['accounts', 'actions', 'assets', 'collections', 'eventHandlers', 'events', 'groups', 'jobs',
-                      'messageTemplates', 'metadataDefinitions', 'objectTypes', 'profiles', 'quotas', 'resources',
-                      'roles', 'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions',
-                      'userDefinedObjectTypes', 'users', 'variants', 'wizards', 'workflowDefinitions', 'workflows',
-                      'workspaces']
+FLEX_ITEMS_RESTORE = ['accounts', 'actions', 'eventHandlers', 'groups', 'jobs',
+                      'messageTemplates', 'metadataDefinitions', 'profiles', 'quotas', 'resources', 'roles',
+                      'taskDefinitions', 'taxonomies', 'timedActions', 'userDefinedObjectTypes',
+                      'users', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']
 
 FLEX_ITEMS_COMPARE = ['accounts', 'actions', 'eventHandlers', 'groups', 'messageTemplates', 'metadataDefinitions',
                       'objectTypes', 'profiles', 'quotas', 'resources', 'roles', 'tagCollections', 'taskDefinitions',
@@ -104,4 +103,4 @@ VARIANTS_SUB_ITEMS = []
 WIZARDS_SUB_ITEMS = ['configuration']
 WORKFLOW_DEFINITIONS_SUB_ITEMS = ['structure']
 WORKFLOWS_SUB_ITEMS = ['jobs']
-WORKSPACES_SUB_ITEMS = []
+WORKSPACES_SUB_ITEMS = ['members']

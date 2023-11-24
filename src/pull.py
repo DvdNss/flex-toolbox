@@ -53,10 +53,6 @@ def pull_all() -> bool:
     sorted_items = get_items(config_item='actions', sub_items=['configuration'], filters=['enabled=true'])
     save_items(config_item='actions', items=sorted_items)
     print('---')
-    # collections
-    sorted_items = get_items(config_item='collections', sub_items=['metadata'])
-    save_items(config_item='collections', items=sorted_items)
-    print('---')
     # event Handlers
     sorted_items = get_items(config_item='eventHandlers', sub_items=['configuration'], filters=['enabled=true'])
     save_items(config_item='eventHandlers', items=sorted_items)
