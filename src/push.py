@@ -152,9 +152,6 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
         item_id = item.get(config_item)[0].get('id')
         plugin = item.get(config_item)[0].get('pluginClass')
 
-        if item.get(config_item)[0].get('revision'):
-            payload['revision'] = item.get(config_item)[0].get('revision')
-
         # create backup
         if not restore:
             backup = get_items(config_item=config_item, sub_items=['configuration'], filters=[f"id={item_id}"],
