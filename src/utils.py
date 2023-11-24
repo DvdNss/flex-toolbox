@@ -525,22 +525,22 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
                 create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
             else:
                 with open(f"{environment}/{config_item}/{folder_name}/configuration.json", "w") as item_config:
-                    json.dump(obj=items.get(item).get('configuration').get('instance'), fp=item_config, indent=4)
+                    json.dump(obj=items.get(item).get('configuration').get('instance'), fp=item_config, indent=2)
                     items.get(item).pop('configuration')
 
         if 'asset' in items.get(item) and items.get(item).get('asset'):
             with open(f"{environment}/{config_item}/{folder_name}/asset.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('asset'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('asset'), fp=item_config, indent=2)
                 items.get(item).pop('asset')
 
         if 'workflowInstance' in items.get(item) and items.get(item).get('workflowInstance'):
             with open(f"{environment}/{config_item}/{folder_name}/workflowInstance.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('workflowInstance'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('workflowInstance'), fp=item_config, indent=2)
                 items.get(item).pop('workflowInstance')
 
         if 'definition' in items.get(item) and items.get(item).get('definition').get('definition'):
             with open(f"{environment}/{config_item}/{folder_name}/definition.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('definition').get('definition'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('definition').get('definition'), fp=item_config, indent=2)
                 items.get(item).pop('definition')
 
         if 'body' in items.get(item) and items.get(item).get('body'):
@@ -550,67 +550,67 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
 
         if 'workflow' in items.get(item) and items.get(item).get('workflow'):
             with open(f"{environment}/{config_item}/{folder_name}/workflow.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('workflow'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('workflow'), fp=item_config, indent=2)
                 items.get(item).pop('workflow')
 
         if 'properties' in items.get(item) and items.get(item).get('properties').get('accountProperties'):
             with open(f"{environment}/{config_item}/{folder_name}/properties.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('properties').get('accountProperties'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('properties').get('accountProperties'), fp=item_config, indent=2)
                 items.get(item).pop('properties')
 
         if 'references' in items.get(item) and items.get(item).get('references').get('objects'):
             with open(f"{environment}/{config_item}/{folder_name}/references.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('references').get('objects'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('references').get('objects'), fp=item_config, indent=2)
                 items.get(item).pop('references')
 
         if 'metadata' in items.get(item) and items.get(item).get('metadata').get('instance'):
             with open(f"{environment}/{config_item}/{folder_name}/metadata.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('metadata').get('instance'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('metadata').get('instance'), fp=item_config, indent=2)
                 items.get(item).pop('metadata')
 
         if 'fileInformation' in items.get(item) and items.get(item).get('fileInformation'):
             with open(f"{environment}/{config_item}/{folder_name}/fileInformation.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('fileInformation'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('fileInformation'), fp=item_config, indent=2)
                 items.get(item).pop('fileInformation')
 
         if 'assetContext' in items.get(item) and items.get(item).get('assetContext'):
             with open(f"{environment}/{config_item}/{folder_name}/assetContext.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('assetContext'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('assetContext'), fp=item_config, indent=2)
                 items.get(item).pop('assetContext')
 
         if 'members' in items.get(item) and items.get(item).get('members').get('users'):
             with open(f"{environment}/{config_item}/{folder_name}/members.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('members').get('users'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('members').get('users'), fp=item_config, indent=2)
                 items.get(item).pop('members')
 
         if 'role' in items.get(item) and items.get(item).get('role'):
             with open(f"{environment}/{config_item}/{folder_name}/role.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('role'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('role'), fp=item_config, indent=2)
                 items.get(item).pop('role')
 
         if 'permissions' in items.get(item) and items.get(item).get('permissions'):
             with open(f"{environment}/{config_item}/{folder_name}/permissions.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('permissions'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('permissions'), fp=item_config, indent=2)
                 items.get(item).pop('permissions')
 
         if 'hierarchy' in items.get(item) and items.get(item).get('hierarchy'):
             with open(f"{environment}/{config_item}/{folder_name}/hierarchy.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('hierarchy'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('hierarchy'), fp=item_config, indent=2)
                 items.get(item).pop('hierarchy')
 
         if 'structure' in items.get(item) and items.get(item).get('structure'):
             with open(f"{environment}/{config_item}/{folder_name}/structure.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('structure'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('structure'), fp=item_config, indent=2)
                 items.get(item).pop('structure')
 
         if 'variables' in items.get(item) and items.get(item).get('variables'):
             with open(f"{environment}/{config_item}/{folder_name}/variables.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('variables'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('variables'), fp=item_config, indent=2)
                 items.get(item).pop('variables')
 
         if 'jobs' in items.get(item) and items.get(item).get('jobs').get('jobs'):
             with open(f"{environment}/{config_item}/{folder_name}/jobs.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('jobs').get('jobs'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('jobs').get('jobs'), fp=item_config, indent=2)
                 items.get(item).pop('jobs')
 
         if 'history' in items.get(item) and items.get(item).get('history'):
@@ -619,20 +619,28 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
                 history.get('events')[idx].pop('object')
                 history.get('events')[idx].pop('user')
             with open(f"{environment}/{config_item}/{folder_name}/history.json", "w") as item_config:
-                json.dump(obj=items.get(item).get('history'), fp=item_config, indent=4)
+                json.dump(obj=items.get(item).get('history'), fp=item_config, indent=2)
                 items.get(item).pop('history')
 
         try:
             if 'relationships' in items.get(item) and items.get(item).get('relationships').get('relationships'):
                 with open(f"{environment}/{config_item}/{folder_name}/relationships.json", "w") as item_config:
-                    json.dump(obj=items.get(item).get('relationships').get('relationships'), fp=item_config, indent=4)
+                    json.dump(obj=items.get(item).get('relationships').get('relationships'), fp=item_config, indent=2)
                     items.get(item).pop('relationships')
         except:
             pass
 
+        remove_last_modified_keys(items)
+
+        if 'lastPollTime' in items.get(item):
+            items.get(item).pop("lastPollTime")
+
+        if 'revision' in items.get(item):
+            items.get(item).pop('revision')
+
         # save main object
         with open(f"{environment}/{config_item}/{folder_name}/_object.json", "w") as item_config:
-            json.dump(obj=items.get(item), fp=item_config, indent=4)
+            json.dump(obj=items.get(item), fp=item_config, indent=2)
 
     print(f"{environment}/{config_item} have been retrieved successfully. \n") if items and log else None
 
@@ -661,7 +669,7 @@ def save_taxonomies(taxonomies, environment: str = "default"):
 
         # save taxonomy
         with open(f"{environment}/taxonomies/{taxonomy.get('name')}/_object.json", "w") as item_config:
-            json.dump(obj=taxonomies[idx], fp=item_config, indent=4)
+            json.dump(obj=taxonomies[idx], fp=item_config, indent=2)
             print(f"{environment}/taxonomies: {taxonomy.get('name')} has been retrieved successfully. ")
 
     print("") if taxonomies else None
@@ -819,7 +827,8 @@ def get_taxons(taxonomies: List[dict], environment: str = "default", url: str = 
 
         # build and send api call
         root_taxons_request = f"taxonomies/{taxonomy['id']}/taxons" if not url else url
-        taxonomies[idx]['childTaxons'] = query(method="GET", url=f"{root_taxons_request}", log=False, environment=environment)
+        taxonomies[idx]['childTaxons'] = query(method="GET", url=f"{root_taxons_request}", log=False,
+                                               environment=environment)
 
         try:
             # for root taxons' children (childTaxons)
@@ -901,13 +910,13 @@ def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
     # save tags as JSON
     if save_to and 'tagCollections' in mode:
         with open(f"{save_to}/configs/tags.json", "w") as tags_config:
-            json.dump(obj=sorted_tag_dict, fp=tags_config, indent=4)
+            json.dump(obj=sorted_tag_dict, fp=tags_config, indent=2)
             print(f"tags have been saved to {save_to}/configs/tags.json")
 
     # save taxonomies as JSON
     if save_to and 'taxonomies' in mode:
         with open(f"{save_to}/configs/taxonomies.json", "w") as taxonomies_config:
-            json.dump(obj=sorted_tax_dict, fp=taxonomies_config, indent=4)
+            json.dump(obj=sorted_tax_dict, fp=taxonomies_config, indent=2)
             print(f"taxonomies have been saved to {save_to}/configs/taxonomies.json. ")
 
     print("")
@@ -1077,3 +1086,21 @@ def kebab_to_camel_case(string):
     camel_case = ''.join(camel_case_words)
 
     return camel_case + 's'
+
+
+def remove_last_modified_keys(input_dict):
+    """
+    Remove "lastModified" keys in JSON API responses for Bitbucket.
+
+    :param input_dict:
+    :return:
+    """
+    if isinstance(input_dict, dict):
+        for key in list(input_dict.keys()):
+            if "lastModified" in key:
+                del input_dict[key]
+            else:
+                remove_last_modified_keys(input_dict[key])
+    elif isinstance(input_dict, list):
+        for item in input_dict:
+            remove_last_modified_keys(item)

@@ -47,7 +47,7 @@ def push_command_func(args):
     # build item name
     item = " ".join(args.item_names)
 
-    # todo: temp fix
+    # todo: temp fix join bcz jenkins container split args by space
 
     # if path exists
     if os.path.isdir(f"{src_environment}/{args.config_item}/{item}"):
@@ -152,6 +152,9 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
         item_id = item.get(config_item)[0].get('id')
         plugin = item.get(config_item)[0].get('pluginClass')
 
+        if item.get(config_item)[0].get('revision'):
+            payload['revision'] = item.get(config_item)[0].get('revision')
+
         # create backup
         if not restore:
             backup = get_items(config_item=config_item, sub_items=['configuration'], filters=[f"id={item_id}"],
@@ -178,9 +181,9 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
             script_content = script_content[:last_char - 2].replace("class Script extends PluginCommand {",
                                                                     "").strip() + "\n}"
 
-            # reformat \r, \t and \s in code
-            script_content = re.sub(r'\t{1,}', reformat_tabs, script_content)
-            script_content = re.sub(r' {4,}', reformat_spaces, script_content)
+            # # reformat \r, \t and \s in code
+            # script_content = re.sub(r'\t{1,}', reformat_tabs, script_content)
+            # script_content = re.sub(r' {4,}', reformat_spaces, script_content)
 
             try:
                 exec_lock_type = item_config['configuration']['instance']['execution-lock-type']
@@ -268,6 +271,7 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
             # retry job
             query(method="POST", url=f"jobs/{failed_jobs.get(failed_job).get('id')}/actions",
                   payload={"action": "retry"}, environment=dest_environment)
+
 
 # todo
 def push_job(job_config: dict):
