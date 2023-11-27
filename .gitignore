@@ -6,3 +6,5 @@
 !/src/
 !/tests/
 *.bat
+.k
+ftbx.bat

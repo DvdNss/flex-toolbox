@@ -11,6 +11,7 @@
 import json
 
 import VARIABLES
+from src.encryption import encrypt_pwd
 
 
 def env_command_func(args):
@@ -22,7 +23,8 @@ def env_command_func(args):
 
 
 def add_or_update_environments_json(env, username, password, is_default: bool = False, alias: str = None,
-                                    env_file_path: str = VARIABLES.ENV_FILE_PATH):
+                                    env_file_path: str = VARIABLES.ENV_FILE_PATH,
+                                    key_path: str = VARIABLES.KEY_FILE_PATH):
     """
     Add env to enrionments.json
 
@@ -32,6 +34,7 @@ def add_or_update_environments_json(env, username, password, is_default: bool = 
     :param alias: alias for the env
     :param is_default: whether the env is default or not
     :param env_file_path: env file path
+    :param key_path: key path
     :return:
     """
 
@@ -43,7 +46,7 @@ def add_or_update_environments_json(env, username, password, is_default: bool = 
     environments['environments'][alias if not is_default else "default"] = {
         "url": env,
         "username": username,
-        "password": password,
+        "password": encrypt_pwd(pwd=password, key_path=key_path) if not is_default else password,
     }
 
     # save

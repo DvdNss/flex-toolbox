@@ -14,6 +14,7 @@ from requests.auth import HTTPBasicAuth
 
 from src.env import read_environments_json, add_or_update_environments_json
 from src.utils import query
+from src.encryption import decrypt_pwd
 
 # global variables
 PAYLOAD = ""
@@ -41,7 +42,7 @@ def ping(env: str, username: str, password: str, log: bool = True):
     """
 
     # init. connection & auth with env API
-    auth = HTTPBasicAuth(username=username, password=password)
+    auth = HTTPBasicAuth(username=username, password=decrypt_pwd(password))
 
     # send a test request
     response = session.request("GET", f"{env}/api/accounts;limit=1", headers=HEADERS, auth=auth, data=PAYLOAD).json()

@@ -19,6 +19,7 @@ from requests.auth import HTTPBasicAuth
 from tqdm import tqdm
 
 import VARIABLES
+from src.encryption import decrypt_pwd
 from src.env import get_env, get_default_env_alias
 
 # global variables
@@ -971,7 +972,7 @@ def get_auth_material(environment: str = "default"):
     env = get_env(environment=environment)
 
     # init. connection & auth with env API
-    auth = HTTPBasicAuth(username=env['username'], password=env['password'])
+    auth = HTTPBasicAuth(username=env['username'], password=decrypt_pwd(pwd=env['password']))
 
     return env, auth
 
@@ -1051,18 +1052,24 @@ def create_script(item_name, item_config):
 
     # groovy decision
     try:
-        script = script.replace("<&code>", item_config['configuration']['instance']['script_type']['script'].replace("\n", "\n    "))
+        script = script.replace("<&code>",
+                                item_config['configuration']['instance']['script_type']['script'].replace("\n",
+                                                                                                          "\n    "))
     except:
         pass
 
     try:
-        script = script.replace("<&code>", item_config['configuration']['instance']['internal-script']['script-content'].replace("\n", "\n    "))
+        script = script.replace("<&code>",
+                                item_config['configuration']['instance']['internal-script']['script-content'].replace(
+                                    "\n", "\n    "))
     except:
         pass
 
     # groovy script
     try:
-        script = script.replace("<&code>", item_config['configuration']['instance']['script-contents']['script'].replace("\n", "\n    "))
+        script = script.replace("<&code>",
+                                item_config['configuration']['instance']['script-contents']['script'].replace("\n",
+                                                                                                              "\n    "))
     except:
         script = script.replace("<&code>", "")
 
