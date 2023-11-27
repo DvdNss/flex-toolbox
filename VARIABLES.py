@@ -10,6 +10,7 @@
 """
 # PATHS
 ENV_FILE_PATH = "C:\\Users\\dvdna\\PycharmProjects\\flex_toolbox\\environments.json"
+KEY_FILE_PATH = "C:\\Users\\dvdna\\PycharmProjects\\flex_toolbox\\.k"
 
 # DEFAULT CONFIGS
 ACTION_CONFIG = {
