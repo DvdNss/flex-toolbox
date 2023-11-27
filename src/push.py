@@ -256,6 +256,22 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
                         f"{src_environment}/{config_item} [{item_property}]: {item_name} has been restored successfully in {dest_environment}.\n")
     print("---")
 
+    # todo: this doesn't work because Flex API is detecting html code as security threats
+    # if config_item == 'messageTemplates':
+    #     if os.path.isfile(f"{src_environment}/{config_item}/{item_name}/body.html"):
+    #         with open(f"{src_environment}/{config_item}/{item_name}/body.html", 'r') as body:
+    #             # build payload
+    #             payload = body.read()
+    #
+    #             # update body
+    #             query(method="PUT", url=f"{config_item}/{item_id}/body", payload=payload, payload_to_json=False,
+    #                   environment=dest_environment, headers={'Accept': '*/*', 'Content-Type': 'application/json'})
+    #
+    #             print(
+    #                 f"{src_environment}/{config_item} [{item_property}]: {item_name} has been pushed successfully to {dest_environment}.\n") if not restore else \
+    #                 print(
+    #                     f"{src_environment}/{config_item} [{item_property}]: {item_name} has been restored successfully in {dest_environment}.\n")
+
     # retry
     if is_item_instance:
         query(method="POST", url=f"{config_item}/{item_id}/actions", payload={"action": "retry"}, log=False)
