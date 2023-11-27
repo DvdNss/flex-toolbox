@@ -105,6 +105,8 @@ if __name__ == "__main__":
     # todo:
     #     cancel
     #     sync
+    #     build .exe
+    #     installation steps in readme
 
     args = parser.parse_args()
     args.func(args)
