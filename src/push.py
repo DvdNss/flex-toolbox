@@ -100,6 +100,7 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
     # id-based or name-based query
     if config_item in ['jobs', 'workflows']:
         query_content = f"id={item_id}"
+        plugin = item_config.get('action').get('pluginClass')
         is_item_instance = True
     else:
         query_content = f"name={item_name};exactNameMatch=true"
