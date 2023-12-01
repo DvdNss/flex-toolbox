@@ -46,7 +46,7 @@ if __name__ == "__main__":
     list_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_LIST, help='Config item to list')
     list_command.add_argument('--filters', type=str, nargs="*", help="Search by text")
     list_command.add_argument('--post_filters', type=str, nargs="*", help="Post retrieval filters")
-    list_command.add_argument('--env', type=str, help="Post retrieval filters", default="default")
+    list_command.add_argument('--from', dest="from_", type=str, help="Environment to list items from", default="default")
     list_command.set_defaults(func=list_command_func)
 
     # # create_action
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     pull_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_PULL, help='Config item to pull')
     pull_command.add_argument('--filters', type=str, nargs='*', help='Filters to apply')
     pull_command.add_argument('--with_dependencies', type=lambda x: bool(strtobool(x)),
-                              help='Whether to retrieve items dependencies', default=True)
+                              help='Whether to retrieve items dependencies', default=False)
     pull_command.add_argument('--post_filters', type=str, nargs="*", help="Post retrieval filters")
     pull_command.add_argument('--from', dest="from_", type=str, nargs="*", help="Environments to pull items from")
     pull_command.set_defaults(func=pull_command_func)
@@ -105,8 +105,8 @@ if __name__ == "__main__":
     # todo:
     #     cancel
     #     sync
-    #     build .exe
     #     installation steps in readme
+    #     major speedup required for get_items with threads
 
     args = parser.parse_args()
     args.func(args)
