@@ -11,9 +11,11 @@
 import datetime
 import json
 import os
+import re
 import urllib.parse
 from typing import List
 
+import graphviz
 import requests
 from requests.auth import HTTPBasicAuth
 from tqdm import tqdm
@@ -254,10 +256,13 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
                     pass
 
         # find dependencies if config
-        if with_dependencies and 'configuration' in sub_items:
+        if with_dependencies and any(dep_root in sub_items for dep_root in ['configuration', 'structure']):
             for item in tqdm(sorted_items_dict, desc=f"Retrieving {config_item} dependencies", disable=not log):
-                # find deps
-                find_and_pull_dependencies(json_config=sorted_items_dict[item]['configuration']['instance'])
+
+                if config_item == 'workflowDefinitions':
+                    find_and_pull_dependencies(json_config=sorted_items_dict[item]['structure'])
+                else:
+                    find_and_pull_dependencies(json_config=sorted_items_dict[item]['configuration']['instance'])
 
         return sorted_items_dict
 
@@ -606,6 +611,9 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
                 items.get(item).pop('hierarchy')
 
         if 'structure' in items.get(item) and items.get(item).get('structure'):
+            if VARIABLES.RENDER_WORKFLOW_GRAPHS:
+                render_workflow(workflow_structure=items.get(item).get('structure'),
+                                save_to=f"{environment}/{config_item}/{folder_name}/")
             with open(f"{environment}/{config_item}/{folder_name}/structure.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('structure'), fp=item_config, indent=2)
                 items.get(item).pop('structure')
@@ -758,7 +766,12 @@ def find_and_pull_dependencies(json_config: {}):
                 tmp = tmp.get(subpath).copy()
 
         # fetch dependency
-        config_item = kebab_to_camel_case(tmp.get('type'))
+        if 'actionType' in tmp:  # actions in workflowDefinitions
+            config_item = "actions"
+        elif 'objectType' in tmp:  # tasks in workflowDefinitions
+            config_item = "taskDefinitions"
+        else:
+            config_item = kebab_to_camel_case(tmp.get('type'))
         get_full_items(config_item=config_item, filters=[f"name={tmp.get('name')}", "exactNameMatch=true"], save=True,
                        log=False)
 
@@ -781,14 +794,19 @@ def find_nested_dependencies(data, parent_key='', separator='.'):
         new_key = f"{parent_key}{separator}{key}" if parent_key else key
 
         if isinstance(value, dict):
-            if "id" in value:
+            if 'id' in value:
                 paths.append(new_key)
             paths.extend(find_nested_dependencies(value, new_key, separator))
 
         if isinstance(value, list):
-            paths.extend(find_nested_dependencies(value[0], new_key + ".0", separator))
+            for idx, list_item in enumerate(value):
+                if new_key != "transitions":
+                    paths.extend(find_nested_dependencies(value[idx], new_key + f".{idx}", separator))
 
-    return paths
+    # remove actionType and objectType as we don't want to pull these
+    filtered_paths = list(filter(lambda x: not re.compile(r'.*Type.*').match(x), paths))
+
+    return filtered_paths
 
 
 def get_taxonomies(filters: List[str], log: bool = True, environment: str = "default"):
@@ -1114,3 +1132,119 @@ def remove_last_modified_keys(input_dict):
     elif isinstance(input_dict, list):
         for item in input_dict:
             remove_last_modified_keys(item)
+
+
+def render_workflow(workflow_structure: dict, save_to: str):
+    """
+    Render workflows using graphviz.
+
+    :param workflow_structure: dict of workflows
+    :param save_to: where to save the workflow graphs
+    """
+
+    # Init. graph
+    graph = graphviz.Digraph(name=f"graph", directory=f"{save_to}")
+
+    try:
+        # Create nodes with images
+        for node in workflow_structure['nodes']:
+            label, style, color = config_node(node)
+            graph.node(name=escape(node['name']), label=label, shape="box", style=style,
+                       fillcolor=color)
+
+        # Create edges with names
+        for transition in workflow_structure['transitions']:
+            graph.edge(escape(transition['from']['name']),
+                       escape(transition['to']['name']),
+                       label=transition['name'] if not None else None)
+    except KeyError:
+        pass
+
+    # Render graph
+    graph.render(filename=f"graph", engine="dot", format="png")
+
+
+def config_node(node: dict) -> tuple[str, str, str]:
+    """
+    Build node label with name, image and style.
+
+    :param node: json dict of the node
+    """
+
+    # Init. node image and reformat node name
+    node_image = ""
+    node_name = escape(node.get('name'))
+    node_style = "filled"
+    node_color = ""
+    node_action = ""
+
+    # Style map nodes
+    if "objectType" in node:
+        # Workflow
+        if node['objectType']['name'] == "workflow-definition":
+            node_image = "../../flex-icons/workflow.png"
+            node_color = "GhostWhite"
+        # Wizard
+        elif node['objectType']['name'] == "wizard":
+            node_image = "../../flex-icons/wizard.png"
+            node_color = "Yellow"
+        # Resource
+        elif node['objectType']['name'] == 'resource':
+            if node['resourceSubType'] == 'Inbox':
+                node_image = "../../flex-icons/resource-inbox.png"
+                node_color = "Lavender"
+            else:
+                node_image = "../../flex-icons/resource-hot-folder.png"
+                node_color = "LightBlue"
+        # Event Handler
+        elif node['objectType']['name'] == 'event-handler':
+            node_image = "../../flex-icons/event-handler.png"
+            node_color = "Grey"
+        # Launch Action
+        elif node['objectType']['name'] == 'action':
+            node_image = "../../flex-icons/workflow.png"
+            node_color = "GhostWhite"
+            try:
+                node_name = escape(node['configuration']['instance']['workflows'][0]['Workflow']['name'])
+            except KeyError:
+                node_name = escape(node['configuration']['instance']['Workflow']['name'])
+        # Timed Action
+        elif node['objectType']['name'] == 'timed-action':
+            node_image = "../../flex-icons/timed-action.png"
+            node_color = "DarkGrey"
+
+    # Style workflow nodes
+    elif "type" in node:
+        if node['type'] == "ACTION":
+            node_image = "../../../flex-icons/" + node["action"]["type"].lower() + ".png"
+            node_color = "GhostWhite"
+            node_action = escape(node["action"]["name"])
+        else:
+            if node["type"] == "START":
+                node_image = "../../../flex-icons/start.png"
+                node_color = "LightGreen"
+            if node["type"] == "END":
+                node_image = "../../../flex-icons/end.png"
+                node_color = "LightCoral"
+            if node["type"] == "FORK":
+                node_image = "../../../flex-icons/fork.png"
+            if node["type"] == "JOIN":
+                node_image = "../../../flex-icons/join.png"
+            if node["type"] == "TASK":
+                node_image = "../../../flex-icons/task.png"
+                node_color = "LightYellow"
+
+    # Build label
+    node_label = f"""<<table cellspacing="0" border="0" cellborder="0"><tr><td><img src="{node_image}" /></td><td> {node_name if not node_action else node_action}</td></tr></table>>"""
+
+    return node_label, node_style, node_color
+
+
+def escape(string: str) -> str:
+    """
+    Custom string escape
+    :param string:
+    :return:
+    """
+
+    return re.sub(r'[^a-zA-Z0-9-_ ]', '', string)

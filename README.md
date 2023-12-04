@@ -20,6 +20,12 @@ git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
 
 * edit `ftbx.bat` with `ftbx.py` absolute path (ex: C:\Users\dvdna\PycharmProjects\flex_toolbox\ftbx.py)
 
+If you want to be able to render workflow graphs, please download [GraphViz](https://www.graphviz.org/), add it to your PATH environment variable and update `VARIABLES.py` as follows:
+```python
+# Params
+RENDER_WORKFLOW_GRAPHS = True
+```
+
 You will then be able to use the `ftbx` command anywhere in windows with the options below.
 
 ***

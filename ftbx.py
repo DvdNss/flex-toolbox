@@ -105,8 +105,9 @@ if __name__ == "__main__":
     # todo:
     #     cancel
     #     sync
-    #     installation steps in readme
     #     major speedup required for get_items with threads
+    #     retry
+    #     listen
 
     args = parser.parse_args()
     args.func(args)
