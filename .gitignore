@@ -5,6 +5,7 @@
 /*/
 !/src/
 !/tests/
+!/flex-icons/
 *.bat
 .k
 ftbx.bat
