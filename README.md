@@ -138,19 +138,19 @@ ftbx list <config_item>
 
   # List all assets with fql
   ftbx list assets --filters "fql=(mimetype~mp4)" # default env
-  ftbx list assets --filters "fql=(mimetype~mp4)" --env "wb-prod"
+  ftbx list assets --filters "fql=(mimetype~mp4)" --from "wb-prod"
   
   # List 5 jobs in a failed status 
   ftbx list jobs --filters "status=Failed" "limit=5" # default env
-  ftbx list jobs --filters "status=Failed" "limit=5" --env "wb-prod"
+  ftbx list jobs --filters "status=Failed" "limit=5" --from "wb-prod"
   
   # List scripts that contains "createJob"
   ftbx list actions --filters "type=script" --post_filters "configuration.instance.script-contents.script~createJob"
-  ftbx list actions --env "wb-prod" --filters "type=script" --post_filters "configuration.instance.script-contents.script~createJob"
+  ftbx list actions --from "wb-prod" --filters "type=script" --post_filters "configuration.instance.script-contents.script~createJob"
   
   # List all actions with concurrency > 0 from default env
   ftbx list actions --post_filters "concurrencyJobsLimit>0" # default env
-  ftbx list actions --post_filters "concurrencyJobsLimit>0" --env "wb-prod"
+  ftbx list actions --post_filters "concurrencyJobsLimit>0" --from "wb-prod"
   ```
   
   ```shell

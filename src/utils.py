@@ -697,6 +697,8 @@ def get_nested_value(obj, keys):
     """
 
     for key in keys.split('.'):
+        if '[text]' in key:
+            return str(obj[key.split('[text]')[0]])
         if isinstance(obj, dict) and key in obj:
             obj = obj[key]
         else:
@@ -1038,7 +1040,7 @@ def query(method: str, url: str, payload=None, log: bool = True, environment: st
     # exception handler
     if isinstance(query_result, dict) and 'errors' in query_result:
         raise Exception(
-            f"\n\nError while sending {query}. \nError message: {query_result['errors']['error']}\n ")
+            f"\n\nError while sending {query}. \nError message: {str(query_result['errors'])}\n ")
 
     return query_result
 
