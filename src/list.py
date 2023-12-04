@@ -19,7 +19,7 @@ from src.utils import get_full_items
 def list_command_func(args):
     """Action on list command. """
 
-    list_items(config_item=args.config_item, filters=args.filters, post_filters=args.post_filters, environment=args.env)
+    list_items(config_item=args.config_item, filters=args.filters, post_filters=args.post_filters, environment=args.from_)
 
 
 def list_items(config_item: str, filters: List[str] = [], post_filters: List[str] = [],

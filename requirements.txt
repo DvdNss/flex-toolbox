@@ -4,3 +4,4 @@ tqdm~=4.66.1
 pandas~=2.1.0
 numpy~=1.26.0
 cryptography~=41.0.5
+graphviz~=0.20.1

@@ -12,6 +12,9 @@
 ENV_FILE_PATH = "C:\\Users\\dvdna\\PycharmProjects\\flex_toolbox\\environments.json"
 KEY_FILE_PATH = "C:\\Users\\dvdna\\PycharmProjects\\flex_toolbox\\.k"
 
+# PARAMS
+RENDER_WORKFLOW_GRAPHS = False
+
 # DEFAULT CONFIGS
 ACTION_CONFIG = {
     "accountId": 0,
