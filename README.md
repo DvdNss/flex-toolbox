@@ -1,10 +1,10 @@
-# Requirements
+# __Requirements__
 
 #### [Python 3.9 (click here to download)](https://www.python.org/downloads/release/python-390/)
 
 ***
 
-# Installation
+# __Installation__
 
 ## 1. Windows
 
@@ -42,9 +42,9 @@ todo
 
 ***
 
-# Commands
+# __Commands__
 
-## Connection/Setup
+## __Connection/Setup__
 
 This command does 3 things:  
 - add environment credentials to your environments.json  
@@ -130,7 +130,7 @@ ftbx query GET "actions/410" --env "cs-sbx"
 ftbx query PUT "actions/410/configuration" --payload "payload.json"
 ```
 
-## List items
+## __List items__
 
 This command queries any env and displays the main info of the requested items, as well as the requested post_filters values. Two files will then be created:  
 - a list.csv file with a dataframe (excel sheet)  
@@ -192,7 +192,7 @@ ftbx list <config_item>
   Results of the query have been saved as list.json for your best convenience.
   ```
 
-## Pull items
+## __Pull items__
 
 This command queries any env and locally creates folders/files for the requested items. Structure will be in the following format:  
 - `<config_item>/`  
@@ -245,7 +245,7 @@ ftbx pull workflows --filters "id=978324" "includeVariables=false" "includeJobs=
 ftbx pull actions --from "wb-dev" "wb-stg" "wb-prod" --filters "name=set-asset-metadata"
 ```
 
-## Push items
+## __Push items__
 
 This command pushes local items to the destination environments. Process is as shown below:  
 1. check if item exists locally  
@@ -285,7 +285,7 @@ ftbx push actions "check-end-node-wf" --push_to_failed_jobs "true"
 ftbx push actions "set-asset-metadata" --from "wb-dev" --to "wb-stg" "wb-prod""
 ```
 
-## Restore items
+## __Restore items__
 
 This command restores an item from a backup (every push generates a backup) in case you break something.
 
@@ -300,7 +300,7 @@ ftbx restore <config_item> <item_name> <timestamp_or_backup_name>
 ftbx restore actions set-tech-metadata-dpx "2023-10-10 15h53m43s"
 ```
   
-## Compare items
+## __Compare items__
 
 This command compares items from different environments. The first environment provided in the list is always the reference environment. The list of differences will then be saved in a `compare/` folder with a TSV file for each item (no file if no differences).  
 - **'x'** means same value as reference environment  
