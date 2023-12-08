@@ -26,7 +26,7 @@ git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
 python C:\path\to\toolbox\ftbx.py %* 
 ```
 
-If you want to be able to render workflow graphs, please download [GraphViz](https://www.graphviz.org/), add it to your PATH environment variable and update `VARIABLES.py` as follows:
+* If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it to your PATH environment variable and update `VARIABLES.py` as follows:
 ```python
 # Params
 RENDER_WORKFLOW_GRAPHS = True
@@ -46,10 +46,10 @@ todo
 
 ## Connection/Setup
 
-This command does 3 things:
-- add environment credentials to your environments.json
-- check connection against the env with url, username and password
-- set the environment as your default environment if connection successfull
+This command does 3 things:  
+- add environment credentials to your environments.json  
+- check connection against the env with url, username and password  
+- set the environment as your default environment if connection successfull  
 
 
 ```shell
@@ -57,8 +57,8 @@ This command does 3 things:
 ftbx connect <env_url_or_alias> <username> <password>
 ```
 
-> options: \
-> --alias [String] alias to set for the environment (ex: wb-stg for warner brother STG)
+> options:  
+> --alias [String]: alias to set for the environment (ex: wb-stg for warner brother STG)
 
 ---
 
@@ -68,8 +68,10 @@ ftbx connect <env_url_or_alias> <username> <password>
 ftbx connect "https://devstaging.flex.daletdemos.com" "username" "password"
 ```
 
-> Note: this will save the env configuration in `environments.json`, set the env as your default environment, and ping the env to check its connection.
+> Note: this will save the env configuration in `environments.json`, set the env as your default environment, and ping the env to check its connection.  
+
 ---
+
 #### 2. Connect to a known environment (must be in `environments.json`)
 ```shell
 # environments.json:
@@ -89,7 +91,9 @@ ftbx connect "devstaging.flex"
 # Alias
 ftbx connect "dalet-sandbox"
 ```
+
 ---
+
 #### 3. Display default environment
 ```shell
 ftbx env
@@ -105,9 +109,10 @@ This command queries any env without the need of setting up headers etc..
 ftbx query <method> <long_or_short_query>
 ```
 
-> options:\
-> --env [String] environment to query if not default environment\
-> --payload [String] path to payload (JSON) file
+> options:  
+> --env [String] environment to query if not default environment  
+> --payload [String] path to payload (JSON) file  
+
 ---
 
 #### 1. Query absolutely everything
@@ -127,18 +132,18 @@ ftbx query PUT "actions/410/configuration" --payload "payload.json"
 
 ## List items
 
-This command queries any env and displays the main info of the requested items, as well as the requested post_filters values. Two files will then be created:
-- a list.csv file with a dataframe (excel sheet)
-- a list.json file with the raw result of the request
+This command queries any env and displays the main info of the requested items, as well as the requested post_filters values. Two files will then be created:  
+- a list.csv file with a dataframe (excel sheet)  
+- a list.json file with the raw result of the request  
 
 ```shell
 ftbx list <config_item>
 ```
 
-> options:\
-> --env [String] environment to query if not default environment\
-> --filters [String(s)] filters to apply, that are used directly within the query\
-> --post_filters [String(s)] post retrieval filters, that are applied after query (operators: '!=', '>=', '<=', '~', '=', '<', '>')
+> options:  
+> --env [String]: environment to query if not default environment  
+> --filters [String(s)]: filters to apply, that are used directly within the query  
+> --post_filters [String(s)]: post retrieval filters, that are applied after query (operators: '!=', '>=', '<=', '~', '=', '<', '>')  
 
 ---
 
@@ -189,24 +194,25 @@ ftbx list <config_item>
 
 ## Pull items
 
-This command queries any env and locally creates folders/files for the requested items. Structure will be in the following format:
-- `<config_item>/`
-  - `<item_name>/`
-    - `_object.json`: main config of the item
-    - `<item_property>.json`: item properties (ex: configuration, variables..)
+This command queries any env and locally creates folders/files for the requested items. Structure will be in the following format:  
+- `<config_item>/`  
+  - `<item_name>/`  
+    - `_object.json`: main config of the item  
+    - `<item_property>.json`: item properties (ex: configuration, variables..)  
 
 ```shell
 ftbx pull <config_item>
 ```
 
-> options:\
-> --from [String(s)] environments to pull from if not default environment\
-> --filters [String(s)] filters to apply, that are used directly within the query\
-> --with_dependencies [Boolean - default:True] whether to retrieve all the items dependencies (ex: workflows of launch actions etc..)\
-> --post_filters [String(s)] post retrieval filters, that are applied after query (operators: '!=', '>=', '<=', '~', '=', '<', '>')
+> options:  
+> --from [String(s)]: environments to pull from if not default environment  
+> --filters [String(s)]: filters to apply, that are used directly within the query  
+> --with_dependencies [Boolean - default:True]: whether to retrieve all the items dependencies (ex: workflows of launch actions etc..)  
+> --post_filters [String(s)]: post retrieval filters, that are applied after query (operators: '!=', '>=', '<=', '~', '=', '<', '>')  
 ---
 
 #### 1. Pull anything
+
 ```shell
 # Pull **ALL** actions
 ftbx pull actions # default env
@@ -241,28 +247,30 @@ ftbx pull actions --from "wb-dev" "wb-stg" "wb-prod" --filters "name=set-asset-m
 
 ## Push items
 
-This command pushes local items to the destination environments. Process is as shown below:
-1. check if item exists locally
-   - yes: continue
-   - no: stop
-2. check if item exists in the destination environment
-   - yes: pull to `<item_name>/backup/` in case you break something
-   - no: create it in destination environment
-3. push updated item properties (ex: configuration.json, script.groovy etc..)
-4. pull updated items from the destination environment for verification purposes
+This command pushes local items to the destination environments. Process is as shown below:  
+1. check if item exists locally  
+   - yes: continue  
+   - no: stop  
+2. check if item exists in the destination environment  
+   - yes: pull to `<item_name>/backup/` in case you break something  
+   - no: create it in destination environment  
+3. push updated item properties (ex: configuration.json, script.groovy etc..)  
+4. pull updated items from the destination environment for verification purposes  
 
 
 ```shell
 ftbx push <config_item> <item_name>
 ```
 
-> options:\
-> --from [String] environment to push from if not default environment\
-> --to [String(s)] environments (yes, several at the same time is possible) to push to if not default environment\
-> --push_to_failed_jobs [Boolean - default:False] whether to update and restart failed jobs if item is an action
+> options:  
+> --from [String] environment to push from if not default environment  
+> --to [String(s)] environments (yes, several at the same time is possible) to push to if not default environment  
+> --push_to_failed_jobs [Boolean - default:False] whether to update and restart failed jobs if item is an action  
+
 ---
 
 #### 1. Push anything
+
 ```shell
 # Push action to an env
 ftbx push actions check-end-node-wf # from default env to default env
@@ -294,16 +302,18 @@ ftbx restore actions set-tech-metadata-dpx "2023-10-10 15h53m43s"
   
 ## Compare items
 
-This command compares items from different environments. The first environment provided in the list is always the reference environment. The list of differences will then be saved in a `compare/` folder with a TSV file for each item (no file if no differences).
-- **'x'** means same value as reference environment
-- **'NaN'** means value is missing in comparand
-- **'/!\\'** means value is different than reference environment
+This command compares items from different environments. The first environment provided in the list is always the reference environment. The list of differences will then be saved in a `compare/` folder with a TSV file for each item (no file if no differences).  
+- **'x'** means same value as reference environment  
+- **'NaN'** means value is missing in comparand  
+- **'/!\\'** means value is different than reference environment  
 
 ```shell
 ftbx compare <config_item> <list_of_envs>
 ```
-> options:\
-> --filters [String(s)] filters to apply, that are used directly within the query\
+
+> options:  
+> --filters [String(s)]: filters to apply, that are used directly within the query  
+
 ---
 
 #### 1. Compare items
