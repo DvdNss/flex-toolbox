@@ -58,7 +58,7 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
     elif config_item == 'groups':
         log_fields = ['name', 'id', 'role.name', 'role.id']
     elif config_item == 'jobs':
-        log_fields = ['name', 'id', 'status', 'actionType.name', 'asset.id', 'workflow.id']
+        log_fields = ['name', 'id', 'status', 'progress', 'actionType.name', 'asset.id', 'workflow.id']
     elif config_item == 'messageTemplates':
         log_fields = ['name', 'id']
     elif config_item == 'metadataDefinitions':

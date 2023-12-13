@@ -13,7 +13,7 @@ import json
 import os
 import re
 import urllib.parse
-from typing import List
+from typing import List, Union
 
 import graphviz
 import requests
@@ -271,6 +271,32 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
         print(f"No {config_item} found for the given parameters. ") if log else None
 
         return {}
+
+
+def retry_config_item_instance(config_item: str, id: str, environment: str):
+    """
+    Retry config item instance given its id.
+
+    :param config_item: config item
+    :param id: object id
+    :param environment: environment to retry from
+    """
+
+    # payload
+    payload = {
+        "action": "retry"
+    }
+
+    # retry
+    query_result = query(
+        method="POST",
+        url=f"{config_item}/{id}/actions",
+        environment=environment,
+        payload=payload,
+        log=False,
+    )
+
+    return query_result.get('name'), query_result.get('progress')
 
 
 def enumerate_sub_items(config_item: str):
@@ -997,7 +1023,7 @@ def get_auth_material(environment: str = "default"):
     return env, auth
 
 
-def query(method: str, url: str, payload=None, log: bool = True, environment: str = "default"):
+def query(method: str, url: str, payload=None, log: bool = True, environment: str = "default") -> Union[dict, list]:
     """
     Query the public API.
 

@@ -14,7 +14,8 @@
 import argparse
 from distutils.util import strtobool
 
-from VARIABLES import FLEX_ITEMS_PULL, FLEX_ITEMS_LIST, FLEX_ITEMS_PUSH, FLEX_ITEMS_RESTORE, FLEX_ITEMS_COMPARE
+from VARIABLES import FLEX_ITEMS_PULL, FLEX_ITEMS_LIST, FLEX_ITEMS_PUSH, FLEX_ITEMS_RESTORE, FLEX_ITEMS_COMPARE, \
+    FLEX_ITEMS_RETRY
 from src.compare import compare_command_func
 from src.connect import connect_command_func
 from src.env import env_command_func
@@ -23,6 +24,7 @@ from src.pull import pull_command_func
 from src.push import push_command_func
 from src.query import query_command_func
 from src.restore import restore_command_func
+from src.retry import retry_command_func
 
 if __name__ == "__main__":
     # parser
@@ -73,8 +75,8 @@ if __name__ == "__main__":
     push_command = subparsers.add_parser('push', help='Push config items to Flex')
     push_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_PUSH, help='Config item to push')
     push_command.add_argument('item_names', type=str, nargs='*', help='Items to push')
-    push_command.add_argument('--from', dest="from_", type=str, default="default", )
-    push_command.add_argument('--to', type=str, nargs='*', default=["default"])
+    push_command.add_argument('--from', dest="from_", type=str, default="default", help='Environment to push from')
+    push_command.add_argument('--to', type=str, nargs='*', default=["default"], help='Environments to push to')
     push_command.add_argument('--push_to_failed_jobs', type=bool, default=False)
     # push_command.add_argument('--all', type=bool, help='Whether to push all config items or not')
     push_command.set_defaults(func=push_command_func)
@@ -101,6 +103,14 @@ if __name__ == "__main__":
     compare_command.add_argument('environments', type=str, nargs='*', help='Environments')
     compare_command.add_argument('--filters', type=str, nargs='*', help='Filters to apply')
     compare_command.set_defaults(func=compare_command_func)
+
+    # retry
+    retry_command = subparsers.add_parser('retry', help='Retry or bulk retry config item instances')
+    retry_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_RETRY, help='Config item')
+    retry_command.add_argument('--from', dest="from_", type=str, default="default", help='Environment to retry from')
+    retry_command.add_argument('--filters', type=str, nargs='*', default=[], help='Filters to apply')
+    retry_command.add_argument('--file', type=str, default=None, help='File containing items to retry')
+    retry_command.set_defaults(func=retry_command_func)
 
     # todo:
     #     cancel
