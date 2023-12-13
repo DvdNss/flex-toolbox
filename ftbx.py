@@ -44,6 +44,7 @@ if __name__ == "__main__":
     connect_command.set_defaults(func=connect_command_func)
 
     # list
+    # todo: change default items that are queried based on input command
     list_command = subparsers.add_parser('list', help='List config items from env')
     list_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_LIST, help='Config item to list')
     list_command.add_argument('--filters', type=str, nargs="*", help="Search by text")
@@ -113,10 +114,10 @@ if __name__ == "__main__":
     retry_command.set_defaults(func=retry_command_func)
 
     # todo:
+    #     push workflows + their scripts
     #     cancel
     #     sync
     #     major speedup required for get_items with threads
-    #     retry
     #     listen
 
     args = parser.parse_args()
