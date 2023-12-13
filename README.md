@@ -9,11 +9,13 @@
 ## 1. Windows
 
 * clone the repo
+
 ```shell
 git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
 ```
 
 * add ftbx to your environment variables  
+  
 1. Windows Menu  
 2. Edit the system environment variables  
 3. Environments variables  
@@ -21,12 +23,15 @@ git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
 5. Add path to flex toolbox (ex: C:\Users\dvdna\PyCharmProjects\flex_toolbox)  
 
 * create a `ftbx.bat` file with the following content and replace the path to `ftbx.py`:
+
 ```shell
 @echo off
 python C:\path\to\toolbox\ftbx.py %* 
 ```
 
-* If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it to your PATH environment variable and update `VARIABLES.py` as follows:
+* If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
+  to your PATH environment variable and update `VARIABLES.py` as follows:
+
 ```python
 # Params
 RENDER_WORKFLOW_GRAPHS = True
@@ -47,10 +52,10 @@ todo
 ## __Connection/Setup__
 
 This command does 3 things:  
+  
 - add environment credentials to your environments.json  
 - check connection against the env with url, username and password  
 - set the environment as your default environment if connection successfull  
-
 
 ```shell
 # MAIN COMMAND
@@ -68,11 +73,13 @@ ftbx connect <env_url_or_alias> <username> <password>
 ftbx connect "https://devstaging.flex.daletdemos.com" "username" "password"
 ```
 
-> Note: this will save the env configuration in `environments.json`, set the env as your default environment, and ping the env to check its connection.  
+> Note: this will save the env configuration in `environments.json`, set the env as your default environment, and ping
+> the env to check its connection.  
 
 ---
 
 #### 2. Connect to a known environment (must be in `environments.json`)
+
 ```shell
 # environments.json:
 # "dalet-sandbox": {
@@ -95,6 +102,7 @@ ftbx connect "dalet-sandbox"
 ---
 
 #### 3. Display default environment
+
 ```shell
 ftbx env
 ```
@@ -102,7 +110,6 @@ ftbx env
 ## __Raw Queries__
 
 This command queries any env without the need of setting up headers etc..
-
 
 ```shell
 # MAIN COMMAND
@@ -116,6 +123,7 @@ ftbx query <method> <long_or_short_query>
 ---
 
 #### 1. Query absolutely everything
+
 ```shell
 # GET (commands below are the same)
 
@@ -132,7 +140,9 @@ ftbx query PUT "actions/410/configuration" --payload "payload.json"
 
 ## __List items__
 
-This command queries any env and displays the main info of the requested items, as well as the requested post_filters values. Two files will then be created:  
+This command queries any env and displays the main info of the requested items, as well as the requested post_filters
+values. Two files will then be created:  
+
 - a list.csv file with a dataframe (excel sheet)  
 - a list.json file with the raw result of the request  
 
@@ -148,6 +158,7 @@ ftbx list <config_item>
 ---
 
 #### 1. List anything
+
   ```shell
   # List all actions 
   ftbx list actions # default env
@@ -195,10 +206,11 @@ ftbx list <config_item>
 ## __Pull items__
 
 This command queries any env and locally creates folders/files for the requested items. Structure will be in the following format:  
+
 - `<config_item>/`  
-  - `<item_name>/`  
-    - `_object.json`: main config of the item  
-    - `<item_property>.json`: item properties (ex: configuration, variables..)  
+    - `<item_name>/`  
+        - `_object.json`: main config of the item  
+        - `<item_property>.json`: item properties (ex: configuration, variables..)  
 
 ```shell
 ftbx pull <config_item>
@@ -207,8 +219,9 @@ ftbx pull <config_item>
 > options:  
 > --from [String(s)]: environments to pull from if not default environment  
 > --filters [String(s)]: filters to apply, that are used directly within the query  
-> --with_dependencies [Boolean - default:True]: whether to retrieve all the items dependencies (ex: workflows of launch actions etc..)  
+> --with_dependencies [Boolean - default:False]: whether to retrieve all the items dependencies (ex: workflows of launch actions etc..)  
 > --post_filters [String(s)]: post retrieval filters, that are applied after query (operators: '!=', '>=', '<=', '~', '=', '<', '>')  
+
 ---
 
 #### 1. Pull anything
@@ -248,6 +261,7 @@ ftbx pull actions --from "wb-dev" "wb-stg" "wb-prod" --filters "name=set-asset-m
 ## __Push items__
 
 This command pushes local items to the destination environments. Process is as shown below:  
+
 1. check if item exists locally  
    - yes: continue  
    - no: stop  
@@ -256,7 +270,6 @@ This command pushes local items to the destination environments. Process is as s
    - no: create it in destination environment  
 3. push updated item properties (ex: configuration.json, script.groovy etc..)  
 4. pull updated items from the destination environment for verification purposes  
-
 
 ```shell
 ftbx push <config_item> <item_name>
@@ -296,13 +309,20 @@ ftbx restore <config_item> <item_name> <timestamp_or_backup_name>
 ---
 
 #### 1. Restore backup (in config_item/item_name/backup)
+
 ```shell
 ftbx restore actions set-tech-metadata-dpx "2023-10-10 15h53m43s"
 ```
+<<<<<<< HEAD
   
 ## __Compare items__
+=======
+
+## Compare items
+>>>>>>> 79d9f6b (added retry feature (tested), updated README.md)
 
 This command compares items from different environments. The first environment provided in the list is always the reference environment. The list of differences will then be saved in a `compare/` folder with a TSV file for each item (no file if no differences).  
+
 - **'x'** means same value as reference environment  
 - **'NaN'** means value is missing in comparand  
 - **'/!\\'** means value is different than reference environment  
@@ -321,7 +341,7 @@ ftbx compare <config_item> <list_of_envs>
 ```shell
 ftbx compare actions "wb-dev" "wb-stg" "wb-prod" --filters "name=check-end-node-wf"
 ```
-  
+
 ```shell
 # OUTPUT
 Performing [GET] https://portal.dev.archive.warnerbros.com/api/actions;name=check-end-node-wf...
@@ -356,4 +376,65 @@ supportsAutoRetry                                                 False     x   
 concurrentJobsLimit                                                   0     x       x
 configuration.instance.script_type.script                        <CODE>   /!\     /!\
 
+```
+
+## Retry items
+
+This command bulk retries job/workflow instances within a Flex environment, either from a query or from JSON/CSV files.  
+
+```shell
+ftbx retry <config_item> <options>
+```
+
+> options:  
+> --filters [String(s)]: filters to apply, that are used directly within the query  
+> --from [String]: environment alias if not default  
+> --file [String]: JSON or CSV file to take as input  
+
+* CSV format:  
+CSV file must contain at least the "id" column, the number/name/order of the other columns doesn't matter.  
+
+| id  | other_column_name | other_column_status |
+|-----|-------------------|---------------------|
+| 238 | job1              | Failed              |
+| 239 | job2              | Failed              |
+| 240 | job3              | Failed              |
+
+* JSON format:  
+JSON file must contain a dict with an "id" key for each instance, the number/name/order of the other keys doesn't matter.  
+
+```json
+{
+  "workflow_1": {"id": 238, "other_key_1": "..."},
+  "workflow_2": {"id": 239, "other_key_1": "..."},
+  "workflow_3": {"id": 240, "other_key_1": "..."},
+  ...
+}
+```
+
+---
+
+### 1. Retry instances
+
+```shell
+# retry 5 failed "untar-frames" jobs with query
+ftbx retry jobs --filters "name=untar-frames" "limit=5"
+
+# retry all failed "untar-frames" jobs
+ftbx retry jobs --filters "name=untar-frames"
+
+# retry **ALL** failed jobs/workflows
+ftbx retry jobs
+ftbx retry workflows
+
+# retry all failed jobs from a CSV file (CSV file must contain the "id" column)
+ftbx retry jobs --file "failed_jobs.csv"
+
+# retry all failed workflows from a JSON file (JSON file must be made of a dict for each instance, with a "id" key within each dict)
+ftbx retry workflows --file "failed_workflows.json"
+
+# LIST + RETRY flow
+ftbx list jobs --filters "status=Failed" "name=untar-frames" # this will create a JSON and CSV file with the failed items 
+ftbx retry jobs --file "list.json" # same as below
+ftbx retry jobs --file "list.csv" # same as above
 ```
