@@ -19,6 +19,7 @@ from VARIABLES import FLEX_ITEMS_PULL, FLEX_ITEMS_LIST, FLEX_ITEMS_PUSH, FLEX_IT
 from src.compare import compare_command_func
 from src.connect import connect_command_func
 from src.env import env_command_func
+from src.init import init_command_func
 from src.list import list_command_func
 from src.pull import pull_command_func
 from src.push import push_command_func
@@ -30,6 +31,10 @@ if __name__ == "__main__":
     # parser
     parser = argparse.ArgumentParser(description='Flex ToolBoX')
     subparsers = parser.add_subparsers(help='Tools')
+
+    # init
+    init_command = subparsers.add_parser('init', help='Init Flex ToolBox')
+    init_command.set_defaults(func=init_command_func)
 
     # env
     env_command = subparsers.add_parser('env', help='Show current env')

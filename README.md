@@ -8,10 +8,15 @@
 
 ## 1. Windows
 
-* clone the repo
+* install Python (link above)  
+
+* clone the repo, install requirements and run ftbx init    
 
 ```shell
 git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
+cd flex_toolbox
+pip install -r requirements.txt
+ftbx init
 ```
 
 * add ftbx to your environment variables  
@@ -21,13 +26,6 @@ git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
 3. Environments variables  
 4. User variables > Path  
 5. Add path to flex toolbox (ex: C:\Users\dvdna\PyCharmProjects\flex_toolbox)  
-
-* create a `ftbx.bat` file with the following content and replace the path to `ftbx.py`:
-
-```shell
-@echo off
-python C:\path\to\toolbox\ftbx.py %* 
-```
 
 * If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
   to your PATH environment variable and update `VARIABLES.py` as follows:
@@ -43,7 +41,33 @@ You will then be able to use the `ftbx` command anywhere in windows with the opt
 
 ## 2. Linux
 
-todo
+* install Python (link above)  
+
+* clone the repo, install requirements and run ftbx init  
+
+```shell
+git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
+cd flex_toolbox
+pip install -r requirements.txt
+ftbx init
+```
+
+* If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
+  to your PATH environment variable and update `VARIABLES.py` as follows:
+
+```python
+# Params
+RENDER_WORKFLOW_GRAPHS = True
+```
+
+You will then be able to use the `ftbx` command anywhere in windows with the options below.
+
+
+* add ftbx to your aliases
+```shell
+# in ~/.bashr
+alias ftbx="path\to\flex_toolbox"
+```
 
 ***
 

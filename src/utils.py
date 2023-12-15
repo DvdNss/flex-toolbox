@@ -1208,27 +1208,27 @@ def config_node(node: dict) -> tuple[str, str, str]:
     if "objectType" in node:
         # Workflow
         if node['objectType']['name'] == "workflow-definition":
-            node_image = f"{VARIABLES.TOOLBOX_PATH}flex-icons/workflow.png"
+            node_image = f"{os.environ.get('FTBX')}/flex-icons/workflow.png"
             node_color = "GhostWhite"
         # Wizard
         elif node['objectType']['name'] == "wizard":
-            node_image = f"{VARIABLES.TOOLBOX_PATH}flex-icons/wizard.png"
+            node_image = f"{os.environ.get('FTBX')}/flex-icons/wizard.png"
             node_color = "Yellow"
         # Resource
         elif node['objectType']['name'] == 'resource':
             if node['resourceSubType'] == 'Inbox':
-                node_image = f"{VARIABLES.TOOLBOX_PATH}flex-icons/resource-inbox.png"
+                node_image = f"{os.environ.get('FTBX')}/flex-icons/resource-inbox.png"
                 node_color = "Lavender"
             else:
-                node_image = f"{VARIABLES.TOOLBOX_PATH}flex-icons/resource-hot-folder.png"
+                node_image = f"{os.environ.get('FTBX')}/flex-icons/resource-hot-folder.png"
                 node_color = "LightBlue"
         # Event Handler
         elif node['objectType']['name'] == 'event-handler':
-            node_image = f"{VARIABLES.TOOLBOX_PATH}flex-icons/event-handler.png"
+            node_image = f"{os.environ.get('FTBX')}/flex-icons/event-handler.png"
             node_color = "Grey"
         # Launch Action
         elif node['objectType']['name'] == 'action':
-            node_image = f"{VARIABLES.TOOLBOX_PATH}flex-icons/workflow.png"
+            node_image = f"{os.environ.get('FTBX')}/flex-icons/workflow.png"
             node_color = "GhostWhite"
             try:
                 node_name = escape(node['configuration']['instance']['workflows'][0]['Workflow']['name'])
@@ -1236,28 +1236,28 @@ def config_node(node: dict) -> tuple[str, str, str]:
                 node_name = escape(node['configuration']['instance']['Workflow']['name'])
         # Timed Action
         elif node['objectType']['name'] == 'timed-action':
-            node_image = f"{VARIABLES.TOOLBOX_PATH}flex-icons/timed-action.png"
+            node_image = f"{os.environ.get('FTBX')}/flex-icons/timed-action.png"
             node_color = "DarkGrey"
 
     # Style workflow nodes
     elif "type" in node:
         if node['type'] == "ACTION":
-            node_image = f"{VARIABLES.TOOLBOX_PATH}flex-icons/" + node["action"]["type"].lower() + ".png"
+            node_image = f"{os.environ.get('FTBX')}/flex-icons/" + node["action"]["type"].lower() + ".png"
             node_color = "GhostWhite"
             node_action = escape(node["action"]["name"])
         else:
             if node["type"] == "START":
-                node_image = f"{VARIABLES.TOOLBOX_PATH}flex-icons/start.png"
+                node_image = f"{os.environ.get('FTBX')}/flex-icons/start.png"
                 node_color = "LightGreen"
             if node["type"] == "END":
-                node_image = f"{VARIABLES.TOOLBOX_PATH}flex-icons/end.png"
+                node_image = f"{os.environ.get('FTBX')}/flex-icons/end.png"
                 node_color = "LightCoral"
             if node["type"] == "FORK":
-                node_image = f"{VARIABLES.TOOLBOX_PATH}flex-icons/fork.png"
+                node_image = f"{os.environ.get('FTBX')}/flex-icons/fork.png"
             if node["type"] == "JOIN":
-                node_image = f"{VARIABLES.TOOLBOX_PATH}flex-icons/join.png"
+                node_image = f"{os.environ.get('FTBX')}/flex-icons/join.png"
             if node["type"] == "TASK":
-                node_image = f"{VARIABLES.TOOLBOX_PATH}flex-icons/task.png"
+                node_image = f"{os.environ.get('FTBX')}/flex-icons/task.png"
                 node_color = "LightYellow"
 
     # Build label

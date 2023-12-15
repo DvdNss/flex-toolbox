@@ -8,10 +8,6 @@
     DESCRIPTION: variables file
 
 """
-# PATHS
-TOOLBOX_PATH = "C:\\Users\\dvdna\\PycharmProjects\\flex_toolbox\\"
-ENV_FILE_PATH = "C:\\Users\\dvdna\\PycharmProjects\\flex_toolbox\\environments.json"
-KEY_FILE_PATH = "C:\\Users\\dvdna\\PycharmProjects\\flex_toolbox\\.k"
 
 # PARAMS
 RENDER_WORKFLOW_GRAPHS = False

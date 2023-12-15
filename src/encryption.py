@@ -15,7 +15,7 @@ from cryptography.fernet import Fernet
 import VARIABLES
 
 
-def encrypt_pwd(pwd: str, key_path: str = VARIABLES.KEY_FILE_PATH):
+def encrypt_pwd(pwd: str, key_path: str = f"{os.environ.get('FTBX')}/.k"):
     """
     Encrypt pwd
 
@@ -36,7 +36,7 @@ def encrypt_pwd(pwd: str, key_path: str = VARIABLES.KEY_FILE_PATH):
     return Fernet(key).encrypt(pwd.encode('utf-8')).decode('utf-8')
 
 
-def decrypt_pwd(pwd: str, key_path: str = VARIABLES.KEY_FILE_PATH):
+def decrypt_pwd(pwd: str, key_path: str = f"{os.environ.get('FTBX')}/.k"):
     """
     Decrypt pwd
 
