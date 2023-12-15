@@ -10,6 +10,8 @@
 """
 import json
 
+import pandas as pd
+
 import VARIABLES
 from src.encryption import encrypt_pwd
 
@@ -17,9 +19,28 @@ from src.encryption import encrypt_pwd
 def env_command_func(args):
     """Action on env command. """
 
-    # log default environment
-    default_env = read_environments_json()['environments']['default']
-    print(f"Current default environment is {default_env['url']} - user: {default_env['username']}. ")
+    # retrieve environments
+    environments = read_environments_json()['environments']
+    default_environment = environments['default']
+
+    pd.set_option('display.colheader_justify', 'center')
+
+    env_df = pd.DataFrame(columns=['DEFAULT', 'ALIAS', 'URL', 'USERNAME'])
+    environments.pop('default')
+
+    print("")
+
+    for env_alias, env_config in environments.items():
+        is_default = (default_environment['url'] == env_config['url'])
+
+        env_df.loc[len(env_df)] = {
+            "DEFAULT": "X" if is_default else "",
+            "ALIAS": env_alias,
+            "URL": env_config.get('url'),
+            "USERNAME": env_config.get('username'),
+        }
+
+    print(env_df.to_string(index=False), "\n")
 
 
 def add_or_update_environments_json(env, username, password, is_default: bool = False, alias: str = None,
