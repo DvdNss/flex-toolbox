@@ -28,6 +28,7 @@ def init_command_func(args):
 
     # current dir
     current_dir = os.getcwd()
+    print(f"Current dir: {current_dir} \n")
 
     # try to get FTBX
     ftbx = os.environ.get('FTBX')
