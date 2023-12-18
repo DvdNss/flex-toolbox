@@ -36,7 +36,7 @@ def init_command_func(args):
     # FTBX env var doesn't exist
     if not ftbx:
         # check curdir = ftbx dir
-        if current_dir.endswith("flex_toolbox"):
+        if current_dir.endswith("flex_toolbox") or current_dir.endswith("flex-env-config-deploy"):
             # windows
             if user_os == "Windows":
                 # permanent
