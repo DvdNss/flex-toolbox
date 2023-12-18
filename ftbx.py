@@ -53,8 +53,9 @@ if __name__ == "__main__":
     list_command = subparsers.add_parser('list', help='List config items from env')
     list_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_LIST, help='Config item to list')
     list_command.add_argument('--filters', type=str, nargs="*", help="Search by text")
-    list_command.add_argument('--post_filters', type=str, nargs="*", help="Post retrieval filters")
-    list_command.add_argument('--from', dest="from_", type=str, help="Environment to list items from", default="default")
+    list_command.add_argument('--post-filters', dest="post_filters", type=str, nargs="*", help="Post retrieval filters")
+    list_command.add_argument('--from', dest="from_", type=str, help="Environment to list items from",
+                              default="default")
     list_command.set_defaults(func=list_command_func)
 
     # # create_action
@@ -71,9 +72,9 @@ if __name__ == "__main__":
     pull_command = subparsers.add_parser('pull', help='Pull config items from Flex')
     pull_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_PULL, help='Config item to pull')
     pull_command.add_argument('--filters', type=str, nargs='*', help='Filters to apply')
-    pull_command.add_argument('--with_dependencies', type=lambda x: bool(strtobool(x)),
-                              help='Whether to retrieve items dependencies', default=False)
-    pull_command.add_argument('--post_filters', type=str, nargs="*", help="Post retrieval filters")
+    pull_command.add_argument('--with-dependencies', dest="with_dependencies", action='store_true',
+                              help='Whether to retrieve items dependencies')
+    pull_command.add_argument('--post-filters', dest="post_filters", type=str, nargs="*", help="Post retrieval filters")
     pull_command.add_argument('--from', dest="from_", type=str, nargs="*", help="Environments to pull items from")
     pull_command.set_defaults(func=pull_command_func)
 
@@ -83,7 +84,8 @@ if __name__ == "__main__":
     push_command.add_argument('item_names', type=str, nargs='*', help='Items to push')
     push_command.add_argument('--from', dest="from_", type=str, default="default", help='Environment to push from')
     push_command.add_argument('--to', type=str, nargs='*', default=["default"], help='Environments to push to')
-    push_command.add_argument('--push_to_failed_jobs', type=bool, default=False)
+    push_command.add_argument('--push-to-failed-jobs', dest="push_to_failed_jobs", action='store_true',
+                              help='Whether to retry failed jobs with new code')
     # push_command.add_argument('--all', type=bool, help='Whether to push all config items or not')
     push_command.set_defaults(func=push_command_func)
 
@@ -99,7 +101,7 @@ if __name__ == "__main__":
     query_command = subparsers.add_parser('query', help='Query API')
     query_command.add_argument('method', type=str, choices=['GET', 'POST', 'PUT'], default='GET')
     query_command.add_argument('url', type=str, help='Query to send')
-    query_command.add_argument('--env', type=str, help='Environment to query', default="default")
+    query_command.add_argument('--from', dest="from_", type=str, help='Environment to query', default="default")
     query_command.add_argument('--payload', type=str, help='File to use as payload')
     query_command.set_defaults(func=query_command_func)
 

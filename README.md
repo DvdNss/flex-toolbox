@@ -12,28 +12,29 @@
 
 * clone the repo, install requirements and run ftbx init    
 
-```shell
-git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
-cd flex_toolbox
-pip install -r requirements.txt
-ftbx init
-```
+    ```shell
+    git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
+    cd flex_toolbox
+    pip install -r requirements.txt
+    ftbx init
+    ```
 
 * add ftbx to your environment variables  
   
-1. Windows Menu  
-2. Edit the system environment variables  
-3. Environments variables  
-4. User variables > Path  
-5. Add path to flex toolbox (ex: C:\Users\dvdna\PyCharmProjects\flex_toolbox)  
+  1. Windows Menu  
+  2. Edit the system environment variables  
+  3. Environments variables  
+  4. User variables > Path  
+  5. Add path to flex toolbox (ex: C:\Users\dvdna\PyCharmProjects\flex_toolbox)  
+
 
 * If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
   to your PATH environment variable and update `VARIABLES.py` as follows:
 
-```python
-# Params
-RENDER_WORKFLOW_GRAPHS = True
-```
+    ```python
+    # Params
+    RENDER_WORKFLOW_GRAPHS = True
+    ```
 
 You will then be able to use the `ftbx` command anywhere in windows with the options below.
 
@@ -45,29 +46,29 @@ You will then be able to use the `ftbx` command anywhere in windows with the opt
 
 * clone the repo, install requirements and run ftbx init  
 
-```shell
-git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
-cd flex_toolbox
-pip install -r requirements.txt
-ftbx init
-```
+    ```shell
+    git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
+    cd flex_toolbox
+    pip install -r requirements.txt
+    ftbx init
+    ```
+  
+* add ftbx to your aliases  
+
+    ```shell
+    # in ~/.bashr
+    alias ftbx="path\to\flex_toolbox"
+    ```
 
 * If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
   to your PATH environment variable and update `VARIABLES.py` as follows:
 
-```python
-# Params
-RENDER_WORKFLOW_GRAPHS = True
-```
+    ```python
+    # Params
+    RENDER_WORKFLOW_GRAPHS = True
+    ```
 
-You will then be able to use the `ftbx` command anywhere in windows with the options below.
-
-
-* add ftbx to your aliases
-```shell
-# in ~/.bashr
-alias ftbx="path\to\flex_toolbox"
-```
+You will then be able to use the `ftbx` command anywhere in windows with the options below.  
 
 ***
 
@@ -75,19 +76,18 @@ alias ftbx="path\to\flex_toolbox"
 
 ## __Connection/Setup__
 
-This command does 3 things:  
-  
-- add environment credentials to your environments.json  
-- check connection against the env with url, username and password  
-- set the environment as your default environment if connection successfull  
-
 ```shell
-# MAIN COMMAND
 ftbx connect <env_url_or_alias> <username> <password>
 ```
 
 > options:  
-> --alias [String]: alias to set for the environment (ex: wb-stg for warner brother STG)
+> --alias [String]: alias to set for the environment (ex: wb-stg for warner brother STG)  
+
+This command does 3 things:  
+  
+- add environment credentials to your environments.json (encrypted)  
+- check connection against the env with url, username and password  
+- set the environment as your default environment if connection successfull  
 
 ---
 
@@ -97,21 +97,11 @@ ftbx connect <env_url_or_alias> <username> <password>
 ftbx connect "https://devstaging.flex.daletdemos.com" "username" "password"
 ```
 
-> Note: this will save the env configuration in `environments.json`, set the env as your default environment, and ping
-> the env to check its connection.  
-
 ---
 
 #### 2. Connect to a known environment (must be in `environments.json`)
 
 ```shell
-# environments.json:
-# "dalet-sandbox": {
-#     "url": "https://devstaging.flex.daletdemos.com",
-#     "username": "xxx",
-#     "password": "xxx"
-# }
-
 # Full URL
 ftbx connect "https://devstaging.flex.daletdemos.com"
 
@@ -123,26 +113,43 @@ ftbx connect "devstaging.flex"
 ftbx connect "dalet-sandbox"
 ```
 
+```shell
+# OUTPUT
+
+Successfully connected to https://master.cs-sandbox.flex.cs.dalet.cloud - this environment is now your default environment.
+```
+
 ---
 
-#### 3. Display default environment
+#### 3. Display available default environments
 
 ```shell
 ftbx env
 ```
 
+```shell
+# OUTPUT
+
+DEFAULT             ALIAS                                   URL                       USERNAME  
+   X        cs-sandbox-ovh-flex-config https://master.cs-sandbox.flex.cs.dalet.cloud masteruser  
+        devstaging.flex.daletdemos.com        https://devstaging.flex.daletdemos.com    dnaisse  
+                                wb-dev     https://portal.dev.archive.warnerbros.com    dnaisse  
+                                wb-stg      https://vault.stg.archive.warnerbros.com    dnaisse  
+                               wb-prod          https://vault.archive.warnerbros.com    dnaisse  
+          master.firstmedia.ooflex.net          https://master.firstmedia.ooflex.net masteruser  
+```
+
 ## __Raw Queries__
 
-This command queries any env without the need of setting up headers etc..
-
 ```shell
-# MAIN COMMAND
 ftbx query <method> <long_or_short_query>
 ```
 
 > options:  
-> --env [String] environment to query if not default environment  
+> --from [String] environment to query if not default environment  
 > --payload [String] path to payload (JSON) file  
+
+This command queries any env (without the need of setting up headers etc...) and stores the result in a query.json file.  
 
 ---
 
@@ -156,28 +163,37 @@ ftbx query GET "actions/410"
 # Full url
 ftbx query GET "https://master.cs-sandbox.flex.cs.dalet.cloud/api/actions/410"
 # Env alias (can be partial too)
-ftbx query GET "actions/410" --env "cs-sbx"
+ftbx query GET "actions/410" --from "cs-sbx"
 
 # POST/PUT (same args as above, plus --payload)
 ftbx query PUT "actions/410/configuration" --payload "payload.json"
 ```
 
+```shell
+# OUTPUT
+
+Performing [GET] https://master.cs-sandbox.flex.cs.dalet.cloud/api/actions;limit=10...  
+  
+Result of the query has been saved in query.json for your best convenience.  
+```
+
 ## __List items__
-
-This command queries any env and displays the main info of the requested items, as well as the requested post_filters
-values. Two files will then be created:  
-
-- a list.csv file with a dataframe (excel sheet)  
-- a list.json file with the raw result of the request  
 
 ```shell
 ftbx list <config_item>
 ```
 
 > options:  
-> --env [String]: environment to query if not default environment  
+> --from [String]: environment to query if not default environment  
 > --filters [String(s)]: filters to apply, that are used directly within the query  
-> --post_filters [String(s)]: post retrieval filters, that are applied after query (operators: '!=', '>=', '<=', '~', '=', '<', '>')  
+> --post-filters [String(s)]: post retrieval filters, that are applied after query (operators: '!=', '>=', '<=', '~', '=', '<', '>')  
+
+
+This command queries any env and displays the main info of the requested items, as well as the requested post_filters
+values. Two files will then be created:  
+
+- a list.csv file with a dataframe (excel sheet)  
+- a list.json file with the raw result of the request  
 
 ---
 
@@ -186,7 +202,7 @@ ftbx list <config_item>
   ```shell
   # List all actions 
   ftbx list actions # default env
-  ftbx list actions --env "wb-prod"
+  ftbx list actions --from "wb-prod"
 
   # List all assets with fql
   ftbx list assets --filters "fql=(mimetype~mp4)" # default env
@@ -197,16 +213,17 @@ ftbx list <config_item>
   ftbx list jobs --filters "status=Failed" "limit=5" --from "wb-prod"
   
   # List scripts that contains "createJob"
-  ftbx list actions --filters "type=script" --post_filters "configuration.instance.script-contents.script~createJob"
-  ftbx list actions --from "wb-prod" --filters "type=script" --post_filters "configuration.instance.script-contents.script~createJob"
+  ftbx list actions --filters "type=script" --post-filters "configuration.instance[text]~createJob"
+  ftbx list actions --from "wb-prod" --filters "type=script" --post-filters "configuration.instance[text]~createJob"
   
   # List all actions with concurrency > 0 from default env
-  ftbx list actions --post_filters "concurrencyJobsLimit>0" # default env
-  ftbx list actions --post_filters "concurrencyJobsLimit>0" --from "wb-prod"
+  ftbx list actions --post-filters "concurrencyJobsLimit>0" # default env
+  ftbx list actions --post-filters "concurrencyJobsLimit>0" --from "wb-prod"
   ```
   
   ```shell
   # OUTPUT
+  
   Performing [GET] https://portal.dev.archive.warnerbros.com/api/actions;type=script;limit=10...
 
   Retrieving actions: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.46it/s]
@@ -229,13 +246,6 @@ ftbx list <config_item>
 
 ## __Pull items__
 
-This command queries any env and locally creates folders/files for the requested items. Structure will be in the following format:  
-
-- `<config_item>/`  
-    - `<item_name>/`  
-        - `_object.json`: main config of the item  
-        - `<item_property>.json`: item properties (ex: configuration, variables..)  
-
 ```shell
 ftbx pull <config_item>
 ```
@@ -243,8 +253,16 @@ ftbx pull <config_item>
 > options:  
 > --from [String(s)]: environments to pull from if not default environment  
 > --filters [String(s)]: filters to apply, that are used directly within the query  
-> --with_dependencies [Boolean - default:False]: whether to retrieve all the items dependencies (ex: workflows of launch actions etc..)  
-> --post_filters [String(s)]: post retrieval filters, that are applied after query (operators: '!=', '>=', '<=', '~', '=', '<', '>')  
+> --with-dependencies [Boolean - default:False]: whether to retrieve all the items dependencies (ex: workflows of launch actions etc..)  
+> --post-filters [String(s)]: post retrieval filters, that are applied after query (operators: '!=', '>=', '<=', '~', '=', '<', '>')  
+
+
+This command queries any env and locally creates folders/files for the requested items. Structure will be in the following format:  
+
+- `<config_item>/`  
+    - `<item_name>/`  
+        - `_object.json`: main config of the item  
+        - `<item_property>.json`: item properties (ex: configuration, variables..)  
 
 ---
 
@@ -266,11 +284,11 @@ ftbx pull actions --filters "type=script" "enabled=true" # default env
 ftbx pull all
 ftbx pull all --from "wb-stg"
 
-# Pull env actions without deps
-ftbx pull actions --with_dependencies "false" # default env
+# Pull env actions with dependencies
+ftbx pull actions --with-dependencies # default env
 
 # Pull all actions where script contains "context.asset.id"
-ftbx pull actions --post_filters "configuration.instance[text]~destPath"
+ftbx pull actions --post-filters "configuration.instance[text]~destPath"
 
 # Pull workflows (workflow variables and jobs come by default)
 ftbx pull workflows --filters "id=978324"
@@ -284,6 +302,16 @@ ftbx pull actions --from "wb-dev" "wb-stg" "wb-prod" --filters "name=set-asset-m
 
 ## __Push items__
 
+```shell
+ftbx push <config_item> <item_name>
+```
+
+> options:  
+> --from [String] environment to push from if not default environment  
+> --to [String(s)] environments (yes, several at the same time is possible) to push to if not default environment  
+> --push-to-failed-jobs [Boolean - default:False] whether to update and restart failed jobs if item is an action  
+
+
 This command pushes local items to the destination environments. Process is as shown below:  
 
 1. check if item exists locally  
@@ -294,15 +322,6 @@ This command pushes local items to the destination environments. Process is as s
    - no: create it in destination environment  
 3. push updated item properties (ex: configuration.json, script.groovy etc..)  
 4. pull updated items from the destination environment for verification purposes  
-
-```shell
-ftbx push <config_item> <item_name>
-```
-
-> options:  
-> --from [String] environment to push from if not default environment  
-> --to [String(s)] environments (yes, several at the same time is possible) to push to if not default environment  
-> --push_to_failed_jobs [Boolean - default:False] whether to update and restart failed jobs if item is an action  
 
 ---
 
@@ -316,19 +335,19 @@ ftbx push actions check-end-node-wf # from default env to default env
 ftbx push jobs 294036 # from default env to default env
 
 # Push updated action to failed jobs and retry them
-ftbx push actions "check-end-node-wf" --push_to_failed_jobs "true"
+ftbx push actions "check-end-node-wf" --push-to-failed-jobs
 
 # Push action from wb-dev to wb-stg AND wb-prod (yes)
-ftbx push actions "set-asset-metadata" --from "wb-dev" --to "wb-stg" "wb-prod""
+ftbx push actions "set-asset-metadata" --from "wb-dev" --to "wb-stg" "wb-prod"  
 ```
 
 ## __Restore items__
 
-This command restores an item from a backup (every push generates a backup) in case you break something.
-
 ```shell
 ftbx restore <config_item> <item_name> <timestamp_or_backup_name>
 ```
+
+This command restores an item from a backup (every push generates a backup) in case you break something.  
 
 ---
 
@@ -337,19 +356,8 @@ ftbx restore <config_item> <item_name> <timestamp_or_backup_name>
 ```shell
 ftbx restore actions set-tech-metadata-dpx "2023-10-10 15h53m43s"
 ```
-<<<<<<< HEAD
   
 ## __Compare items__
-=======
-
-## Compare items
->>>>>>> 79d9f6b (added retry feature (tested), updated README.md)
-
-This command compares items from different environments. The first environment provided in the list is always the reference environment. The list of differences will then be saved in a `compare/` folder with a TSV file for each item (no file if no differences).  
-
-- **'x'** means same value as reference environment  
-- **'NaN'** means value is missing in comparand  
-- **'/!\\'** means value is different than reference environment  
 
 ```shell
 ftbx compare <config_item> <list_of_envs>
@@ -357,6 +365,13 @@ ftbx compare <config_item> <list_of_envs>
 
 > options:  
 > --filters [String(s)]: filters to apply, that are used directly within the query  
+
+
+This command compares items from different environments. The first environment provided in the list is always the reference environment. The list of differences will then be saved in a `compare/` folder with a TSV file for each item (no file if no differences).  
+
+- **'x'** means same value as reference environment  
+- **'NaN'** means value is missing in comparand  
+- **'/!\\'** means value is different than reference environment  
 
 ---
 
@@ -404,8 +419,6 @@ configuration.instance.script_type.script                        <CODE>   /!\   
 
 ## Retry items
 
-This command bulk retries job/workflow instances within a Flex environment, either from a query or from JSON/CSV files.  
-
 ```shell
 ftbx retry <config_item> <options>
 ```
@@ -414,6 +427,8 @@ ftbx retry <config_item> <options>
 > --filters [String(s)]: filters to apply, that are used directly within the query  
 > --from [String]: environment alias if not default  
 > --file [String]: JSON or CSV file to take as input  
+
+This command bulk retries job/workflow instances within a Flex environment, either from a query or from JSON/CSV files.  
 
 * CSV format:  
 CSV file must contain at least the "id" column, the number/name/order of the other columns doesn't matter.  
@@ -441,6 +456,8 @@ JSON file must contain a dict with an "id" key for each instance, the number/nam
 ### 1. Retry instances
 
 ```shell
+# "status=Failed" is applied by the command by default 
+
 # retry 5 failed "untar-frames" jobs with query
 ftbx retry jobs --filters "name=untar-frames" "limit=5"
 
