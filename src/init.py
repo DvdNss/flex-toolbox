@@ -22,6 +22,8 @@ def init_command_func(args):
     :return:
     """
 
+    current_dir_options = ['flex_toolbox', 'flex-toolbox', 'flex-toolbox\\', 'flex-toolbox/']
+
     # get os
     user_os = platform.system()
     print(f"\nOS: {user_os.upper()}\n")
@@ -36,7 +38,7 @@ def init_command_func(args):
     # FTBX env var doesn't exist
     if not ftbx:
         # check curdir = ftbx dir
-        if current_dir.endswith("flex_toolbox") or current_dir.endswith("flex-toolbox") or current_dir.endswith("flex-env-config-deploy"):
+        if any(current_dir.endswith(opt) for opt in current_dir_options) or current_dir.endswith("flex-env-config-deploy"):
             # windows
             if user_os == "Windows":
                 # permanent
