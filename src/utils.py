@@ -195,16 +195,19 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
 
         # sequentially get all items (batch_size at a time)
         for _ in tqdm(range(0, int(total_count / batch_size) + 1), desc=f"Retrieving {config_item}", disable=not log):
-            # get batch of items from API
-            items_batch = query(
-                method="GET",
-                url=f"{config_item};offset={str(offset)}{';' + ';'.join(filters) if filters else ''}",
-                environment=environment,
-                log=False
-            )
+            try:
+                # get batch of items from API
+                items_batch = query(
+                    method="GET",
+                    url=f"{config_item};offset={str(offset)}{';' + ';'.join(filters) if filters else ''}",
+                    environment=environment,
+                    log=False
+                )
 
-            # add batch of items to the list
-            items.extend(items_batch[config_item] if config_item in items_batch else items_batch)
+                # add batch of items to the list
+                items.extend(items_batch[config_item] if config_item in items_batch else items_batch)
+            except:
+                print(f"API error for batch_size={batch_size} and offset={offset}, skipping...")
 
             # incr. offset
             offset = offset + batch_size
@@ -362,7 +365,7 @@ def enumerate_sub_items(config_item: str):
 
 
 def get_full_items(config_item, filters, post_filters: List = [], save: bool = False, with_dependencies: bool = False,
-                   log: bool = True, environment: str = "default"):
+                   log: bool = True, environment: str = "default", cmd: str = None):
     """
     Get full config items, including sub items, with filters.
 
@@ -373,6 +376,7 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
     :param with_dependencies: whether to also retrieve dependencies
     :param log: whether to log
     :param environment: environment
+    :param cmd: cmd mode used
     :return:
     """
 
@@ -383,6 +387,15 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
 
     # define sub items
     sub_items = enumerate_sub_items(config_item=config_item)
+
+    if cmd == "list":
+        final_sub_items = []
+        if post_filters:
+            for sub_item in sub_items:
+                for post_filter in post_filters:
+                    if post_filter.startswith(sub_item):
+                        final_sub_items.append(sub_item)
+        sub_items = final_sub_items
 
     # switch case
     if config_item == 'accounts':
@@ -491,7 +504,7 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
     if save and config_item == 'taxonomies':
         save_taxonomies(taxonomies=taxonomies, environment=environment)
     elif save and config_item != 'taxonomies':
-        if post_processed_sorted_items:
+        if post_filters:
             save_items(config_item=config_item, items=post_processed_sorted_items, log=log)
         else:
             save_items(config_item=config_item, items=sorted_items, log=log)
@@ -499,7 +512,7 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
     # taxonomies handled differently
     if config_item == 'taxonomies':
         return taxonomies
-    elif post_processed_sorted_items:
+    elif post_filters:
         return post_processed_sorted_items
     else:
         return sorted_items

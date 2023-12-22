@@ -39,7 +39,7 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
     log_fields = []
 
     # get items
-    sorted_items = get_full_items(config_item=config_item, filters=filters, post_filters=post_filters, environment=environment)
+    sorted_items = get_full_items(config_item=config_item, filters=filters, post_filters=post_filters, environment=environment, cmd="list")
 
     # switch case
     if config_item == 'accounts':
