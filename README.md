@@ -89,7 +89,7 @@ list                List (to CSV & JSON) config items from an environment, with 
 pull                Pull (files & folders) config items from an environment, with filters and post-filters
 push                Push (create or update) config items to an environment
 restore             Restore config items to a previous point in time
-query               Query (GET, POST, PUT) an environment with or without payload
+query               Query (GET, POST, PUT) an environment with or without payload (file or command line arguments)
 compare             Compare config items against several environments
 retry               Retry or bulk retry config item instances within an environment
 launch              Launch a config item instance within an environment  
@@ -186,7 +186,7 @@ ftbx query <method> <long_or_short_query>
 
 > options:  
 > --from [String] environment to query if not default environment  
-> --payload [String] path to payload (JSON) file  
+> --payload [String] path to payload (JSON) file or payload arguments
 
 This command queries any env (without the need of setting up headers etc...) and stores the result in a query.json file.  
 
@@ -206,6 +206,9 @@ ftbx query GET "actions/410" --from "cs-sbx"
 
 # POST/PUT (same args as above, plus --payload)
 ftbx query PUT "actions/410/configuration" --payload "payload.json"
+
+# Retry a failed job with command line arguments
+ftbx query POST "jobs/1213/actions" --payload "action=retry"
 ```
 
 ```shell
@@ -327,7 +330,7 @@ ftbx pull all --from "wb-stg"
 ftbx pull actions --with-dependencies # default env
 
 # Pull all actions where script contains "context.asset.id"
-ftbx pull actions --post-filters "configuration.instance[text]~destPath"
+ftbx pull actions --post-filters "configuration.instance[text]~context.asset.id"
 
 # Pull workflows (workflow variables and jobs come by default)
 ftbx pull workflows --filters "id=978324"
@@ -402,7 +405,7 @@ ftbx push actions "check-end-node-wf" --push-to-failed-jobs
 ftbx push actions "check-end-node-wf" --push-to-failed-jobs "failed_jobs.csv"
 ftbx push actions "check-end-node-wf" --push-to-failed-jobs "failed_jobs.json"
 
-# LIST + RETRY flow: retry corresponding failed jobs created after given date
+# LIST + PUSH with RETRY flow: push & retry failed jobs created after given date
 ftbx list jobs --filters "name=check-end-node-wf" "createdFrom=20 Dec 2023"
 ftbx push actions "check-end-node-wf" --push-to-failed-jobs "list.json"
 ftbx push actions "check-end-node-wf" --push-to-failed-jobs "list.csv"

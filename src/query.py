@@ -28,8 +28,16 @@ def query_command_func(args):
 
     # get payload if needed
     if args.payload:
-        with open(args.payload, 'r') as payload_file:
-            payload = json.load(payload_file)
+        # file
+        if len(args.payload) == 1 and ".json" in args.payload[0]:
+            with open(args.payload[0], 'r') as payload_file:
+                payload = json.load(payload_file)
+        # command line args
+        else:
+            payload = dict()
+            for param in args.payload:
+                key, value = param.split('=')[0], param.split('=')[1]
+                payload[key] = value
     else:
         payload = None
 
