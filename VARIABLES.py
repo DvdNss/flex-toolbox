@@ -79,6 +79,8 @@ FLEX_ITEMS_COMPARE = ['accounts', 'actions', 'eventHandlers', 'groups', 'message
 
 FLEX_ITEMS_RETRY = ['jobs', 'workflows']
 
+FLEX_ITEMS_LAUNCH = ['jobs', 'workflows']
+
 # CONFIG ITEMS SUB ITEMS
 ACCOUNTS_SUB_ITEMS = ['metadata', 'properties']
 ACTIONS_SUB_ITEMS = ['configuration']

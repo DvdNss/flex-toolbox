@@ -11,7 +11,9 @@
 import json
 import os
 import re
+from typing import Union
 
+import pandas as pd
 from tqdm import tqdm
 
 from src.connect import get_default_account_id
@@ -62,7 +64,7 @@ def push_command_func(args):
                 config_item=args.config_item,
                 item_name=item,
                 item_config=data,
-                push_and_retry_failed_jobs=args.push_to_failed_jobs,
+                push_to_failed_jobs=args.push_to_failed_jobs,
                 src_environment=src_environment,
                 dest_environment=dest_environment
             )
@@ -71,7 +73,8 @@ def push_command_func(args):
 
 
 def push_item(config_item: str, item_name: str, item_config: dict, restore: bool = False,
-              push_and_retry_failed_jobs=False, src_environment: str = "default", dest_environment: str = "default"):
+              push_to_failed_jobs: Union[bool, str] = False, src_environment: str = "default",
+              dest_environment: str = "default", log=True):
     """
     Push action for Flex.
 
@@ -79,9 +82,10 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
     :param item_name: item name
     :param item_config: item config
     :param restore: whether it's coming from a restore command or not
-    :param push_and_retry_failed_jobs: whether to retry failed jobs or not
+    :param push_to_failed_jobs: whether to retry failed jobs or not
     :param src_environment: src environment
     :param dest_environment: dest environment
+    :param log: whether to log in terminal
     :return:
     """
 
@@ -149,8 +153,8 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
         # create backup
         if not restore:
             backup = get_items(config_item=config_item, sub_items=['configuration'], filters=[f"id={item_id}"],
-                               environment=dest_environment)
-            save_items(config_item=config_item, items=backup, backup=True, environment=dest_environment)
+                               environment=dest_environment, log=log)
+            save_items(config_item=config_item, items=backup, backup=True, environment=dest_environment, log=log)
 
         # update item
         query(method="PUT", url=f"{config_item}/{item_id}", payload=payload, environment=dest_environment)
@@ -235,10 +239,11 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
             query(method="PUT", url=f"{config_item}/{item_id}/configuration", payload=payload,
                   environment=dest_environment)
 
-            print(
-                f"{src_environment}/{config_item}: {item_name} has been pushed successfully to {dest_environment}.\n") if not restore else \
-                print(
-                    f"{src_environment}/{config_item}: {item_name} has been restored successfully in {dest_environment}.\n")
+            if log:
+                print(f"{src_environment}/{config_item}: {item_name} has been pushed successfully "
+                      f"to {dest_environment}.\n") if not restore else \
+                    print(f"{src_environment}/{config_item}: {item_name} has been restored "
+                          f"successfully in {dest_environment}.\n")
 
     # push config
     for item_property in ['configuration', 'metadata', 'definition']:
@@ -251,11 +256,11 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
                 query(method="PUT", url=f"{config_item}/{item_id}/{item_property}", payload=payload,
                       environment=dest_environment)
 
-                print(
-                    f"{src_environment}/{config_item} [{item_property}]: {item_name} has been pushed successfully to {dest_environment}.\n") if not restore else \
-                    print(
-                        f"{src_environment}/{config_item} [{item_property}]: {item_name} has been restored successfully in {dest_environment}.\n")
-    print("---")
+                if log:
+                    print(f"{src_environment}/{config_item} [{item_property}]: {item_name} has been pushed successfully"
+                          f" to {dest_environment}.\n") if not restore else \
+                        print(f"{src_environment}/{config_item} [{item_property}]: {item_name} has been restored "
+                              f"successfully in {dest_environment}.\n")
 
     # todo: this doesn't work because Flex API is detecting html code as security threats
     # if config_item == 'messageTemplates':
@@ -279,23 +284,43 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
 
     # get updated action
     updated_item = get_items(config_item=config_item, sub_items=enumerate_sub_items(config_item=config_item),
-                             filters=[f"id={item_id}"], environment=dest_environment)
-    save_items(config_item=config_item, items=updated_item, environment=dest_environment)
-    print("---")
+                             filters=[f"id={item_id}"], environment=dest_environment, log=False)
+    save_items(config_item=config_item, items=updated_item, environment=dest_environment, log=False)
 
     # push to failed jobs if needed
-    if push_and_retry_failed_jobs:
+    if push_to_failed_jobs:
 
-        # retrieve failed jobs for given item
-        failed_jobs = get_items(config_item="jobs",
-                                filters=[f"name={item_name}", "exactNameMatch=true", "status=Failed"],
-                                environment=dest_environment)
+        failed_jobs = []
 
+        # from file
+        if isinstance(push_to_failed_jobs, str):
+            # csv
+            if ".csv" in push_to_failed_jobs:
+                failed_jobs = pd.read_csv(push_to_failed_jobs)['id'].to_list()
+
+            # json
+            elif ".json" in push_to_failed_jobs:
+                with open(push_to_failed_jobs, "r") as json_file:
+                    failed_jobs = [failed_job['id'] for failed_job in json.load(json_file).values()]
+
+            else:
+                print(f"Sorry, {push_to_failed_jobs} doesn't belong to the supported formats. "
+                      f"Please try with .JSON or .CSV instead. ")
+                quit()
+        # from api
+        else:
+            failed_jobs = get_items(config_item="jobs",
+                                    filters=[f"name={item_name}", "exactNameMatch=true", "status=Failed"],
+                                    environment=dest_environment)
+            failed_jobs = [failed_jobs.get(failed_job).get('id') for failed_job in failed_jobs]
+
+        print("")
         for failed_job in tqdm(failed_jobs, desc="Pushing to failed jobs and retrying them"):
             # push script
-            query(method="PUT", url=f"jobs/{failed_jobs.get(failed_job).get('id')}/configuration", payload=payload,
-                  environment=dest_environment)
+            query(method="PUT", url=f"jobs/{failed_job}/configuration", payload=payload,
+                  environment=dest_environment, log=False)
 
             # retry job
-            query(method="POST", url=f"jobs/{failed_jobs.get(failed_job).get('id')}/actions",
-                  payload={"action": "retry"}, environment=dest_environment)
+            query(method="POST", url=f"jobs/{failed_job}/actions",
+                  payload={"action": "retry"}, environment=dest_environment, log=False)
+        print("")
