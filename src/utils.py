@@ -302,6 +302,28 @@ def retry_config_item_instance(config_item: str, id: str, environment: str):
     return query_result.get('name'), query_result.get('progress')
 
 
+def launch_config_item_instance(config_item: str, payload: dict, environment: str):
+    """
+    Launch config item instance.
+
+    :param config_item: config item
+    :param payload: payload containing launch parameters
+    :param environment: environment to launch in
+    :return:
+    """
+
+    # retry
+    query_result = query(
+        method="POST",
+        url=f"{config_item}",
+        environment=environment,
+        payload=payload,
+        log=True,
+    )
+
+    return query_result
+
+
 def enumerate_sub_items(config_item: str):
     """
     Returns the list of sub items for a given config item.

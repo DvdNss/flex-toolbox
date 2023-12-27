@@ -74,6 +74,45 @@ You will then be able to use the `ftbx` command anywhere in windows with the opt
 
 # __Commands__
 
+You can use the flag `--help` with any command to show the command arguments (see below).  
+
+```shell
+ftbx --help
+
+# output
+arguments:
+                    Tools
+init                Initialize Flex ToolBox (multi-OS)
+env                 Show available environments and default environment
+connect             Connect to a Flex env (url, username, pwd)
+list                List (to CSV & JSON) config items from an environment, with filters and post-filters
+pull                Pull (files & folders) config items from an environment, with filters and post-filters
+push                Push (create or update) config items to an environment
+restore             Restore config items to a previous point in time
+query               Query (GET, POST, PUT) an environment with or without payload
+compare             Compare config items against several environments
+retry               Retry or bulk retry config item instances within an environment
+launch              Launch a config item instance within an environment  
+```
+
+```shell
+ftbx retry --help
+
+# output
+usage: ftbx.py retry [-h] [--from FROM_] [--filters [FILTERS ...]] [--file FILE] {jobs,workflows}
+
+positional arguments:
+  {jobs,workflows}      Config item
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --from FROM_          Environment to retry from
+  --filters [FILTERS ...]
+                        Filters to apply
+  --file FILE           File containing items to retry
+
+```
+
 ## __Connection/Setup__
 
 ```shell
@@ -309,7 +348,7 @@ ftbx push <config_item> <item_name>
 > options:  
 > --from [String] environment to push from if not default environment  
 > --to [String(s)] environments (yes, several at the same time is possible) to push to if not default environment  
-> --push-to-failed-jobs [Boolean - default:False] whether to update and restart failed jobs if item is an action  
+> --push-to-failed-jobs [Boolean or String - default:False] whether to update and restart failed jobs if item is an action. If a string is provided, it must be the path to either a .CSV or .JSON (see examples in 1.)  
 
 
 This command pushes local items to the destination environments. Process is as shown below:  
@@ -322,6 +361,28 @@ This command pushes local items to the destination environments. Process is as s
    - no: create it in destination environment  
 3. push updated item properties (ex: configuration.json, script.groovy etc..)  
 4. pull updated items from the destination environment for verification purposes  
+5. [OPTIONAL] retry given failed jobs with new configuration (see file formats and examples below)  
+
+* CSV format:  
+CSV file must contain at least the "id" column, the number/name/order of the other columns doesn't matter.  
+
+| id  | other_column_name | other_column_status |
+|-----|-------------------|---------------------|
+| 238 | job1              | Failed              |
+| 239 | job2              | Failed              |
+| 240 | job3              | Failed              |
+
+* JSON format:  
+JSON file must contain a dict with an "id" key for each instance, the number/name/order of the other keys doesn't matter.  
+
+```json
+{
+  "failed_job_1": {"id": 238, "other_key_1": "..."},
+  "failed_job_2": {"id": 239, "other_key_1": "..."},
+  "failed_job_3": {"id": 240, "other_key_1": "..."},
+  ...
+}
+```
 
 ---
 
@@ -334,8 +395,17 @@ ftbx push actions check-end-node-wf # from default env to default env
 # Push job (yes, you can pull jobs directly and tweak their code in your IDE)
 ftbx push jobs 294036 # from default env to default env
 
-# Push updated action to failed jobs and retry them
+# Push updated action to **ALL** corresponding failed jobs and retry them
 ftbx push actions "check-end-node-wf" --push-to-failed-jobs
+
+# Push updated action to failed jobs contained in .CSV or .JSON and retry them
+ftbx push actions "check-end-node-wf" --push-to-failed-jobs "failed_jobs.csv"
+ftbx push actions "check-end-node-wf" --push-to-failed-jobs "failed_jobs.json"
+
+# LIST + RETRY flow: retry corresponding failed jobs created after given date
+ftbx list jobs --filters "name=check-end-node-wf" "createdFrom=20 Dec 2023"
+ftbx push actions "check-end-node-wf" --push-to-failed-jobs "list.json"
+ftbx push actions "check-end-node-wf" --push-to-failed-jobs "list.csv"
 
 # Push action from wb-dev to wb-stg AND wb-prod (yes)
 ftbx push actions "set-asset-metadata" --from "wb-dev" --to "wb-stg" "wb-prod"  
@@ -478,4 +548,121 @@ ftbx retry workflows --file "failed_workflows.json"
 ftbx list jobs --filters "status=Failed" "name=untar-frames" # this will create a JSON and CSV file with the failed items 
 ftbx retry jobs --file "list.json" # same as below
 ftbx retry jobs --file "list.csv" # same as above
+```
+
+## Launch instances & custom scripts
+
+```shell
+ftbx launch <config_item> <item_name> <options>
+```
+
+> options:  
+> --in [String]: environment alias if not default  
+> --params [String(s)]: params to use for the launched instance  
+> --from-file [String]: JSON file to take as input (contained values will replace --params)  
+> --use-local [Boolean - default: False]: whether to push the local config before launching the instance  
+
+This command allows you to launch config instances (jobs, workflows) with custom parameters, including scripts with or without asset in context.  
+
+To be able to run any custom local script within an environment, please create a script in the destination environment with a unique name first (ex: `ftbx-script-dnaisse-wb-dev`). The flow will be explained in 2.  
+
+---
+
+### 1. Launch instances
+
+```shell
+# launch a check-end-node-wf job
+ftbx launch jobs "check-end-node-wf"
+
+# launch a check-end-node-wf job in wb-dev
+ftbx launch jobs "check-end-node-wf" --in "wb-dev"
+
+# launch a check-end-node-wf on asset id 809, in workspace id 303
+ftbx launch jobs "check-end-node-wf" --params "assetId=809" "workspaceId=303"
+
+# launch a check-end-node-wf on asset id 809 from file launch_config.json
+# launch_config.json:
+# {
+#   "assetId"=809,
+#   "workspaceId"=303
+# } 
+ftbx launch jobs "check-end-node-wf" --from-file "launch_config.json"
+
+# launch a check-end-node-wf with your local configuration on asset id 809
+ftbx launch jobs "check-end-node-wf" --params "assetId=809" --use-local
+```
+
+---
+
+### 2. Launch custom local scripts
+
+To be able to run any custom local script within an environment, please create a script in the destination environment with a unique name first (ex: `ftbx-script-dnaisse-wb-dev`). This script will be used as an ultra-configurable, multi-purpose action.  
+
+#### 2.1. Same action, different code, different assets
+
+```shell
+# Example: I want to set some metadata on asset id 809  
+# 1. I update the code of my local ftbx-script-dnaisse-wb-dev to do what I want
+
+# wb-dev/actions/ftbx-script-dnaisse-wb-dev/script.groovy:
+
+# import com.ooyala.flex.plugins.PluginCommand
+# 
+# class Script extends PluginCommand {
+#   def execute() {
+#     assetId = context.asset.id
+#     flexSdkClient.assetService.setAssetMetadata(assetId, <someMetadata>)
+#   }
+# }
+
+# 2. I launch my local script on the asset, here the --use-local is the key 
+ftbx launch jobs "ftbx-script-dnaisse-wb-dev" --params "assetId=809" --use-local
+
+# 3. I now want to do something else on asset 1320, I update my local action again
+
+# wb-dev/actions/ftbx-script-dnaisse-wb-dev/script.groovy:
+
+# import com.ooyala.flex.plugins.PluginCommand
+# 
+# class Script extends PluginCommand {
+#   def execute() {
+#     <do something else>
+#   }
+# }
+
+# 4. I launch my local script again, on a different asset
+ftbx launch jobs "ftbx-script-dnaisse-wb-dev" --params "assetId=1320" --use-local
+```
+
+#### 2.2. Run a script on an asset and retry it until you get it right
+
+```shell
+# Example: I want to set some metadata on asset id 809  
+# 1. I update the code of my local ftbx-script-dnaisse-wb-dev to do what I want
+
+# wb-dev/actions/ftbx-script-dnaisse-wb-dev/script.groovy:
+
+# import com.ooyala.flex.plugins.PluginCommand
+# 
+# class Script extends PluginCommand {
+#   def execute() {
+#     assetId = context.asset.id
+#     flexSdkClient.assetService.setAssetMetadata(assetId, <someMetadata>)
+#     assert <myMetadataUpdateWorkedCorrectly>
+#   }
+# }
+
+# 2. I launch my local script on the asset
+ftbx launch jobs "ftbx-script-dnaisse-wb-dev" --params "assetId=809" --use-local
+# However, let's say my script fails because my code is incorrect
+
+# 3. I can now pull the job by its ID
+ftbx pull jobs --filters "id=308"
+
+# 4. Then, I update and push the code until it succeeds
+ftbx push jobs 308  # fails too, I update and push the code again 
+ftbx push jobs 308  # fails too, I update and push the code again 
+ftbx push jobs 308  # finally works!
+
+# 5. I can now copy the script to a new action since I know my code works
 ```
