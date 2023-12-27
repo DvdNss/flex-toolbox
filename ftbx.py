@@ -99,11 +99,11 @@ if __name__ == "__main__":
 
     # query
     # todo: payload from cli
-    query_command = subparsers.add_parser('query', help='Query (GET, POST, PUT) an environment with or without payload')
+    query_command = subparsers.add_parser('query', help='Query (GET, POST, PUT) an environment with or without payload (file or command line arguments)')
     query_command.add_argument('method', type=str, choices=['GET', 'POST', 'PUT'], default='GET')
     query_command.add_argument('url', type=str, help='Query to send')
     query_command.add_argument('--from', dest="from_", type=str, help='Environment to query', default="default")
-    query_command.add_argument('--payload', type=str, help='File to use as payload')
+    query_command.add_argument('--payload', type=str, nargs='*', help='File or arguments to use as payload')
     query_command.set_defaults(func=query_command_func)
 
     # compare
