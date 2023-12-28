@@ -64,16 +64,18 @@ def apply_post_retrieval_filters(items, filters, log: bool = True):
                 # get nested value
                 item_value = get_nested_value(items[item], key)
 
-                # convert to int
-                try:
-                    item_value = int(item_value)
-                except:
-                    pass
+                # try to switch type
+                try: item_value = int(item_value)
+                except: pass
 
-                try:
-                    value = int(value)
-                except:
-                    pass
+                try: value = int(value)
+                except: pass
+
+                try: item_value = str_to_bool(item_value)
+                except: pass
+
+                try: value = str_to_bool(item_value)
+                except: pass
 
                 # switch
                 if operator == '=':
@@ -758,9 +760,13 @@ def get_nested_value(obj, keys):
     """
 
     for key in keys.split('.'):
-        if '[text]' in key:
-            return str(obj[key.split('[text]')[0]])
-        if isinstance(obj, dict) and key in obj:
+        if '[' in key and ']' in key:
+            if '[text]' in key:
+                return str(obj[key.split('[text]')[0]])
+            elif re.search(r"\[-?\d+\]", key):
+                match = int(re.search(r'\[-?\d+\]', key).group(0)[1:-1])
+                obj = obj[key.split('[')[0]][-match]
+        elif isinstance(obj, dict) and key in obj:
             obj = obj[key]
         else:
             return None
@@ -1309,3 +1315,19 @@ def escape(string: str) -> str:
     """
 
     return re.sub(r'[^a-zA-Z0-9-_ ]', '', string)
+
+
+def str_to_bool(string: str):
+    """
+    Converts strings to bool ()
+
+    :param string: from [false, False, true, True]
+    :return:
+    """
+
+    if string.lower() == 'true':
+        return True
+    elif string.lower() == 'false':
+        return False
+    else:
+        raise ValueError(f"String is not a valid boolean (input: {string}, expected: [false, False, true, True])")

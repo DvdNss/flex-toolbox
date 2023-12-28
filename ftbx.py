@@ -49,13 +49,11 @@ if __name__ == "__main__":
     connect_command.set_defaults(func=connect_command_func)
 
     # list
-    # todo: update post filters to take lists indexes into account (history.events[-1] for instance)
     list_command = subparsers.add_parser('list', help='List (to CSV & JSON) config items from an environment, with filters and post-filters')
     list_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_LIST, help='Config item to list')
     list_command.add_argument('--filters', type=str, nargs="*", help="Search by text")
     list_command.add_argument('--post-filters', dest="post_filters", type=str, nargs="*", help="Post retrieval filters")
-    list_command.add_argument('--from', dest="from_", type=str, help="Environment to list items from",
-                              default="default")
+    list_command.add_argument('--from', dest="from_", type=str, help="Environment to list items from", default="default")
     list_command.set_defaults(func=list_command_func)
 
     # # create_action
@@ -72,8 +70,7 @@ if __name__ == "__main__":
     pull_command = subparsers.add_parser('pull', help='Pull (files & folders) config items from an environment, with filters and post-filters')
     pull_command.add_argument('config_item', type=str, choices=FLEX_ITEMS_PULL, help='Config item to pull')
     pull_command.add_argument('--filters', type=str, nargs='*', help='Filters to apply')
-    pull_command.add_argument('--with-dependencies', dest="with_dependencies", action='store_true',
-                              help='Whether to retrieve items dependencies')
+    pull_command.add_argument('--with-dependencies', dest="with_dependencies", action='store_true', help='Whether to retrieve items dependencies')
     pull_command.add_argument('--post-filters', dest="post_filters", type=str, nargs="*", help="Post retrieval filters")
     pull_command.add_argument('--from', dest="from_", type=str, nargs="*", help="Environments to pull items from")
     pull_command.set_defaults(func=pull_command_func)
@@ -84,8 +81,7 @@ if __name__ == "__main__":
     push_command.add_argument('item_names', type=str, nargs='*', help='Items to push')
     push_command.add_argument('--from', dest="from_", type=str, default="default", help='Environment to push from')
     push_command.add_argument('--to', type=str, nargs='*', default=["default"], help='Environments to push to')
-    push_command.add_argument('--push-to-failed-jobs', nargs='?', const=True, default=False,
-                              help='Whether to retry failed jobs with new code. If a value is provided, it will be treated as the filename.')
+    push_command.add_argument('--push-to-failed-jobs', nargs='?', const=True, default=False, help='Whether to retry failed jobs with new code. If a value is provided, it will be treated as the filename.')
     # push_command.add_argument('--all', type=bool, help='Whether to push all config items or not')
     push_command.set_defaults(func=push_command_func)
 
@@ -98,7 +94,6 @@ if __name__ == "__main__":
     restore_command.set_defaults(func=restore_command_func)
 
     # query
-    # todo: payload from cli
     query_command = subparsers.add_parser('query', help='Query (GET, POST, PUT) an environment with or without payload (file or command line arguments)')
     query_command.add_argument('method', type=str, choices=['GET', 'POST', 'PUT'], default='GET')
     query_command.add_argument('url', type=str, help='Query to send')
@@ -128,13 +123,11 @@ if __name__ == "__main__":
     launch_command.add_argument('--in', dest="in_", type=str, default="default", help='Environment to launch instance in')
     launch_command.add_argument('--params', type=str, nargs='*', default=[], help='Parameters to use')
     launch_command.add_argument('--from-file', type=str, help='Parameters file to use')
-    launch_command.add_argument('--use-local', nargs='?', const=True, default=False,
-                                help='Whether to push local config to remote before launching an instance')
+    launch_command.add_argument('--use-local', nargs='?', const=True, default=False, help='Whether to push local config to remote before launching an instance')
     launch_command.set_defaults(func=launch_command_func)
 
     # todo:
     #     logs and log file
-    #     boolean in post_filters
     #     push workflows + their scripts
     #     cancel
     #     sync
