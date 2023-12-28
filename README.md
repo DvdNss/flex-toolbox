@@ -243,24 +243,22 @@ values. Two files will then be created:
 
   ```shell
   # List all actions 
-  ftbx list actions # default env
-  ftbx list actions --from "wb-prod"
+  ftbx list actions
 
   # List all assets with fql
-  ftbx list assets --filters "fql=(mimetype~mp4)" # default env
-  ftbx list assets --filters "fql=(mimetype~mp4)" --from "wb-prod"
+  ftbx list assets --filters "fql=(mimetype~mp4)"
   
   # List 5 jobs in a failed status 
-  ftbx list jobs --filters "status=Failed" "limit=5" # default env
-  ftbx list jobs --filters "status=Failed" "limit=5" --from "wb-prod"
+  ftbx list jobs --filters "status=Failed" "limit=5"
   
   # List scripts that contains "createJob"
   ftbx list actions --filters "type=script" --post-filters "configuration.instance[text]~createJob"
-  ftbx list actions --from "wb-prod" --filters "type=script" --post-filters "configuration.instance[text]~createJob"
+  
+  # List jobs for which the last (-1) history message is an error message containing "getName()" in its stackTrace
+  ftbx list jobs --filters "name=basic-long-running-action" --post-filters "history.events[-1].stackTrace~getName()"
   
   # List all actions with concurrency > 0 from default env
-  ftbx list actions --post-filters "concurrencyJobsLimit>0" # default env
-  ftbx list actions --post-filters "concurrencyJobsLimit>0" --from "wb-prod"
+  ftbx list actions --post-filters "concurrencyJobsLimit>0"
   ```
   
   ```shell

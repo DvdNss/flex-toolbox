@@ -9,6 +9,7 @@
     
 """
 import json
+import re
 from typing import List
 
 import pandas as pd
@@ -160,7 +161,17 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
                         tmp = sorted_items.get(item)
                         for subfield in field.split("."):
                             try:
-                                tmp = tmp.get(subfield)
+                                if "[" in subfield and "]" in subfield:
+                                    if '[text]' in subfield:
+                                        tmp = tmp.get(str(subfield.split('[')[0]))
+                                    elif re.search(r"\[-?\d+\]", subfield):
+                                        match = int(re.search(r'\[-?\d+\]', subfield).group(0)[1:-1])
+                                        tmp = tmp.get(subfield.split('[')[0])[-match]
+                                else:
+                                    tmp = tmp.get(subfield)
+                                    # replace line breaks otherwise csv is broken
+                                    if isinstance(tmp, str):
+                                        tmp = tmp.replace("\n", " ")
                             except:
                                 pass
                         row.append(str(tmp))
@@ -169,8 +180,8 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
             # display dataframe
             table = pd.DataFrame(rows, columns=columns)
             pd.set_option('display.colheader_justify', 'center')
-            pd.set_option('display.max_colwidth', None)
-            pd.set_option('display.max_rows', None)
+            pd.set_option('display.max_colwidth', 75)
+            pd.set_option('display.max_rows', 50)
             table.index += 1
             pd.DataFrame.to_csv(table, "list.csv")
             print(table)
