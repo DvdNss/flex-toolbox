@@ -65,17 +65,25 @@ def apply_post_retrieval_filters(items, filters, log: bool = True):
                 item_value = get_nested_value(items[item], key)
 
                 # try to switch type
-                try: item_value = int(item_value)
-                except: pass
+                try:
+                    item_value = int(item_value)
+                except:
+                    pass
 
-                try: value = int(value)
-                except: pass
+                try:
+                    value = int(value)
+                except:
+                    pass
 
-                try: item_value = str_to_bool(item_value)
-                except: pass
+                try:
+                    item_value = str_to_bool(item_value)
+                except:
+                    pass
 
-                try: value = str_to_bool(item_value)
-                except: pass
+                try:
+                    value = str_to_bool(item_value)
+                except:
+                    pass
 
                 # switch
                 if operator == '=':
@@ -182,21 +190,25 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
     env, auth = get_auth_material(environment=environment)
 
     # get total count
+    tmp_filters = [filter for filter in filters if 'limit' not in filter]
+    tmp_filters.append('limit=1')
     test_query_result = query(
         method="GET",
-        url=f"{config_item}{';' + ';'.join(filters) if filters else ''}",
+        url=f"{config_item}{';' + ';'.join(tmp_filters) if tmp_filters else ''}",
         environment=environment,
         log=log
     )
 
     # retrieve totalCount
-    total_count = test_query_result['limit'] if test_query_result['limit'] != batch_size else test_query_result[
+    total_count = test_query_result['limit'] if test_query_result['limit'] != batch_size and test_query_result[
+        'limit'] != 1 else test_query_result[
         'totalCount']
 
     if total_count != 0:
 
         # sequentially get all items (batch_size at a time)
-        for _ in tqdm(range(0, int(total_count / batch_size) + 1), desc=f"Retrieving {config_item}", disable=not log):
+        for _ in tqdm(range(0, int(total_count / batch_size) + 1), desc=f"Retrieving {total_count} {config_item}",
+                      disable=not log):
             try:
                 # get batch of items from API
                 items_batch = query(
@@ -446,8 +458,21 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
     elif config_item == 'jobs':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log, environment=environment)
-        sorted_items = get_surrounding_items(config_item=config_item, items=sorted_items,
-                                             sub_items=['asset', 'workflow'], log=log, environment=environment)
+
+        # do not retrieve surrounding items if cmd is list and items not in post filters
+        surrounding_items = ['asset', 'workflow']
+        if cmd == "list":
+            final_surrounding_items = []
+            if post_filters:
+                for surrounding_item in surrounding_items:
+                    for post_filter in post_filters:
+                        if post_filter.startswith(surrounding_item):
+                            final_surrounding_items.append(surrounding_item)
+            surrounding_items = final_surrounding_items
+
+        if surrounding_items:
+            sorted_items = get_surrounding_items(config_item=config_item, items=sorted_items,
+                                                 sub_items=surrounding_items, log=log, environment=environment)
     elif config_item == 'messageTemplates':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log, environment=environment)
@@ -786,27 +811,29 @@ def get_surrounding_items(config_item: str, items: dict, sub_items: List[str], l
     :return:
     """
 
-    for item in tqdm(items, desc="Retrieving jobs ['asset', 'workflow']", disable=not log):
+    for item in tqdm(items, desc=f"Retrieving {config_item} {str(sub_items)}", disable=not log):
 
         # asset
-        try:
-            asset_id = items.get(item).get('asset').get('id')
-            asset = query(method="GET", url=f"assets/{asset_id};includeMetadata=true", log=False,
-                          environment=environment)
-            items[item]['asset'] = asset
-        except:
-            pass
+        if 'asset' in sub_items:
+            try:
+                asset_id = items.get(item).get('asset').get('id')
+                asset = query(method="GET", url=f"assets/{asset_id};includeMetadata=true", log=False,
+                              environment=environment)
+                items[item]['asset'] = asset
+            except:
+                pass
 
         # workflow
-        try:
-            workflow_id = items.get(item).get('workflow').get('id')
-            workflow_instance = query(method="GET", url=f"workflows/{workflow_id}", log=False, environment=environment)
-            workflow_variables = query(method="GET", url=f"workflows/{workflow_id}/variables", log=False,
-                                       environment=environment)
-            items[item]['workflow'] = workflow_instance
-            items[item]['workflow']['variables'] = workflow_variables
-        except:
-            pass
+        if 'workflow' in sub_items:
+            try:
+                workflow_id = items.get(item).get('workflow').get('id')
+                workflow_instance = query(method="GET", url=f"workflows/{workflow_id}", log=False, environment=environment)
+                workflow_variables = query(method="GET", url=f"workflows/{workflow_id}/variables", log=False,
+                                           environment=environment)
+                items[item]['workflow'] = workflow_instance
+                items[item]['workflow']['variables'] = workflow_variables
+            except:
+                pass
 
     return items
 
@@ -961,6 +988,7 @@ def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
     :param mode: which items to retrieve
     :param metadata_definitions: dict of metadata defs
     :param save_to: where to save the config
+    :param environment: environment to get the tags and taxonomies from
     """
 
     # init. tax & tags
