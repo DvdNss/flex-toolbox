@@ -64,26 +64,10 @@ def apply_post_retrieval_filters(items, filters, log: bool = True):
                 # get nested value
                 item_value = get_nested_value(items[item], key)
 
-                # try to switch type
-                try:
-                    item_value = int(item_value)
-                except:
-                    pass
-
-                try:
+                if isinstance(item_value, bool):
+                    value = str_to_bool(str(value))
+                elif isinstance(item_value, int):
                     value = int(value)
-                except:
-                    pass
-
-                try:
-                    item_value = str_to_bool(item_value)
-                except:
-                    pass
-
-                try:
-                    value = str_to_bool(item_value)
-                except:
-                    pass
 
                 # switch
                 if operator == '=':
@@ -116,7 +100,7 @@ def apply_post_retrieval_filters(items, filters, log: bool = True):
 
 def reformat_tabs(match):
     """
-    Reformat tabs for groovy scripts.
+    Reformat tabs for groovy scripts by removing one \t out of many.
 
     :param match:
     :return:
@@ -127,7 +111,7 @@ def reformat_tabs(match):
 
 def reformat_spaces(match):
     """
-        Reformat spaces for groovy scripts.
+        Reformat spaces for groovy scripts by removing one "    " out of many.
 
         :param match:
         :return:
@@ -148,7 +132,6 @@ def create_folder(folder_name: str, ignore_error: bool = False):
 
     try:
         os.mkdir(folder_name)
-        # print(f"Folder {folder_name} was created. ")
         return True
     except FileExistsError:
         if ignore_error:
@@ -190,7 +173,10 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
     env, auth = get_auth_material(environment=environment)
 
     # get total count
-    tmp_filters = [filter for filter in filters if 'limit' not in filter]
+    limit = batch_size
+    if filters and any("limit" in filter for filter in filters):
+        limit = int([filter for filter in filters if "limit" in filter][0].split("=")[1])
+    tmp_filters = [filter for filter in filters if f"limit={str(limit)}" not in filter] if filters else []
     tmp_filters.append('limit=1')
     test_query_result = query(
         method="GET",
@@ -200,9 +186,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
     )
 
     # retrieve totalCount
-    total_count = test_query_result['limit'] if test_query_result['limit'] != batch_size and test_query_result[
-        'limit'] != 1 else test_query_result[
-        'totalCount']
+    total_count = limit if limit != batch_size else test_query_result['totalCount']
 
     if total_count != 0:
 
@@ -466,7 +450,7 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
             if post_filters:
                 for surrounding_item in surrounding_items:
                     for post_filter in post_filters:
-                        if post_filter.startswith(surrounding_item):
+                        if post_filter.startswith(surrounding_item) and get_nested_value(list(sorted_items)[0], post_filter) is None:
                             final_surrounding_items.append(surrounding_item)
             surrounding_items = final_surrounding_items
 

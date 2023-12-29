@@ -179,6 +179,7 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
 
             # display dataframe
             table = pd.DataFrame(rows, columns=columns)
+            table = table.loc[:, ~table.columns.duplicated()]
             pd.set_option('display.colheader_justify', 'center')
             pd.set_option('display.max_colwidth', 75)
             pd.set_option('display.max_rows', 50)
