@@ -9,3 +9,4 @@
 *.bat
 .k
 ftbx.bat
+__pycache__
