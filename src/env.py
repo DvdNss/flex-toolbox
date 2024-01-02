@@ -13,19 +13,19 @@ import os
 
 import pandas as pd
 
-import VARIABLES
 from src.encryption import encrypt_pwd
 
-FTBX_HOME = os.environ.get("FTBX")
-if FTBX_HOME is None:
-    raise Exception("Unable to find the environment variable \"FTBX\", have you run the initialisation command `ftbx init`?")
 DEFAULT_ENVIRONMENT_FILENAME = "environments.json"
-DEFAULT_ENVIRONMENT_PATH = os.path.join(
-    FTBX_HOME,
-    DEFAULT_ENVIRONMENT_FILENAME
-)
 DEFAUL_KEY_FILENAME = ".k"
+FTBX_HOME = os.environ.get("FTBX")
+
+if not FTBX_HOME or not os.path.exists(os.path.join(FTBX_HOME, "ftbx.py")):
+    raise Exception(f"Could not find the environment variable \"FTBX\", or value is wrong (current: {str(FTBX_HOME)}).\n"
+                    "Please use the command `ftbx init` to initialize Flex ToolBox correctly.\n")
+
+DEFAULT_ENVIRONMENT_PATH = os.path.join(FTBX_HOME, DEFAULT_ENVIRONMENT_FILENAME)
 DEFAULT_KEY_PATH = os.path.join(FTBX_HOME, DEFAUL_KEY_FILENAME)
+
 
 def env_command_func(args):
     """Action on env command. """
