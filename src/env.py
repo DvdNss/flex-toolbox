@@ -15,17 +15,6 @@ import pandas as pd
 
 from src.encryption import encrypt_pwd
 
-DEFAULT_ENVIRONMENT_FILENAME = "environments.json"
-DEFAUL_KEY_FILENAME = ".k"
-FTBX_HOME = os.environ.get("FTBX")
-
-if not FTBX_HOME or not os.path.exists(os.path.join(FTBX_HOME, "ftbx.py")):
-    raise Exception(f"Could not find the environment variable \"FTBX\", or value is wrong (current: {str(FTBX_HOME)}).\n"
-                    "Please use the command `ftbx init` to initialize Flex ToolBox correctly.\n")
-
-DEFAULT_ENVIRONMENT_PATH = os.path.join(FTBX_HOME, DEFAULT_ENVIRONMENT_FILENAME)
-DEFAULT_KEY_PATH = os.path.join(FTBX_HOME, DEFAUL_KEY_FILENAME)
-
 
 def env_command_func(args):
     """Action on env command. """
@@ -55,8 +44,8 @@ def env_command_func(args):
 
 
 def add_or_update_environments_json(env, username, password, is_default: bool = False, alias: str = None,
-                                    env_file_path: str = DEFAULT_ENVIRONMENT_PATH,
-                                    key_path: str = DEFAULT_KEY_PATH):
+                                    env_file_path: str = f"{os.environ.get('FTBX')}/environments.json",
+                                    key_path: str = f"{os.environ.get('FTBX')}/.k"):
     """
     Add env to environments.json
 
@@ -88,7 +77,7 @@ def add_or_update_environments_json(env, username, password, is_default: bool = 
     return environments['environments'][alias if not is_default else "default"]
 
 
-def read_environments_json(env_file_path: str = DEFAULT_ENVIRONMENT_PATH):
+def read_environments_json(env_file_path: str = f"{os.environ.get('FTBX')}/environments.json"):
     """
     Read or creates the environments.json file.
 
@@ -124,7 +113,7 @@ def get_env(environment: str = "default"):
     return environments['environments'][environment]
 
 
-def get_default_env_alias(env_file_path: str = DEFAULT_ENVIRONMENT_PATH):
+def get_default_env_alias(env_file_path: str = f"{os.environ.get('FTBX')}/environments.json"):
     """
     Get default env alias.
     """

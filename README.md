@@ -16,7 +16,7 @@
     git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
     cd flex_toolbox
     pip install -r requirements.txt
-    ftbx init
+    python3 ftbx.py init
     ```
 
 * add ftbx to your environment variables  
@@ -50,14 +50,14 @@ You will then be able to use the `ftbx` command anywhere in windows with the opt
     git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
     cd flex_toolbox
     pip install -r requirements.txt
-    ftbx init
+    python3 ftbx.py init
     ```
   
 * add ftbx to your aliases  
 
     ```shell
-    # in ~/.bashr
-    alias ftbx="path\to\flex_toolbox"
+    # in ~/.bashrc
+    alias ftbx="python3 path\to\flex_toolbox\ftbx.py"
     ```
 
 * If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it

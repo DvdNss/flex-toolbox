@@ -29,7 +29,7 @@ def init_command_func(args):
     print(f"\nOS: {user_os.upper()}\n")
 
     # current dir
-    current_dir = os.getcwd()
+    current_dir = os.path.expanduser(os.getcwd())
     print(f"Current dir: {current_dir} \n")
 
     # try to get FTBX
