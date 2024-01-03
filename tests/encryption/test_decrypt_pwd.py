@@ -1,11 +1,11 @@
 """
 
     PROJECT: flex_toolbox
-    FILENAME: test_encryption.py
+    FILENAME: test_decrypt_pwd.py.py
     AUTHOR: David NAISSE
-    DATE: November 27, 2023
+    DATE: December 29, 2023
 
-    DESCRIPTION: tests for encryption.py
+    DESCRIPTION: decrypt_pwd function testing
     
 """
 import os
@@ -14,7 +14,8 @@ from unittest import TestCase
 from src.encryption import encrypt_pwd, decrypt_pwd
 
 
-class TestEncryption(TestCase):
+class TestEncryptPwd(TestCase):
+
     def test_decrypt_pwd_valid(self):
         # ins
         pwd = "this is a pwd"

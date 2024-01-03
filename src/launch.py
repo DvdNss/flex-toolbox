@@ -83,7 +83,7 @@ def launch_command_func(args):
                   f"Please check that the information provided is correct and try again.\n")
             quit()
 
-    # launch job
+    # launch instance
     instance = launch_config_item_instance(config_item=args.config_item, payload=payload, environment=args.in_)
     print(
         f"Instance ID {instance.get('id')} [{args.config_item[:-1]}:{instance.get('name')}] has been launched successfully.\n ")

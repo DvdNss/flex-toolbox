@@ -6,7 +6,8 @@
     DATE: September 13, 2023
 
     DESCRIPTION: functions that are used across the project
-    
+
+    TEST STATUS: FULLY TESTED
 """
 import datetime
 import json
@@ -36,9 +37,12 @@ def apply_post_retrieval_filters(items, filters, log: bool = True):
     """
     Apply post-API-retrieval filters to some config items.
 
+    TEST STATUS: FULLY TESTED
+
     :param filters: custom post-processing filters
     :param items: config items dict
     :param log: log or not
+
     :return:
     """
 
@@ -46,7 +50,7 @@ def apply_post_retrieval_filters(items, filters, log: bool = True):
     for post_filter in tqdm(filters, desc=f"Applying post filters {filters}", disable=not log):
         # operator
         operator = None
-        for op in ['!=', '>=', '<=', '~', '=', '<', '>']:
+        for op in ['!~', '!=', '>=', '<=', '~', '=', '<', '>']:
             if op in post_filter:
                 operator = op
                 break
@@ -88,6 +92,9 @@ def apply_post_retrieval_filters(items, filters, log: bool = True):
                 elif operator == '>':
                     if item_value > value:
                         filtered_items[item] = items[item]
+                elif operator == '!~':
+                    if isinstance(item_value, str) and value not in item_value:
+                        filtered_items[item] = items[item]
                 elif operator == '~':
                     if isinstance(item_value, str) and value in item_value:
                         filtered_items[item] = items[item]
@@ -102,6 +109,8 @@ def reformat_tabs(match):
     """
     Reformat tabs for groovy scripts by removing one \t out of many.
 
+    TEST STATUS: FULLY TESTED
+
     :param match:
     :return:
     """
@@ -111,11 +120,13 @@ def reformat_tabs(match):
 
 def reformat_spaces(match):
     """
-        Reformat spaces for groovy scripts by removing one "    " out of many.
+    Reformat spaces for groovy scripts by removing one "    " out of many.
 
-        :param match:
-        :return:
-        """
+    TEST STATUS: FULLY TESTED
+
+    :param match:
+    :return:
+    """
 
     return match.group(0)[4:]
 
@@ -123,6 +134,8 @@ def reformat_spaces(match):
 def create_folder(folder_name: str, ignore_error: bool = False):
     """
     Create folder or return error if already exists.
+
+    TEST STATUS: FULLY TESTED
 
     :param folder_name: folder name
     :param ignore_error: whether to ignore folder already exists or not
@@ -138,7 +151,7 @@ def create_folder(folder_name: str, ignore_error: bool = False):
             return True
         else:
             print(f"Folder {folder_name} already exists. ")
-        return False
+            return False
 
 
 def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = [],
@@ -146,6 +159,8 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
               log: bool = True) -> dict:
     """
     Get items from an env using public API.
+
+    TEST STATUS: FULLY TESTED
 
     :param log: whether to log
     :param environment: environment to get the items from
@@ -274,9 +289,11 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
         return {}
 
 
-def retry_config_item_instance(config_item: str, id: str, environment: str):
+def retry_config_item_instance(config_item: str, id: str, environment: str = "default"):
     """
     Retry config item instance given its id.
+
+    TEST STATUS: FULLY TESTED
 
     :param config_item: config item
     :param id: object id
@@ -300,9 +317,11 @@ def retry_config_item_instance(config_item: str, id: str, environment: str):
     return query_result.get('name'), query_result.get('progress')
 
 
-def launch_config_item_instance(config_item: str, payload: dict, environment: str):
+def launch_config_item_instance(config_item: str, payload: dict, environment: str = "default"):
     """
     Launch config item instance.
+
+    TEST STATUS: FULLY TESTED
 
     :param config_item: config item
     :param payload: payload containing launch parameters
@@ -325,6 +344,8 @@ def launch_config_item_instance(config_item: str, payload: dict, environment: st
 def enumerate_sub_items(config_item: str):
     """
     Returns the list of sub items for a given config item.
+
+    TEST STATUS: DOES NOT REQUIRE TESTING
 
     :param config_item: config item
     :return:
@@ -389,6 +410,8 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
     """
     Get full config items, including sub items, with filters.
 
+    TEST STATUS: FULLY TESTED
+
     :param config_item: config item
     :param filters: filters to apply (from Flex API)
     :param post_filters: custom post-processing filters
@@ -415,7 +438,7 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
                 for post_filter in post_filters:
                     if post_filter.startswith(sub_item):
                         final_sub_items.append(sub_item)
-        sub_items = final_sub_items
+        sub_items = set(final_sub_items)
 
     # switch case
     if config_item == 'accounts':
@@ -450,7 +473,8 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
             if post_filters:
                 for surrounding_item in surrounding_items:
                     for post_filter in post_filters:
-                        if post_filter.startswith(surrounding_item) and get_nested_value(list(sorted_items)[0], post_filter) is None:
+                        if post_filter.startswith(surrounding_item) and get_nested_value(list(sorted_items)[0],
+                                                                                         post_filter) is None:
                             final_surrounding_items.append(surrounding_item)
             surrounding_items = final_surrounding_items
 
@@ -554,6 +578,8 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
 def save_items(config_item: str, items: dict, backup: bool = False, log: bool = True, environment: str = "default"):
     """
     Save Flex items to JSON
+
+    TEST STATUS: DOES NOT REQUIRE TESTING
 
     :param config_item: config item
     :param items: dict of items
@@ -734,6 +760,8 @@ def save_taxonomies(taxonomies, environment: str = "default"):
     """
     Save taxonomies.
 
+    TEST STATUS: DOES NOT REQUIRE TESTING
+
     :param taxonomies: taxonomies
     :param environment: environment
     :return:
@@ -766,6 +794,11 @@ def save_taxonomies(taxonomies, environment: str = "default"):
 def get_nested_value(obj, keys):
     """
     Get nested value for a given key separater by '.'
+
+    TEST STATUS: FULLY TESTED
+
+    :param obj: obj to search the value in
+    :param keys: sequence of keys separater by '.'
     """
 
     for key in keys.split('.'):
@@ -774,7 +807,11 @@ def get_nested_value(obj, keys):
                 return str(obj[key.split('[text]')[0]])
             elif re.search(r"\[-?\d+\]", key):
                 match = int(re.search(r'\[-?\d+\]', key).group(0)[1:-1])
-                obj = obj[key.split('[')[0]][-match]
+                # skip if error from API
+                try:
+                    obj = obj[key.split('[')[0]][-match]
+                except:
+                    return None
         elif isinstance(obj, dict) and key in obj:
             obj = obj[key]
         else:
@@ -786,6 +823,8 @@ def get_surrounding_items(config_item: str, items: dict, sub_items: List[str], l
                           environment: str = "default"):
     """
     Get surrounding items of a config item.
+
+    TEST STATUS: DOES NOT REQUIRE TESTING
 
     :param log:
     :param config_item: config item
@@ -811,7 +850,8 @@ def get_surrounding_items(config_item: str, items: dict, sub_items: List[str], l
         if 'workflow' in sub_items:
             try:
                 workflow_id = items.get(item).get('workflow').get('id')
-                workflow_instance = query(method="GET", url=f"workflows/{workflow_id}", log=False, environment=environment)
+                workflow_instance = query(method="GET", url=f"workflows/{workflow_id}", log=False,
+                                          environment=environment)
                 workflow_variables = query(method="GET", url=f"workflows/{workflow_id}/variables", log=False,
                                            environment=environment)
                 items[item]['workflow'] = workflow_instance
@@ -824,7 +864,9 @@ def get_surrounding_items(config_item: str, items: dict, sub_items: List[str], l
 
 def find_and_pull_dependencies(json_config: {}):
     """
-    Find dependencies and create them if they do not exist.
+    Find and pull dependencies.
+
+    TEST STATUS: DOES NOT REQUIRE TESTING
 
     :return:
     """
@@ -860,6 +902,8 @@ def find_nested_dependencies(data, parent_key='', separator='.'):
     """
     Find dependencies in a JSON item config.
 
+    TEST STATUS: FULLY TESTED
+
     :param data:
     :param parent_key:
     :param separator:
@@ -891,6 +935,8 @@ def get_taxonomies(filters: List[str], log: bool = True, environment: str = "def
     """
     Get taxonomies from public API
 
+    TEST STATUS: FULLY TESTED
+
     :param environment: environment
     :param filters: filters to apply
     :param log: whether to log
@@ -921,6 +967,8 @@ def get_taxonomies(filters: List[str], log: bool = True, environment: str = "def
 def get_taxons(taxonomies: List[dict], environment: str = "default", url: str = None):
     """
     Get taxonomies' taxons - recursively
+
+    TEST STATUS: DOES NOT REQUIRE TESTING
 
     :param taxonomies: taxonomies
     :param environment: environment
@@ -968,6 +1016,8 @@ def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
                             mode: List[str] = ['tagCollections', 'taxonomies'], environment: str = "default"):
     """
     Get taxonomies and tags from metadata def configs.
+
+    TEST STATUS: DOES NOT REQUIRE TESTING
 
     :param mode: which items to retrieve
     :param metadata_definitions: dict of metadata defs
@@ -1040,6 +1090,8 @@ def dig_for_tags_and_taxonomies(entries, tags: List, taxonomies: List):
     """
     Dig deeper to find tags and taxonomies.
 
+    TEST STATUS: FULLY TESTED
+
     :param entries: entries to search in
     :param tags: list of tags
     :param taxonomies: list of taxonomies
@@ -1064,6 +1116,8 @@ def get_auth_material(environment: str = "default"):
     """
     Returns auth material: env & auth.
 
+    TEST STATUS: FULLY TESTED
+
     :return:
     """
 
@@ -1079,6 +1133,8 @@ def get_auth_material(environment: str = "default"):
 def query(method: str, url: str, payload=None, log: bool = True, environment: str = "default") -> Union[dict, list]:
     """
     Query the public API.
+
+    TEST STATUS: FULLY TESTED
 
     :param environment: env to query
     :param method: method to use from [GET, POST, PUT]
@@ -1127,6 +1183,8 @@ def query(method: str, url: str, payload=None, log: bool = True, environment: st
 def create_script(item_name, item_config):
     """
     Create groovy script with according imports and plugins.
+
+    TEST STATUS: FULLY TESTED
 
     :param item_name: script name
     :param item_config: script config
@@ -1184,6 +1242,8 @@ def kebab_to_camel_case(string):
     """
     Kebab to Camel Case.
 
+    TEST STATUS: FULLY TESTED
+
     :param string: string to convert
     :return:
     """
@@ -1198,6 +1258,8 @@ def kebab_to_camel_case(string):
 def remove_last_modified_keys(input_dict):
     """
     Remove "lastModified" keys in JSON API responses for Bitbucket.
+
+    TEST STATUS: FULLY TESTED
 
     :param input_dict:
     :return:
@@ -1216,6 +1278,8 @@ def remove_last_modified_keys(input_dict):
 def render_workflow(workflow_structure: dict, save_to: str):
     """
     Render workflows using graphviz.
+
+    TEST STATUS: DOES NOT REQUIRE TESTING
 
     :param workflow_structure: dict of workflows
     :param save_to: where to save the workflow graphs
@@ -1246,6 +1310,8 @@ def render_workflow(workflow_structure: dict, save_to: str):
 def config_node(node: dict) -> tuple[str, str, str]:
     """
     Build node label with name, image and style.
+
+    TEST STATUS: DOES NOT REQUIRE TESTING
 
     :param node: json dict of the node
     """
@@ -1322,6 +1388,9 @@ def config_node(node: dict) -> tuple[str, str, str]:
 def escape(string: str) -> str:
     """
     Custom string escape
+
+    TEST STATUS: DOES NOT REQUIRE TESTING
+
     :param string:
     :return:
     """
@@ -1333,6 +1402,8 @@ def str_to_bool(string: str):
     """
     Converts strings to bool ()
 
+    TEST STATUS: FULLY TESTED
+
     :param string: from [false, False, true, True]
     :return:
     """
@@ -1343,3 +1414,31 @@ def str_to_bool(string: str):
         return False
     else:
         raise ValueError(f"String is not a valid boolean (input: {string}, expected: [false, False, true, True])")
+
+
+def convert_to_native_type(string: str):
+    """
+    Converts a string to its most likely type.
+
+    TEST STATUS: FULLY TESTED
+
+    :param string: a string
+    :return:
+    """
+
+    try:
+        # int first
+        return int(string)
+    except ValueError:
+        try:
+            # float
+            return float(string)
+        except ValueError:
+            # finally bool
+            if string.lower() == 'true':
+                return True
+            elif string.lower() == 'false':
+                return False
+            else:
+                # default to str
+                return string

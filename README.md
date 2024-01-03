@@ -303,6 +303,8 @@ This command queries any env and locally creates folders/files for the requested
     - `<item_name>/`  
         - `_object.json`: main config of the item  
         - `<item_property>.json`: item properties (ex: configuration, variables..)  
+        - `script.groovy`: groovy file with code if any (actions etc...)  
+        - `body.html`: html file with html code if any (message templates etc...)  
 
 ---
 
