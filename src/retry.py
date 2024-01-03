@@ -6,7 +6,8 @@
     DATE: December 12, 2023
 
     DESCRIPTION: retry command functions
-    
+
+    TEST STATUS: FULLY TESTED
 """
 import json
 
@@ -18,7 +19,11 @@ from src.utils import get_items, retry_config_item_instance, get_auth_material
 
 
 def retry_command_func(args):
-    """Action on retry command. """
+    """
+    Action on retry command.
+
+    TEST STATUS: FULLY TESTED
+    """
 
     retried_instances = pd.DataFrame(columns=['config_item', 'name', 'id', 'status', 'progress'])
 

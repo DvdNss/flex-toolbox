@@ -118,6 +118,7 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
     if total_count == 0 and not is_item_instance:
         # todo: taxonomies create
         # todo: workflow create
+        # todo: double-check with id when item is renamed locally or on remote
 
         # set action parameters
         payload['pluginClass'] = item_config['pluginClass']
@@ -288,7 +289,7 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
     save_items(config_item=config_item, items=updated_item, environment=dest_environment, log=False)
 
     # push to failed jobs if needed
-    if push_to_failed_jobs:
+    if config_item == 'actions' and push_to_failed_jobs:
 
         failed_jobs = []
 

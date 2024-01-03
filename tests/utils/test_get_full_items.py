@@ -1,226 +1,19 @@
 """
 
     PROJECT: flex_toolbox
-    FILENAME: test_utils.py
+    FILENAME: test_get_full_items.py
     AUTHOR: David NAISSE
-    DATE: November 13, 2023
+    DATE: January 02, 2024
 
-    DESCRIPTION: tests for utils.py
+    DESCRIPTION: get_full_items function testing
     
 """
-import os
 from unittest import TestCase
 
-from src.utils import kebab_to_camel_case, create_script, query, get_auth_material, dig_for_tags_and_taxonomies, \
-    get_taxonomies, find_nested_dependencies, get_nested_value, get_full_items, apply_post_retrieval_filters
+from src.utils import get_full_items
 
 
-class TestUtils(TestCase):
-    """Tests for utils.py"""
-
-    def test_kebab_to_camel_case(self):
-        # ins
-        input = "event-handler"
-
-        # outs
-        output = kebab_to_camel_case(input)
-
-        # test
-        assert output == "eventHandlers", f"Should be eventHandlers, is {input}."
-
-    def test_create_script(self):
-        # ins
-        item_name = "pyUnitTest"
-        item_config = {
-            "configuration": {
-                "instance": {
-                    "internal-script": {
-                        "script-content": "def execute() {\n    context.logInfo('test')\n}",
-                        "script-import": [
-                            {
-                                "value": "groovy.json.JsonSlurper"
-                            }
-                        ]
-                    }
-                }
-            }
-        }
-
-        # outs
-        os.mkdir(item_name)
-        test_create = create_script(item_name=item_name, item_config=item_config)
-
-        # reset
-        os.remove(f"{item_name}/script.groovy")
-        os.removedirs(f"{item_name}")
-
-        # test
-        expected = "import com.ooyala.flex.plugins.PluginCommand\nimport groovy.json.JsonSlurper\n\nclass Script extends PluginCommand {\n    def execute() {\n        context.logInfo('test')\n    }\n}"
-        assert test_create == expected
-
-    def test_query_valid(self):
-        # ins
-        method, url, environment = "GET", "resources;limit=1", "default"
-
-        # outs
-        response = query(method=method, url=url, log=False, environment=environment)
-
-        # test
-        assert 'resources' in response and len(response['resources']) != 0
-
-    def test_query_invalid(self):
-        # ins
-        method, url, environment = "GET", "resources;invalid", "default"
-
-        # outs
-        try:
-            query(method=method, url=url, log=False, environment=environment)
-
-            # test
-            self.fail()
-        except Exception as ex:
-            assert "Error message: " in str(ex) and "invalid" in str(ex)
-
-    def test_get_auth_material_valid(self):
-        # ins
-        environment = "default"
-
-        # outs
-        try:
-            get_auth_material(environment=environment)
-        except:
-            self.fail()
-
-    def test_get_auth_material_invalid(self):
-        # ins
-        environments = "invalid"
-
-        # outs
-        try:
-            get_auth_material(environment=environments)
-            self.fail()
-        except KeyError as ke:
-            assert "invalid" in str(ke)
-
-    def test_get_tags_and_taxonomies_tags(self):
-        # ins
-        tags = []
-        entries = [
-            # depth = 1
-            {
-                "backingStoreType": "USER_DEFINED_TAG_COLLECTION",
-                "backingStoreInstanceId": 7465,
-            },
-            # depth > 1
-            {
-                "children":
-                    [
-                        {
-                            "backingStoreType": "USER_DEFINED_TAG_COLLECTION",
-                            "backingStoreInstanceId": 74650,
-                        },
-                    ]
-
-            }
-        ]
-
-        # outs
-        dig_for_tags_and_taxonomies(entries=entries, tags=tags, taxonomies=[])
-
-        # test
-        assert tags == [7465, 74650]
-
-    def test_get_tags_and_taxonomies_taxonomies(self):
-        # ins
-        taxonomies = []
-        entries = [
-            # depth =1
-            {
-                "backingStoreType": "TAXONOMY",
-                "filter": "000",
-            },
-            # depth > 1
-            {
-                "children":
-                    [
-                        {
-                            "backingStoreType": "TAXONOMY",
-                            "filter": "001",
-                        },
-                    ]
-
-            }
-        ]
-
-        # outs
-        dig_for_tags_and_taxonomies(entries=entries, tags=[], taxonomies=taxonomies)
-
-        # test
-        assert taxonomies == ["000", "001"]
-
-    def test_get_taxonomies_valid(self):
-        # ins
-        filters = ["enabled=true"]
-
-        # outs
-        try:
-            taxonomies = get_taxonomies(filters=filters, log=False)
-            assert isinstance(taxonomies, list)
-        except:
-            self.fail()
-
-    def test_find_nested_dependencies(self):
-        # ins
-        data = {
-            "id": 999,
-            "nested_1": {
-                "id": 111,
-                "nested_2": {
-                    "id": 222,
-                }
-            }
-        }
-
-        # outs
-        dependencies = find_nested_dependencies(data=data)
-
-        # test
-        assert dependencies == ['nested_1', 'nested_1.nested_2']
-
-    def test_get_nested_value_valid(self):
-        # ins
-        key = "nested_key"
-        data = {
-            "nested_1": {
-                "nested_2": {
-                    "key": "value"
-                }
-            }
-        }
-
-        # outs
-        nested_value = get_nested_value(obj=data, keys="nested_1.nested_2.key")
-
-        # test
-        assert nested_value == "value"
-
-    def test_get_nested_value_invalid(self):
-        # ins
-        key = "nested_1.nested_2.key"
-        data = {
-            "nested_1":
-                [{
-                    "nested_2": {
-                        "key": "value"
-                    }
-                }]
-        }
-
-        # outs
-        nested_value = get_nested_value(obj=data, keys=key)
-
-        # test
-        assert not nested_value
+class TestGetFullItems(TestCase):
 
     def test_get_full_items_accounts(self):
         # ins
@@ -427,8 +220,9 @@ class TestUtils(TestCase):
         )
 
         # test
-        assert isinstance(profiles, dict) and (profiles.get(list(profiles.keys())[0]).get('objectType').get('name') \
-                                               == 'profile' if len(list(profiles.keys())) != 0 else True)
+        assert isinstance(profiles, dict) and (
+            profiles.get(list(profiles.keys())[0]).get('objectType').get('name') == 'profile' if len(
+                list(profiles.keys())) != 0 else True)
 
     def test_get_full_items_quotas(self):
         # ins
@@ -444,8 +238,9 @@ class TestUtils(TestCase):
         )
 
         # test
-        assert isinstance(quotas, dict) and (quotas.get(list(quotas.keys())[0]).get('objectType').get('name') \
-                                             == 'quota' if len(list(quotas.keys())) != 0 else True)
+        assert isinstance(quotas, dict) and (
+            quotas.get(list(quotas.keys())[0]).get('objectType').get('name') == 'quota' if len(
+                list(quotas.keys())) != 0 else True)
 
     def test_get_full_items_resources(self):
         # ins
@@ -461,8 +256,9 @@ class TestUtils(TestCase):
         )
 
         # test
-        assert isinstance(resources, dict) and (resources.get(list(resources.keys())[0]).get('objectType').get('name') \
-                                                == 'resource' if len(list(resources.keys())) != 0 else True)
+        assert isinstance(resources, dict) and (
+            resources.get(list(resources.keys())[0]).get('objectType').get('name') == 'resource' if len(
+                list(resources.keys())) != 0 else True)
 
     def test_get_full_items_roles(self):
         # ins
@@ -479,8 +275,8 @@ class TestUtils(TestCase):
 
         # test
         assert isinstance(roles, dict) and (
-            roles.get(list(roles.keys())[0]).get('objectType').get('name') \
-            == 'role' if len(list(roles.keys())) != 0 else True)
+            roles.get(list(roles.keys())[0]).get('objectType').get('name') == 'role' if len(
+                list(roles.keys())) != 0 else True)
 
     def test_get_full_items_task_definitions(self):
         # ins
@@ -497,8 +293,8 @@ class TestUtils(TestCase):
 
         # test
         assert isinstance(task_definitions, dict) and (
-            task_definitions.get(list(task_definitions.keys())[0]).get('objectType').get('name') \
-            == 'task-definition' if len(list(task_definitions.keys())) != 0 else True)
+            task_definitions.get(list(task_definitions.keys())[0]).get('objectType').get(
+                'name') == 'task-definition' if len(list(task_definitions.keys())) != 0 else True)
 
     def test_get_full_items_tasks(self):
         # ins
@@ -515,8 +311,24 @@ class TestUtils(TestCase):
 
         # test
         assert isinstance(tasks, dict) and (
-            tasks.get(list(tasks.keys())[0]).get('objectType').get('name') \
-            == 'task' if len(list(tasks.keys())) != 0 else True)
+            tasks.get(list(tasks.keys())[0]).get('objectType').get('name') == 'task' if len(
+                list(tasks.keys())) != 0 else True)
+
+    def test_get_full_items_taxonomies(self):
+        # ins
+        config_item, filters, post_filters, with_dependencies = "taxonomies", ['limit=1'], [], False
+
+        # outs
+        taxonomies = get_full_items(
+            config_item=config_item,
+            filters=filters,
+            post_filters=post_filters,
+            with_dependencies=with_dependencies,
+            log=False
+        )
+
+        # test
+        assert isinstance(taxonomies, list) and taxonomies[0].get('childTaxons')
 
     def test_get_full_items_timed_actions(self):
         # ins
@@ -533,8 +345,8 @@ class TestUtils(TestCase):
 
         # test
         assert isinstance(timed_actions, dict) and (
-            timed_actions.get(list(timed_actions.keys())[0]).get('objectType').get('name') \
-            == 'timed-action' if len(list(timed_actions.keys())) != 0 else True)
+            timed_actions.get(list(timed_actions.keys())[0]).get('objectType').get('name') == 'timed-action' if len(
+                list(timed_actions.keys())) != 0 else True)
 
     def test_get_full_items_user_defined_object_types(self):
         # ins
@@ -551,8 +363,8 @@ class TestUtils(TestCase):
 
         # test
         assert isinstance(user_defined_object_types, dict) and (
-            user_defined_object_types.get(list(user_defined_object_types.keys())[0]).get('objectType').get('name') \
-            == 'user-defined-object-type' if len(list(user_defined_object_types.keys())) != 0 else True)
+            user_defined_object_types.get(list(user_defined_object_types.keys())[0]).get('objectType').get(
+                'name') == 'user-defined-object-type' if len(list(user_defined_object_types.keys())) != 0 else True)
 
     def test_get_full_items_users(self):
         # ins
@@ -569,8 +381,8 @@ class TestUtils(TestCase):
 
         # test
         assert isinstance(users, dict) and (
-            users.get(list(users.keys())[0]).get('objectType').get('name') \
-            == 'user' if len(list(users.keys())) != 0 else True)
+            users.get(list(users.keys())[0]).get('objectType').get('name') == 'user' if len(
+                list(users.keys())) != 0 else True)
 
     def test_get_full_items_variants(self):
         # ins
@@ -662,27 +474,3 @@ class TestUtils(TestCase):
         assert isinstance(workspaces, dict) and (
             workspaces.get(list(workspaces.keys())[0]).get('objectType').get('name') == 'workspace' if len(
                 list(workspaces.keys())) != 0 else True)
-
-    def test_apply_post_retrieval_filters(self):
-        # ins
-        filters = ['not_nested_key>0', 'nested.nested_key!=0']
-        items = {
-            "item_1": {
-                "not_nested_key": 0,
-                "nested": {
-                    "nested_key": 0
-                }
-            },
-            "item_2": {
-                "not_nested_key": 1,
-                "nested": {
-                    "nested_key": 1
-                }
-            }
-        }
-
-        # outs
-        filtered_items = apply_post_retrieval_filters(items=items, filters=filters, log=False)
-
-        # test
-        assert filtered_items == {"item_2": {"not_nested_key": 1, "nested": {"nested_key": 1}}}

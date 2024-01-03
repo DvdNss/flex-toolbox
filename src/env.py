@@ -58,7 +58,7 @@ def add_or_update_environments_json(env, username, password, is_default: bool = 
                                     env_file_path: str = DEFAULT_ENVIRONMENT_PATH,
                                     key_path: str = DEFAULT_KEY_PATH):
     """
-    Add env to enrionments.json
+    Add env to environments.json
 
     :param env: env url
     :param username: username

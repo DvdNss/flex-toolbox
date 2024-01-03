@@ -6,6 +6,8 @@
     DATE: October 11, 2023
 
     DESCRIPTION: query command functions
+
+    TEST STATUS: FULLY TESTED
     
 """
 
@@ -13,7 +15,7 @@ import json
 
 import requests
 
-from src.utils import query
+from src.utils import query, convert_to_native_type
 
 # global variables
 PAYLOAD = ""
@@ -24,7 +26,12 @@ session = requests.Session()
 
 
 def query_command_func(args):
-    """Action on restore command. """
+    """
+    Action on restore command.
+
+    TEST STATUS: FULLY TESTED
+
+    """
 
     # get payload if needed
     if args.payload:
@@ -37,7 +44,7 @@ def query_command_func(args):
             payload = dict()
             for param in args.payload:
                 key, value = param.split('=')[0], param.split('=')[1]
-                payload[key] = value
+                payload[key] = convert_to_native_type(value)
     else:
         payload = None
 
