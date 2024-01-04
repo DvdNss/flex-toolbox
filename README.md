@@ -177,6 +177,25 @@ DEFAULT             ALIAS                                   URL                 
                                wb-prod          https://vault.archive.warnerbros.com    dnaisse  
           master.firstmedia.ooflex.net          https://master.firstmedia.ooflex.net masteruser  
 ```
+#### Self signed environments
+
+Environments deployed with a self-signed certificate are not trusted by default. In order to trust this certification authority, set the environment variable `REQUESTS_CA_BUNDLE` to the path to the certificate of the root certification authority. Like:
+
+```shell
+# POSIX
+export REQUESTS_CA_BUNDLE=/path/to/cert
+
+# Windows - PowerShell
+Set-Item Env:REQUESTS_CA_BUNDLE "path\to\cert"
+```
+
+##### Download Flex root certificate authority certificate
+
+This can be done with most web browser. But here is a command for POSIX system.
+
+```shell
+echo quit | openssl s_client -showcerts -servername "devstaging.flex.daletdemos.com" -connect devstaging.flex.daletdemos.com:443 > cacert.pem
+```
 
 ## __Raw Queries__
 
