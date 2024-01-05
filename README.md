@@ -3,28 +3,28 @@
 Just trying to make flex operations faster for all teams.
 
 ## Table of Contents
-<details>
-  <summary>Click to expand</summary>
+<details>  
+  <summary>Click to expand</summary>  
 
-  - [Requirements](#requirements)
-  - [Installation](#installation)
-    - [Windows](#1-windows)
-    - [Linux](#2-linux)
-  - [Usage](#commandssetup)
-    - [ftbx connect](#connect)
-    - [ftbx query](#raw-queries)
-    - [ftbx list](#list-items)
-    - [ftbx pull](#pull-items)
-    - [ftbx push](#push-items)
-    - [ftbx restore](#restore-items)
-    - [ftbx compare](#compare-items)
-    - [ftbx retry](#retry-items)
-    - [ftbx launch](#launch-instances--custom-scripts)
-  - [Errors & fixes](#errors--fixes)
-    - [SSLCertVerificationError](#self-signed-certificates)
-  - [Contact](#contacts)
+  - [Requirements](#requirements)  
+  - [Installation](#installation)  
+    - [Windows](#1-windows)  
+    - [Linux](#2-linux)  
+  - [Usage](#commandssetup)  
+    - [ftbx connect](#connect)  
+    - [ftbx query](#raw-queries)  
+    - [ftbx list](#list-items)  
+    - [ftbx pull](#pull-items)  
+    - [ftbx push](#push-items)  
+    - [ftbx restore](#restore-items)  
+    - [ftbx compare](#compare-items)  
+    - [ftbx retry](#retry-items)  
+    - [ftbx launch](#launch-instances--custom-scripts)  
+  - [Errors & fixes](#errors--fixes)  
+    - [SSLCertVerificationError](#self-signed-certificates)  
+  - [Contact](#contacts)  
   
-</details>
+</details>  
 
 # __REQUIREMENTS__
 
@@ -49,8 +49,8 @@ Just trying to make flex operations faster for all teams.
 
 * add `path\to\toolbox` to your `Path` environment variable, example: `C:\Users\dvdna\PycharmProjects\flex_toolbox` 
 
-<details>
-  <summary>[OPTIONAL] Render workflowDefintions as PNG</summary>
+<details>  
+  <summary>[OPTIONAL] Render workflowDefintions as PNG</summary>  
 
 * If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
   to your PATH environment variable and update `VARIABLES.py` as follows:
@@ -60,7 +60,7 @@ Just trying to make flex operations faster for all teams.
     RENDER_WORKFLOW_GRAPHS = True
     ```
 
-</details>
+</details>  
 
 ***
 
@@ -84,8 +84,8 @@ Just trying to make flex operations faster for all teams.
     alias ftbx="python3 path\to\flex_toolbox\ftbx.py"
     ```
 
-<details>
-  <summary>[OPTIONAL] Render workflowDefintions as PNG</summary>
+<details>  
+  <summary>[OPTIONAL] Render workflowDefintions as PNG</summary>  
 
 * If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
   to your PATH environment variable and update `VARIABLES.py` as follows:
@@ -95,7 +95,7 @@ Just trying to make flex operations faster for all teams.
     RENDER_WORKFLOW_GRAPHS = True
     ```
 
-</details>
+</details>  
 
 ***
 
@@ -424,7 +424,8 @@ This command pushes local items to the destination environments. Process is as s
 4. pull updated items from the destination environment for verification purposes  
 5. [OPTIONAL] retry given failed jobs with new configuration (see file formats and examples below)  
 
-<details><summary>CSV (same as .csv file resulting from `ftbx list`)</summary>
+<details>  
+  <summary>CSV (same as .csv file resulting from `ftbx list`)</summary>  
 
 CSV file must contain at least the "id" column, the number/name/order of the other columns doesn't matter.  
 
@@ -434,9 +435,10 @@ CSV file must contain at least the "id" column, the number/name/order of the oth
 | 239 | job2              | Failed              |
 | 240 | job3              | Failed              |
 
-</details> 
+</details>   
 
-<details><summary>JSON (same as .json file resulting from `ftbx list`)</summary>
+<details>
+  <summary>JSON (same as .json file resulting from `ftbx list`)</summary>  
 
 JSON file must contain a dict with an "id" key for each instance, the number/name/order of the other keys doesn't matter.  
 
@@ -448,7 +450,7 @@ JSON file must contain a dict with an "id" key for each instance, the number/nam
   ...
 }
 ```
-</details>
+</details>  
 
 ---
 
@@ -569,7 +571,8 @@ ftbx retry <config_item> <options>
 
 This command bulk retries job/workflow instances within a Flex environment, either from a query or from JSON/CSV files (see formats below).  
 
-<details><summary>CSV (same as .csv file resulting from `ftbx list`)</summary>
+<details>
+  <summary>CSV (same as .csv file resulting from `ftbx list`)</summary>  
 
 CSV file must contain at least the "id" column, the number/name/order of the other columns doesn't matter.  
 
@@ -579,9 +582,10 @@ CSV file must contain at least the "id" column, the number/name/order of the oth
 | 239 | job2              | Failed              |
 | 240 | job3              | Failed              |
 
-</details> 
+</details>   
 
-<details><summary>JSON (same as .json file resulting from `ftbx list`)</summary>
+<details>
+  <summary>JSON (same as .json file resulting from `ftbx list`)</summary>  
 
 JSON file must contain a dict with an "id" key for each instance, the number/name/order of the other keys doesn't matter.  
 
@@ -593,7 +597,7 @@ JSON file must contain a dict with an "id" key for each instance, the number/nam
   ...
 }
 ```
-</details>
+</details>  
 
 ---
 
