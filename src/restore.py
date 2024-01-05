@@ -6,7 +6,8 @@
     DATE: October 05, 2023
 
     DESCRIPTION: restore command functions
-    
+
+    TEST STATUS: DOES NOT REQUIRE TESTING
 """
 import json
 import os
@@ -15,7 +16,11 @@ from src.push import push_item
 
 
 def restore_command_func(args):
-    """Action on restore command. """
+    """
+    Action on restore command.
+
+    TEST STATUS: DOES NOT REQUIRE TESTING
+    """
 
     # if path exists
     if os.path.isdir(f"{args.config_item}/{args.item_name}/backup/{args.backup}"):

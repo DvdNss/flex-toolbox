@@ -6,7 +6,8 @@
     DATE: September 13, 2023
 
     DESCRIPTION: pull command functions
-    
+
+    TEST STATUS: FULLY TESTED
 """
 import json
 
@@ -17,7 +18,11 @@ from src.utils import create_folder, get_tags_and_taxonomies, get_items, get_tax
 
 
 def pull_command_func(args):
-    """Action on pull command. """
+    """
+    Action on pull command.
+
+    TEST STATUS: FULLY TESTED
+    """
 
     # if list of envs provided
     if args.from_:
@@ -40,6 +45,8 @@ def pull_command_func(args):
 def pull_all() -> bool:
     """
     Pull all.
+
+    TEST STATUS: FULLY TESTED
 
     :return: True if succeeds, False if fails
     """

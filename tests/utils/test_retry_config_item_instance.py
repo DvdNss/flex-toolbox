@@ -21,7 +21,7 @@ class TestRetryConfigItemInstance(TestCase):
         id = 1213
 
         # outs
-        name, progress = retry_config_item_instance(config_item=config_item, id=id)
+        name, progress = retry_config_item_instance(config_item=config_item, id=id, environment='cs-sandbox-ovh-flex-config')
 
         # test
         assert name and progress == 0
@@ -33,7 +33,7 @@ class TestRetryConfigItemInstance(TestCase):
 
         # outs
         try:
-            name, progress = retry_config_item_instance(config_item=config_item, id=id)
+            name, progress = retry_config_item_instance(config_item=config_item, id=id, environment='cs-sandbox-ovh-flex-config')
         except Exception as e:
             # test
             assert "retry is not available" in str(e)
