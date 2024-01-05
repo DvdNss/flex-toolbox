@@ -24,7 +24,7 @@ class TestQueryCommandFunc(TestCase):
         args = argparse.Namespace()
         args.method = 'GET'
         args.url = 'resources;limit=1'
-        args.from_ = 'default'
+        args.from_ = 'cs-sandbox-ovh-flex-config'
         args.payload = None
 
         # outs
@@ -41,7 +41,7 @@ class TestQueryCommandFunc(TestCase):
         args = argparse.Namespace()
         args.method = 'GET'
         args.url = 'https://master.cs-sandbox.flex.cs.dalet.cloud/api/resources;limit=1'
-        args.from_ = 'default'
+        args.from_ = 'cs-sandbox-ovh-flex-config'
         args.payload = None
 
         # outs
@@ -60,7 +60,7 @@ class TestQueryCommandFunc(TestCase):
         args = argparse.Namespace()
         args.method = 'POST'
         args.url = f"jobs/{failed_job.get('id')}/actions"
-        args.from_ = 'default'
+        args.from_ = 'cs-sandbox-ovh-flex-config'
         args.payload = ['action=retry']
 
         # outs
@@ -79,7 +79,7 @@ class TestQueryCommandFunc(TestCase):
         args = argparse.Namespace()
         args.method = 'POST'
         args.url = f"jobs/{failed_job.get('id')}/actions"
-        args.from_ = 'default'
+        args.from_ = 'cs-sandbox-ovh-flex-config'
         args.payload = ['query_config.json']
 
         with open('query_config.json', 'w') as query_config_file:

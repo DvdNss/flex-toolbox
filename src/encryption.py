@@ -6,7 +6,8 @@
     DATE: November 27, 2023
 
     DESCRIPTION: encryption functions
-    
+
+    TEST STATUS: FULLY TESTED
 """
 import os
 
@@ -18,6 +19,8 @@ import VARIABLES
 def encrypt_pwd(pwd: str, key_path: str = f"{os.environ.get('FTBX')}/.k"):
     """
     Encrypt pwd
+
+    TEST STATUS: FULLY TESTED
 
     :param pwd:
     :param key_path:
@@ -39,6 +42,8 @@ def encrypt_pwd(pwd: str, key_path: str = f"{os.environ.get('FTBX')}/.k"):
 def decrypt_pwd(pwd: str, key_path: str = f"{os.environ.get('FTBX')}/.k"):
     """
     Decrypt pwd
+
+    TEST STATUS: FULLY TESTED
 
     :param pwd:
     :param key_path:

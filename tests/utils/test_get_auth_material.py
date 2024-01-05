@@ -17,7 +17,7 @@ class TestGetAuthMaterial(TestCase):
 
     def test_get_auth_material_valid(self):
         # ins
-        environment = "default"
+        environment = "cs-sandbox-ovh-flex-config"
 
         # outs
         try:

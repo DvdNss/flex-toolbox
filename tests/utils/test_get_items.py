@@ -22,7 +22,8 @@ class TestGetItems(TestCase):
         sub_items = VARIABLES.ACCOUNTS_SUB_ITEMS
 
         # outs
-        items = get_items(config_item=config_item, sub_items=sub_items, log=False)
+        items = get_items(config_item=config_item, sub_items=sub_items, log=False,
+                          environment='cs-sandbox-ovh-flex-config')
 
         # test
         assert items and items[next(iter(items), {})].get('name') == "Master Account" and \
@@ -34,7 +35,8 @@ class TestGetItems(TestCase):
         filters = ['fql=(name=test)']
 
         # outs
-        items = get_items(config_item=config_item, filters=filters, log=False)
+        items = get_items(config_item=config_item, filters=filters, log=False,
+                          environment='cs-sandbox-ovh-flex-config')
 
         # test
         assert items and items[next(iter(items), {})].get("name") == 'test'
@@ -45,7 +47,8 @@ class TestGetItems(TestCase):
         filters = ['limit=3']
 
         # outs
-        items = get_items(config_item=config_item, filters=filters, log=False)
+        items = get_items(config_item=config_item, filters=filters, log=False,
+                          environment='cs-sandbox-ovh-flex-config')
 
         # test
         assert items and len(items) == 3

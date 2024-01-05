@@ -25,7 +25,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -42,7 +43,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -59,7 +61,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -76,7 +79,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -93,7 +97,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -111,7 +116,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -128,7 +134,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -146,7 +153,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -163,7 +171,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -181,7 +190,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -199,7 +209,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -216,7 +227,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -234,7 +246,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -252,7 +265,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -270,7 +284,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -288,7 +303,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -306,7 +322,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -324,7 +341,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -340,7 +358,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -358,7 +377,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -376,7 +396,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -394,7 +415,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -412,7 +434,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -430,7 +453,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -449,7 +473,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test
@@ -467,7 +492,8 @@ class TestGetFullItems(TestCase):
             filters=filters,
             post_filters=post_filters,
             with_dependencies=with_dependencies,
-            log=False
+            log=False,
+            environment='cs-sandbox-ovh-flex-config'
         )
 
         # test

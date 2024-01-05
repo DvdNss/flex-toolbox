@@ -17,7 +17,7 @@ class TestQuery(TestCase):
 
     def test_query_valid(self):
         # ins
-        method, url, environment = "GET", "resources;limit=1", "default"
+        method, url, environment = "GET", "resources;limit=1", "cs-sandbox-ovh-flex-config"
 
         # outs
         response = query(method=method, url=url, log=False, environment=environment)
@@ -27,7 +27,7 @@ class TestQuery(TestCase):
 
     def test_query_invalid(self):
         # ins
-        method, url, environment = "GET", "resources;invalid", "default"
+        method, url, environment = "GET", "resources;invalid", "cs-sandbox-ovh-flex-config"
 
         # outs
         try:

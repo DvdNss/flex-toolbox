@@ -62,15 +62,16 @@ FLEX_ITEMS_LIST = ['accounts', 'actions', 'assets', 'collections', 'eventHandler
                    'tagCollections', 'taskDefinitions', 'tasks', 'taxonomies', 'timedActions', 'userDefinedObjectTypes',
                    'users', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']
 
-FLEX_ITEMS_PUSH = ['accounts', 'actions', 'eventHandlers', 'groups', 'jobs',
+FLEX_ITEMS_PUSH = ['accounts', 'actions', 'assets', 'eventHandlers', 'groups', 'jobs',
                    'messageTemplates', 'metadataDefinitions', 'profiles', 'quotas', 'resources', 'roles',
-                   'taskDefinitions', 'taxonomies', 'timedActions', 'userDefinedObjectTypes',
-                   'users', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']
+                   'taskDefinitions', 'tasks', 'timedActions', 'userDefinedObjectTypes',
+                   'users', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']  # todo: taxonomies
 
 FLEX_ITEMS_RESTORE = ['accounts', 'actions', 'eventHandlers', 'groups', 'jobs',
                       'messageTemplates', 'metadataDefinitions', 'profiles', 'quotas', 'resources', 'roles',
-                      'taskDefinitions', 'taxonomies', 'timedActions', 'userDefinedObjectTypes',
-                      'users', 'variants', 'wizards', 'workflowDefinitions', 'workflows', 'workspaces']
+                      'taskDefinitions', 'timedActions', 'userDefinedObjectTypes',
+                      'users', 'variants', 'wizards', 'workflowDefinitions', 'workflows',
+                      'workspaces']  # todo: taxonomies
 
 FLEX_ITEMS_COMPARE = ['accounts', 'actions', 'eventHandlers', 'groups', 'messageTemplates', 'metadataDefinitions',
                       'objectTypes', 'profiles', 'quotas', 'resources', 'roles', 'tagCollections', 'taskDefinitions',

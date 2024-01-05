@@ -7,6 +7,7 @@
 
     DESCRIPTION: compare command functions
 
+    TEST STATUS: FULLY TESTED
 """
 import json
 
@@ -18,7 +19,11 @@ from src.utils import get_items, create_folder, enumerate_sub_items
 
 
 def compare_command_func(args):
-    """Action on pull command. """
+    """
+    Action on compare command.
+
+    TEST STATUS: FULLY TESTED
+    """
 
     if len(args.environments) >= 2:
 
@@ -31,12 +36,13 @@ def compare_command_func(args):
               f"(provided: {args.environments}). ")
 
 
-def compare_items(config_item: str, filters: list, environments: list, local: bool = False, sub_items: list = []):
+def compare_items(config_item: str, filters: list, environments: list, sub_items: list = []):
     """
     Compare items between environments.
 
+    TEST STATUS: DOES NOT REQUIRE TESTING
+
     :param sub_items: sub items
-    :param local: whether to use local comparison or not
     :param config_item: config item (ex: actions, workflowDefinitions)
     :param filters: filters to apply
     :param environments: envs (ex: customer-dev, customer-stg, customer-prod)
@@ -93,6 +99,8 @@ def compare_items(config_item: str, filters: list, environments: list, local: bo
 def create_comparison_dataframe(comparison_dict):
     """
     Create comparison dataframe.
+
+    TEST STATUS: FULLY TESTED
 
     :param comparison_dict:
     :return:
@@ -196,6 +204,8 @@ def create_comparison_dataframe(comparison_dict):
 def check_all_x_or_nan(df):
     """
     Check whether all columns (2+) are 'x' or 'NaN'.
+
+    TEST STATUS: FULLY TESTED
 
     :param df:
     :return:

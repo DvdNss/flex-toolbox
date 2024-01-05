@@ -6,7 +6,8 @@
     DATE: September 13, 2023
 
     DESCRIPTION: list command functions
-    
+
+    TEST STATUS: FULLY TESTED
 """
 import json
 import re
@@ -18,7 +19,11 @@ from src.utils import get_full_items
 
 
 def list_command_func(args):
-    """Action on list command. """
+    """
+    Action on list command.
+
+    TEST STATUS: FULLY TESTED
+    """
 
     list_items(config_item=args.config_item, filters=args.filters, post_filters=args.post_filters, environment=args.from_)
 
@@ -27,6 +32,8 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
                environment: str = "default") -> bool:
     """
     List items ids.
+
+    TEST STATUS: DOES NOT REQUIRE TESTING
 
     :param environment: environment
     :param config_item: item to retrieve from API (ex: workflows, accounts..)
