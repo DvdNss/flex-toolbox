@@ -6,7 +6,8 @@
     DATE: September 13, 2023
 
     DESCRIPTION: environment file functions
-    
+
+    TEST STATUS: FULLY TESTED
 """
 import json
 import os
@@ -17,7 +18,11 @@ from src.encryption import encrypt_pwd
 
 
 def env_command_func(args):
-    """Action on env command. """
+    """
+    Action on env command.
+
+    TEST STATUS: FULLY TESTED
+    """
 
     # retrieve environments
     environments = read_environments_json()['environments']
@@ -48,6 +53,8 @@ def add_or_update_environments_json(env, username, password, is_default: bool = 
                                     key_path: str = f"{os.environ.get('FTBX')}/.k"):
     """
     Add env to environments.json
+
+    TEST STATUS: FULLY TESTED
 
     :param env: env url
     :param username: username
@@ -81,8 +88,9 @@ def read_environments_json(env_file_path: str = f"{os.environ.get('FTBX')}/envir
     """
     Read or creates the environments.json file.
 
-    :param env_file_path: env file path
+    TEST STATUS: FULLY TESTED
 
+    :param env_file_path: env file path
     :return:
     """
 
@@ -103,8 +111,9 @@ def get_env(environment: str = "default"):
     """
     Return default environment.
 
-    :param environment: environment to get from config
+    TEST STATUS: DOES NOT REQUIRE TESTING
 
+    :param environment: environment to get from config
     :return:
     """
 
@@ -116,6 +125,8 @@ def get_env(environment: str = "default"):
 def get_default_env_alias(env_file_path: str = f"{os.environ.get('FTBX')}/environments.json"):
     """
     Get default env alias.
+
+    TEST STATUS: FULLY TESTED
     """
 
     environments = read_environments_json(env_file_path=env_file_path)['environments']

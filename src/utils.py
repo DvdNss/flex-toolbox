@@ -605,7 +605,7 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
         # folder's name
         if config_item == 'events':
             folder_name = f"{items.get(item).get('id')}"
-        elif config_item == 'jobs' or config_item == 'tasks' or config_item == 'workflows':
+        elif config_item == 'jobs' or config_item == 'tasks' or config_item == 'workflows' or config_item == 'assets':
             folder_name = f"{items.get(item).get('id')}".replace("/", "").replace(":", "")
         else:
             folder_name = f"{items.get(item).get('name')}".replace("/", "").replace(":", "")
@@ -734,6 +734,11 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
             with open(f"{environment}/{config_item}/{folder_name}/history.json", "w") as item_config:
                 json.dump(obj=items.get(item).get('history'), fp=item_config, indent=2)
                 items.get(item).pop('history')
+
+        if 'status' in items.get(item) and items.get(item).get('taskDefinition'):
+            with open(f"{environment}/{config_item}/{folder_name}/status.json", "w") as item_config:
+                json.dump(obj={'status': items.get(item).get('status')}, fp=item_config, indent=2)
+                items.get(item).pop('status')
 
         try:
             if 'relationships' in items.get(item) and items.get(item).get('relationships').get('relationships'):

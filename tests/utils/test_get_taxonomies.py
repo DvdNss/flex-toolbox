@@ -21,7 +21,7 @@ class TestGetTaxonomies(TestCase):
 
         # outs
         try:
-            taxonomies = get_taxonomies(filters=filters, log=False)
+            taxonomies = get_taxonomies(filters=filters, log=False, environment='cs-sandbox-ovh-flex-config')
             assert isinstance(taxonomies, list)
         except:
             self.fail()

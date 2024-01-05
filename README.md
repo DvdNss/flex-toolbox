@@ -28,7 +28,7 @@
   5. Add path to flex toolbox (ex: C:\Users\dvdna\PyCharmProjects\flex_toolbox)  
 
 
-* If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
+* [OPTIONAL] If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
   to your PATH environment variable and update `VARIABLES.py` as follows:
 
     ```python
@@ -36,13 +36,16 @@
     RENDER_WORKFLOW_GRAPHS = True
     ```
 
-You will then be able to use the `ftbx` command anywhere in windows with the options below.
+You will then be able to use the `ftbx` command anywhere with the options below.
 
 ***
 
 ## 2. Linux
 
-* install Python (link above)  
+* install Python
+    ```shell
+    sudo apt-get install python3-pip
+    ```
 
 * clone the repo, install requirements and run ftbx init  
 
@@ -60,7 +63,7 @@ You will then be able to use the `ftbx` command anywhere in windows with the opt
     alias ftbx="python3 path\to\flex_toolbox\ftbx.py"
     ```
 
-* If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
+* [OPTIONAL] If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
   to your PATH environment variable and update `VARIABLES.py` as follows:
 
     ```python
@@ -68,7 +71,7 @@ You will then be able to use the `ftbx` command anywhere in windows with the opt
     RENDER_WORKFLOW_GRAPHS = True
     ```
 
-You will then be able to use the `ftbx` command anywhere in windows with the options below.  
+You will then be able to use the `ftbx` command anywhere with the options below.  
 
 ***
 

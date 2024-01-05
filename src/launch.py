@@ -6,7 +6,8 @@
     DATE: December 21, 2023
 
     DESCRIPTION: Launch command functions
-    
+
+    TEST STATUS: FULLY TESTED
 """
 import json
 import os
@@ -17,12 +18,21 @@ from src.utils import get_items, launch_config_item_instance
 
 
 def launch_command_func(args):
-    """Action on launch command. """
+    """
+    Action on launch command.
+
+    TEST STATUS: FULLY TESTED
+    """
+
+    instance_to_config_item_map = {
+        'jobs': 'actions',
+        'workflows': 'workflowDefinitions',
+    }
 
     payload = {}
 
     # check that config instance exists
-    config_item = "actions" if args.config_item == "jobs" else "workflowDefinitions"
+    config_item = instance_to_config_item_map.get(args.config_item)
     item = get_items(config_item=config_item, filters=['exactNameMatch=true', f'name={args.item_name}'],
                      environment=args.in_, log=False)
     try:
@@ -87,3 +97,5 @@ def launch_command_func(args):
     instance = launch_config_item_instance(config_item=args.config_item, payload=payload, environment=args.in_)
     print(
         f"Instance ID {instance.get('id')} [{args.config_item[:-1]}:{instance.get('name')}] has been launched successfully.\n ")
+
+    return instance

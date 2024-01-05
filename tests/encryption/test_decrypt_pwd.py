@@ -29,6 +29,19 @@ class TestEncryptPwd(TestCase):
         # clean
         os.remove('.k')
 
+    def test_decrypt_pwd_special_char(self):
+        # ins
+        pwd = "p#$$sw0rD"
+
+        # outs
+        encrypted_pwd = encrypt_pwd(pwd=pwd, key_path=".k")
+
+        # test
+        assert decrypt_pwd(pwd=encrypted_pwd, key_path=".k") == pwd
+
+        # clean
+        os.remove('.k')
+
     def test_decrypt_pwd_invalid(self):
         # ins
         pwd = "this is a pwd"

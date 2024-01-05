@@ -25,7 +25,7 @@ class TestRetryCommandFunc(TestCase):
         # ins
         args = argparse.Namespace()
         args.config_item = 'jobs'
-        args.from_ = 'default'
+        args.from_ = 'cs-sandbox-ovh-flex-config'
         args.filters = ['limit=1']
         args.file = None
 
@@ -42,7 +42,7 @@ class TestRetryCommandFunc(TestCase):
         # ins
         args = argparse.Namespace()
         args.config_item = 'jobs'
-        args.from_ = 'default'
+        args.from_ = 'cs-sandbox-ovh-flex-config'
         args.filters = []
         args.file = 'instances_to_be_retried.csv'
 
@@ -64,7 +64,7 @@ class TestRetryCommandFunc(TestCase):
         # ins
         args = argparse.Namespace()
         args.config_item = 'jobs'
-        args.from_ = 'default'
+        args.from_ = 'cs-sandbox-ovh-flex-config'
         args.filters = []
         args.file = 'instances_to_be_retried.json'
 
@@ -86,7 +86,7 @@ class TestRetryCommandFunc(TestCase):
         # ins
         args = argparse.Namespace()
         args.config_item = 'workflows'
-        args.from_ = 'default'
+        args.from_ = 'cs-sandbox-ovh-flex-config'
         args.filters = ['limit=1']
         args.file = None
 
@@ -103,7 +103,7 @@ class TestRetryCommandFunc(TestCase):
         # ins
         args = argparse.Namespace()
         args.config_item = 'workflows'
-        args.from_ = 'default'
+        args.from_ = 'cs-sandbox-ovh-flex-config'
         args.filters = []
         args.file = 'instances_to_be_retried.csv'
 
@@ -125,7 +125,7 @@ class TestRetryCommandFunc(TestCase):
         # ins
         args = argparse.Namespace()
         args.config_item = 'workflows'
-        args.from_ = 'default'
+        args.from_ = 'cs-sandbox-ovh-flex-config'
         args.filters = []
         args.file = 'instances_to_be_retried.json'
 

@@ -6,7 +6,8 @@
     DATE: September 14, 2023
 
     DESCRIPTION: push command functions
-    
+
+    TEST STATUS: FULLY TESTED
 """
 import json
 import os
@@ -35,12 +36,24 @@ UPDATE_FIELDS = [
     'timeout',
     'undoAction',
     'useLatestAvailableVersion',
-    'visibilityIds'
+    'visibilityIds',
+    'firstName',
+    'lastName',
+    'phoneNumber',
+    'company',
+    'addressLine1',
+    'addressLine2',
+    'addressLine3',
+    'quote',
 ]
 
 
 def push_command_func(args):
-    """Action on push command. """
+    """
+    Action on push command.
+
+    TEST STATUS: FULLY TESTED
+    """
 
     # get default env alias if not specified in args
     src_environment = get_default_env_alias() if args.from_ == 'default' else args.from_
@@ -78,6 +91,8 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
     """
     Push action for Flex.
 
+    TEST STATUS: DOES NOT REQUIRE TESTING
+
     :param config_item: config entity
     :param item_name: item name
     :param item_config: item config
@@ -107,7 +122,7 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
         plugin = item_config.get('action').get('pluginClass')
         is_item_instance = True
     else:
-        query_content = f"name={item_name};exactNameMatch=true"
+        query_content = f"id={item_id}"
 
     # check if item already exists first
     item = query(method="GET", url=f"{config_item};{query_content}", log=False,
@@ -145,8 +160,8 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
             query(method="POST", url=f"{config_item}/{item_id}/actions", payload={"action": "enable"}, log=False,
                   environment=dest_environment)
 
-    # item exists, update it
-    elif total_count == 1 and not is_item_instance:
+    # item exists and name matches, update it
+    elif total_count == 1 and not is_item_instance and item.get(config_item)[0].get('name') == item_name:
 
         item_id = item.get(config_item)[0].get('id')
         plugin = item.get(config_item)[0].get('pluginClass')
@@ -247,14 +262,14 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
                           f"successfully in {dest_environment}.\n")
 
     # push config
-    for item_property in ['configuration', 'metadata', 'definition']:
+    for item_property in ['configuration', 'metadata', 'definition', 'status']:
         if os.path.isfile(f"{src_environment}/{config_item}/{item_name}/{item_property}.json"):
             with open(f"{src_environment}/{config_item}/{item_name}/{item_property}.json", 'r') as config_json:
                 # build payload
                 payload = json.load(config_json)
 
                 # update configuration
-                query(method="PUT", url=f"{config_item}/{item_id}/{item_property}", payload=payload,
+                query(method="PUT" if not item_property == 'status' else 'POST', url=f"{config_item}/{item_id}/{item_property}", payload=payload,
                       environment=dest_environment)
 
                 if log:
