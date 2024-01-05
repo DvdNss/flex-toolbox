@@ -1,10 +1,38 @@
-# __Requirements__
+# FTBX - FLEX TOOLBOX
+
+Just trying to make flex operations faster for all teams.
+
+## Table of Contents
+<details>
+  <summary>Click to expand</summary>
+
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+    - [Windows](#1-windows)
+    - [Linux](#2-linux)
+  - [Usage](#commandssetup)
+    - [ftbx connect](#connect)
+    - [ftbx query](#raw-queries)
+    - [ftbx list](#list-items)
+    - [ftbx pull](#pull-items)
+    - [ftbx push](#push-items)
+    - [ftbx restore](#restore-items)
+    - [ftbx compare](#compare-items)
+    - [ftbx retry](#retry-items)
+    - [ftbx launch](#launch-instances--custom-scripts)
+  - [Errors & fixes](#errors--fixes)
+    - [SSLCertVerificationError](#self-signed-certificates)
+  - [Contact](#contacts)
+  
+</details>
+
+# __REQUIREMENTS__
 
 #### [Python 3.9 (click here to download)](https://www.python.org/downloads/release/python-390/)
 
 ***
 
-# __Installation__
+# __INSTALLATION__
 
 ## 1. Windows
 
@@ -19,16 +47,12 @@
     python3 ftbx.py init
     ```
 
-* add ftbx to your environment variables  
-  
-  1. Windows Menu  
-  2. Edit the system environment variables  
-  3. Environments variables  
-  4. User variables > Path  
-  5. Add path to flex toolbox (ex: C:\Users\dvdna\PyCharmProjects\flex_toolbox)  
+* add `path\to\toolbox` to your `Path` environment variable, example: `C:\Users\dvdna\PycharmProjects\flex_toolbox` 
 
+<details>
+  <summary>[OPTIONAL] Render workflowDefintions as PNG</summary>
 
-* [OPTIONAL] If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
+* If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
   to your PATH environment variable and update `VARIABLES.py` as follows:
 
     ```python
@@ -36,16 +60,13 @@
     RENDER_WORKFLOW_GRAPHS = True
     ```
 
-You will then be able to use the `ftbx` command anywhere with the options below.
+</details>
 
 ***
 
 ## 2. Linux
 
-* install Python
-    ```shell
-    sudo apt-get install python3-pip
-    ```
+* install Python (link above)  
 
 * clone the repo, install requirements and run ftbx init  
 
@@ -63,7 +84,10 @@ You will then be able to use the `ftbx` command anywhere with the options below.
     alias ftbx="python3 path\to\flex_toolbox\ftbx.py"
     ```
 
-* [OPTIONAL] If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
+<details>
+  <summary>[OPTIONAL] Render workflowDefintions as PNG</summary>
+
+* If you want to be able to render workflow graphs as PNG, please download [GraphViz](https://www.graphviz.org/), add it
   to your PATH environment variable and update `VARIABLES.py` as follows:
 
     ```python
@@ -71,11 +95,11 @@ You will then be able to use the `ftbx` command anywhere with the options below.
     RENDER_WORKFLOW_GRAPHS = True
     ```
 
-You will then be able to use the `ftbx` command anywhere with the options below.  
+</details>
 
 ***
 
-# __Commands__
+# __USAGE__
 
 You can use the flag `--help` with any command to show the command arguments (see below).  
 
@@ -116,7 +140,7 @@ optional arguments:
 
 ```
 
-## __Connection/Setup__
+## Connect
 
 ```shell
 ftbx connect <env_url_or_alias> <username> <password>
@@ -126,10 +150,12 @@ ftbx connect <env_url_or_alias> <username> <password>
 > --alias [String]: alias to set for the environment (ex: wb-stg for warner brother STG)  
 
 This command does 3 things:  
-  
-- add environment credentials to your environments.json (encrypted)  
+   
 - check connection against the env with url, username and password  
-- set the environment as your default environment if connection successfull  
+- add environment credentials to your environments.json if successful (encrypted)
+- set the environment as your default environment if successful
+
+If you're looking for how to connect to self-signed environments, see [here](#4-connect-to-self-signed-environments).
 
 ---
 
@@ -137,6 +163,14 @@ This command does 3 things:
 
 ```shell
 ftbx connect "https://devstaging.flex.daletdemos.com" "username" "password"
+```
+
+```shell
+# OUTPUT
+
+STATUS: Connection successful (0.267 seconds)
+
+DEFAULT ENVIRONMENT: https://master.cs-sandbox.flex.cs.dalet.cloud [cs-sandbox-ovh-flex-config] as masteruser
 ```
 
 ---
@@ -147,10 +181,6 @@ ftbx connect "https://devstaging.flex.daletdemos.com" "username" "password"
 # Full URL
 ftbx connect "https://devstaging.flex.daletdemos.com"
 
-# Partial URL
-ftbx connect "daletdemos.com"
-ftbx connect "devstaging.flex"
-
 # Alias
 ftbx connect "dalet-sandbox"
 ```
@@ -158,7 +188,9 @@ ftbx connect "dalet-sandbox"
 ```shell
 # OUTPUT
 
-Successfully connected to https://master.cs-sandbox.flex.cs.dalet.cloud - this environment is now your default environment.
+STATUS: Connection successful (0.267 seconds)
+
+DEFAULT ENVIRONMENT: https://master.cs-sandbox.flex.cs.dalet.cloud [cs-sandbox-ovh-flex-config] as masteruser
 ```
 
 ---
@@ -179,6 +211,26 @@ DEFAULT             ALIAS                                   URL                 
                                 wb-stg      https://vault.stg.archive.warnerbros.com    dnaisse  
                                wb-prod          https://vault.archive.warnerbros.com    dnaisse  
           master.firstmedia.ooflex.net          https://master.firstmedia.ooflex.net masteruser  
+```
+
+#### 4. Connect to self-signed environments
+
+Environments deployed with a self-signed certificate are not trusted by default. In order to trust this certification authority, set the environment variable `REQUESTS_CA_BUNDLE` to the path to the certificate of the root certification authority. Like:
+
+```shell
+# POSIX
+export REQUESTS_CA_BUNDLE=/path/to/cert
+
+# Windows - PowerShell
+Set-Item Env:REQUESTS_CA_BUNDLE "path\to\cert"
+```
+
+#### Download Flex root certificate authority certificate
+
+This can be done with most web browser. But here is a command for POSIX system.
+
+```shell
+echo quit | openssl s_client -showcerts -servername "devstaging.flex.daletdemos.com" -connect devstaging.flex.daletdemos.com:443 > cacert.pem
 ```
 
 ## __Raw Queries__
@@ -204,14 +256,14 @@ This command queries any env (without the need of setting up headers etc...) and
 ftbx query GET "actions/410"
 # Full url
 ftbx query GET "https://master.cs-sandbox.flex.cs.dalet.cloud/api/actions/410"
-# Env alias (can be partial too)
+# Env alias
 ftbx query GET "actions/410" --from "cs-sbx"
 
 # POST/PUT (same args as above, plus --payload)
 ftbx query PUT "actions/410/configuration" --payload "payload.json"
 
-# Retry a failed job with command line arguments
-ftbx query POST "jobs/1213/actions" --payload "action=retry"
+# Cancel a failed job with command line arguments
+ftbx query POST "jobs/1213/actions" --payload "action=cancel"
 ```
 
 ```shell
@@ -230,8 +282,8 @@ ftbx list <config_item>
 
 > options:  
 > --from [String]: environment to query if not default environment  
-> --filters [String(s)]: filters to apply, that are used directly within the query  
-> --post-filters [String(s)]: post retrieval filters, that are applied after query (operators: '!=', '>=', '<=', '~', '=', '<', '>')  
+> --filters [String(s)]: filters to apply, that are used directly within the query (see available filters [here](https://help.dalet.com/daletflex/admin/developer_guide/apis/apis.html))  
+> --post-filters [String(s)]: post retrieval filters, that are applied after query (operators: '!=', '!~', '>=', '<=', '~', '=', '<', '>')  
 
 
 This command queries any env and displays the main info of the requested items, as well as the requested post_filters
@@ -262,6 +314,9 @@ values. Two files will then be created:
   
   # List all actions with concurrency > 0 from default env
   ftbx list actions --post-filters "concurrencyJobsLimit>0"
+  
+  # List all workflows in a corrupted state
+  ftbx list workflows --fitlers "status=Running" --post-filters "jobs.jobs[-1].status!=Running"
   ```
   
   ```shell
@@ -295,7 +350,7 @@ ftbx pull <config_item>
 
 > options:  
 > --from [String(s)]: environments to pull from if not default environment  
-> --filters [String(s)]: filters to apply, that are used directly within the query  
+> --filters [String(s)]: filters to apply, that are used directly within the query (see available filters [here](https://help.dalet.com/daletflex/admin/developer_guide/apis/apis.html))  
 > --with-dependencies [Boolean - default:False]: whether to retrieve all the items dependencies (ex: workflows of launch actions etc..)  
 > --post-filters [String(s)]: post retrieval filters, that are applied after query (operators: '!=', '>=', '<=', '~', '=', '<', '>')  
 
@@ -305,7 +360,7 @@ This command queries any env and locally creates folders/files for the requested
 - `<config_item>/`  
     - `<item_name>/`  
         - `_object.json`: main config of the item  
-        - `<item_property>.json`: item properties (ex: configuration, variables..)  
+        - `<item_property>.json`: item properties (ex: configuration, variables, status..)  
         - `script.groovy`: groovy file with code if any (actions etc...)  
         - `body.html`: html file with html code if any (message templates etc...)  
 
@@ -369,7 +424,8 @@ This command pushes local items to the destination environments. Process is as s
 4. pull updated items from the destination environment for verification purposes  
 5. [OPTIONAL] retry given failed jobs with new configuration (see file formats and examples below)  
 
-* CSV format:  
+<details><summary>CSV (same as .csv file resulting from `ftbx list`)</summary>
+
 CSV file must contain at least the "id" column, the number/name/order of the other columns doesn't matter.  
 
 | id  | other_column_name | other_column_status |
@@ -378,7 +434,10 @@ CSV file must contain at least the "id" column, the number/name/order of the oth
 | 239 | job2              | Failed              |
 | 240 | job3              | Failed              |
 
-* JSON format:  
+</details> 
+
+<details><summary>JSON (same as .json file resulting from `ftbx list`)</summary>
+
 JSON file must contain a dict with an "id" key for each instance, the number/name/order of the other keys doesn't matter.  
 
 ```json
@@ -389,6 +448,7 @@ JSON file must contain a dict with an "id" key for each instance, the number/nam
   ...
 }
 ```
+</details>
 
 ---
 
@@ -440,8 +500,7 @@ ftbx compare <config_item> <list_of_envs>
 ```
 
 > options:  
-> --filters [String(s)]: filters to apply, that are used directly within the query  
-
+> --filters [String(s)]: filters to apply, that are used directly within the query (see available filters [here](https://help.dalet.com/daletflex/admin/developer_guide/apis/apis.html))  
 
 This command compares items from different environments. The first environment provided in the list is always the reference environment. The list of differences will then be saved in a `compare/` folder with a TSV file for each item (no file if no differences).  
 
@@ -454,7 +513,11 @@ This command compares items from different environments. The first environment p
 #### 1. Compare items
 
 ```shell
+# Compare action "check-end-node-wf" between wb-dev, wb-stg and wb-prod
 ftbx compare actions "wb-dev" "wb-stg" "wb-prod" --filters "name=check-end-node-wf"
+
+# Compare all actions between wb-dev, wb-stg and wb-prod
+ftbx compare actions "wb-dev" "wb-stg" "wb-prod"
 ```
 
 ```shell
@@ -500,13 +563,14 @@ ftbx retry <config_item> <options>
 ```
 
 > options:  
-> --filters [String(s)]: filters to apply, that are used directly within the query  
+> --filters [String(s)]: filters to apply, that are used directly within the query (see available filters [here](https://help.dalet.com/daletflex/admin/developer_guide/apis/apis.html))  
 > --from [String]: environment alias if not default  
 > --file [String]: JSON or CSV file to take as input  
 
-This command bulk retries job/workflow instances within a Flex environment, either from a query or from JSON/CSV files.  
+This command bulk retries job/workflow instances within a Flex environment, either from a query or from JSON/CSV files (see formats below).  
 
-* CSV format:  
+<details><summary>CSV (same as .csv file resulting from `ftbx list`)</summary>
+
 CSV file must contain at least the "id" column, the number/name/order of the other columns doesn't matter.  
 
 | id  | other_column_name | other_column_status |
@@ -515,17 +579,21 @@ CSV file must contain at least the "id" column, the number/name/order of the oth
 | 239 | job2              | Failed              |
 | 240 | job3              | Failed              |
 
-* JSON format:  
+</details> 
+
+<details><summary>JSON (same as .json file resulting from `ftbx list`)</summary>
+
 JSON file must contain a dict with an "id" key for each instance, the number/name/order of the other keys doesn't matter.  
 
 ```json
 {
-  "workflow_1": {"id": 238, "other_key_1": "..."},
-  "workflow_2": {"id": 239, "other_key_1": "..."},
-  "workflow_3": {"id": 240, "other_key_1": "..."},
+  "failed_job_1": {"id": 238, "other_key_1": "..."},
+  "failed_job_2": {"id": 239, "other_key_1": "..."},
+  "failed_job_3": {"id": 240, "other_key_1": "..."},
   ...
 }
 ```
+</details>
 
 ---
 
@@ -564,7 +632,7 @@ ftbx launch <config_item> <item_name> <options>
 
 > options:  
 > --in [String]: environment alias if not default  
-> --params [String(s)]: params to use for the launched instance  
+> --params [String(s)]: params to use for the launched instance (see available parameters [here](https://help.dalet.com/daletflex/admin/developer_guide/apis/apis.html))  
 > --from-file [String]: JSON file to take as input (contained values will replace --params)  
 > --use-local [Boolean - default: False]: whether to push the local config before launching the instance  
 
@@ -672,3 +740,17 @@ ftbx push jobs 308  # finally works!
 
 # 5. I can now copy the script to a new action since I know my code works
 ```
+
+# ERRORS & FIXES
+
+### Self-signed certificates
+```shell
+ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1006)
+```
+Fix: see [4. Connect to self-signed environments](#4-connect-to-self-signed-environments)
+
+---
+
+# CONTACTS
+
+David NAISSE - [dnaisse@dalet.com](dnaisse@dalet.com)
