@@ -17,10 +17,9 @@ from typing import Union
 import pandas as pd
 from tqdm import tqdm
 
-from src.connect import get_default_account_id
 from src.env import get_default_env_alias
 from src.pull import save_items
-from src.utils import get_items, reformat_tabs, reformat_spaces, query, enumerate_sub_items
+from src.utils import get_items, reformat_tabs, reformat_spaces, query, enumerate_sub_items, get_default_account_id
 
 UPDATE_FIELDS = [
     'accountId',
@@ -269,7 +268,8 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
                 payload = json.load(config_json)
 
                 # update configuration
-                query(method="PUT" if not item_property == 'status' else 'POST', url=f"{config_item}/{item_id}/{item_property}", payload=payload,
+                query(method="PUT" if not item_property == 'status' else 'POST',
+                      url=f"{config_item}/{item_id}/{item_property}", payload=payload,
                       environment=dest_environment)
 
                 if log:

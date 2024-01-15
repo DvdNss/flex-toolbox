@@ -16,7 +16,6 @@ from requests.auth import HTTPBasicAuth
 
 from src.encryption import decrypt_pwd
 from src.env import read_environments_json, add_or_update_environments_json
-from src.utils import query
 
 # global variables
 PAYLOAD = ""
@@ -100,26 +99,7 @@ def connect(url_or_alias: str, username: str = None, password: str = None, alias
         alias=alias,
         is_default=True
     )
-    print(f"\nDEFAULT ENVIRONMENT: {default_env.get('url')} [{alias}] as {default_env.get('username')}\n") if log else None
+    print(
+        f"\nDEFAULT ENVIRONMENT: {default_env.get('url')} [{alias}] as {default_env.get('username')}\n") if log else None
 
     return True
-
-
-def get_default_account_id(environment: str = "default"):
-    """
-    Retrieve account id for the default env.
-
-    TEST STATUS: FULLY TESTED
-
-    :return:
-    """
-
-    # get default account id
-    try:
-        accounts = query(method="GET", url="accounts;limit=1", log=False, environment=environment)['accounts']
-        account_id = accounts[0]['id']
-
-        return account_id
-    except:
-        print(f"Failed to retrieve default account.")
-        return 0

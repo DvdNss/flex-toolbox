@@ -10,7 +10,7 @@
 """
 from unittest import TestCase
 
-from src.connect import get_default_account_id
+from src.utils import get_default_account_id
 
 
 class TestGetDefaultAccountId(TestCase):

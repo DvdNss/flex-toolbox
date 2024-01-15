@@ -83,6 +83,8 @@ if __name__ == "__main__":
     push_command.add_argument('--to', type=str, nargs='*', default=["default"], help='Environments to push to')
     push_command.add_argument('--push-to-failed-jobs', nargs='?', const=True, default=False, help='Whether to retry failed jobs with new code. If a value is provided, it will be treated as the filename.')
     # push_command.add_argument('--all', type=bool, help='Whether to push all config items or not')
+    # todo: --retry
+    # todo: same syntax than pull
     push_command.set_defaults(func=push_command_func)
 
     # restore
@@ -127,6 +129,8 @@ if __name__ == "__main__":
     launch_command.set_defaults(func=launch_command_func)
 
     # todo:
+    #     push with rename should delete old local file
+    #     create items from CSV
     #     logs and log file
     #     push workflows + their scripts
     #     cancel

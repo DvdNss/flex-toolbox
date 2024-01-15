@@ -72,6 +72,15 @@ def apply_post_retrieval_filters(items, filters, log: bool = True):
                     value = str_to_bool(str(value))
                 elif isinstance(item_value, int):
                     value = int(value)
+                # todo: handle dates
+                # elif isinstance(item_value, str):
+                #     try:
+                #         value: datetime = datetime.datetime.strptime(value, '%d %b %Y %H:%M:%S %z')
+                #         print(value, type(value))
+                #         item_value: datetime = datetime.datetime.strptime(item_value, '%d %b %Y %H:%M:%S %z')
+                #         print(item_value, type(item_value))
+                #     except:
+                #         pass
 
                 # switch
                 if operator == '=':
@@ -405,7 +414,8 @@ def enumerate_sub_items(config_item: str):
         return VARIABLES.WORKSPACES_SUB_ITEMS
 
 
-def get_full_items(config_item, filters, post_filters: List = [], save: bool = False, with_dependencies: bool = False,
+def get_full_items(config_item, filters: List = [], post_filters: List = [], save: bool = False,
+                   with_dependencies: bool = False,
                    log: bool = True, environment: str = "default", cmd: str = None):
     """
     Get full config items, including sub items, with filters.
@@ -516,6 +526,11 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'tasks':
+        # add account ID by default otherwise some tasks are missing
+        try:
+            filters.append(f"accountId={get_default_account_id(environment=environment)}")
+        except:
+            filters = [f"accountId={get_default_account_id(environment=environment)}"]
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'taxonomies':
@@ -539,16 +554,21 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'workflows':
-        # retrieve variables by default
+        # retrieve workflow variables by default
         filters.append("includeVariables=true") if "includeVariables=false" not in filters else None
-        # mute jobs if asked to
-        # todo: rework includeJobs and includeVariables?
-        if any(f in filters for f in ["includeJobs=false", "includeJobs=False"]):
-            sub_items.remove("jobs")
-            filters.remove("includeJobs=false") if "includeJobs=false" in filters else None
-            filters.remove("includeJobs=False") if "includeJobs=False" in filters else None
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log, environment=environment)
+        # pull workflow jobs
+        if cmd != 'list':
+            for item in sorted_items:
+                jobs = {}
+                for job in tqdm(sorted_items.get(item).get('jobs').get('jobs'),
+                                desc=f"Retrieving workflow ID {sorted_items.get(item).get('id')} jobs"):
+                    job_id = job.get('id')
+                    jobs.update(get_full_items(config_item='jobs', filters=[f'id={job_id}'], log=False,
+                                               environment=environment))
+                save_items(config_item='jobs', items=jobs, log=False, environment=environment)
+
     elif config_item == 'workspaces':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log, environment=environment)
@@ -1447,3 +1467,23 @@ def convert_to_native_type(string: str):
             else:
                 # default to str
                 return string
+
+
+def get_default_account_id(environment: str = "default"):
+    """
+    Retrieve account id for the default env.
+
+    TEST STATUS: FULLY TESTED
+
+    :return:
+    """
+
+    # get default account id
+    try:
+        accounts = query(method="GET", url="accounts;limit=1", log=False, environment=environment)['accounts']
+        account_id = accounts[0]['id']
+
+        return account_id
+    except:
+        print(f"Failed to retrieve default account.")
+        return 0

@@ -66,7 +66,11 @@ Just trying to make flex operations faster for all teams.
 
 ## 2. Linux
 
-* install Python (link above)  
+* install Python
+
+  ```shell
+  sudo apt-get install python3-pip
+  ```
 
 * clone the repo, install requirements and run ftbx init  
 
