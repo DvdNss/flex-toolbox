@@ -137,6 +137,7 @@ if __name__ == "__main__":
     #     sync
     #     major speedup required for get_items with threads
     #     listen
+    #     sort post-filters jobs and events start/time
 
     args = parser.parse_args()
     args.func(args)

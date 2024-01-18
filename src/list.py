@@ -106,7 +106,7 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
     elif config_item == 'workspaces':
         log_fields = ['name', 'id']
     elif config_item == 'all':
-        print("This command is not avaiable. ")
+        print("This command is not available. ")
         quit()
 
     # add post_filters to displayed data if not script (otherwise unreadable)

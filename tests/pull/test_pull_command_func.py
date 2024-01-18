@@ -18,7 +18,7 @@ from src.pull import pull_command_func
 
 class TestPullCommandFunc(TestCase):
 
-    def test_pull_command_func(self):
+    def test_pull_command_func_jef_script_with_imports_and_jars(self):
         # ins
         args = argparse.Namespace()
         args.config_item = 'actions'
@@ -32,7 +32,10 @@ class TestPullCommandFunc(TestCase):
         pull_command_func(args)
 
         # test
-        assert os.path.isdir(env_alias) and os.path.isdir(os.path.join(env_alias, 'actions', 'ftbx-action-dnaisse'))
+        assert os.path.isdir(env_alias) and os.path.isdir(os.path.join(env_alias, 'actions', 'ftbx-action-dnaisse')) and \
+               os.path.isfile(
+                   os.path.join(env_alias, 'actions', 'ftbx-action-dnaisse', 'jars.json')) and os.path.isfile(
+            os.path.join(env_alias, 'actions', 'ftbx-action-dnaisse', 'script.groovy'))
 
         # reset
         shutil.rmtree(env_alias, ignore_errors=False, onerror=None)
@@ -224,7 +227,9 @@ class TestPullCommandFunc(TestCase):
         pull_command_func(args)
 
         # test
-        assert os.path.isdir(env_alias) and os.path.isdir(os.path.join(env_alias, 'actions', 'ftbx-action-dnaisse')) and os.path.isdir(os.path.join(env_alias, 'taxonomies')) and os.path.isdir(os.path.join(env_alias, 'workspaces'))
+        assert os.path.isdir(env_alias) and os.path.isdir(
+            os.path.join(env_alias, 'actions', 'ftbx-action-dnaisse')) and os.path.isdir(
+            os.path.join(env_alias, 'taxonomies')) and os.path.isdir(os.path.join(env_alias, 'workspaces'))
 
         # reset
         shutil.rmtree(env_alias, ignore_errors=False, onerror=None)

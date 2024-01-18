@@ -107,6 +107,7 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
     payload = {}
     item_id = item_config['id']
     imports = []
+    jars = []
     plugin = None
     is_item_instance = False
 
@@ -186,6 +187,11 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
                     imports.append({'value': line[7:], 'isExpression': False})
                     script_content = script_content.replace(line + "\n", "")
 
+            # get jars
+            if os.path.isfile(f"{src_environment}/{config_item}/{item_name}/jars.json"):
+                with open(f"{src_environment}/{config_item}/{item_name}/jars.json") as jars_file:
+                    jars = json.load(jars_file)
+
             # get code
             last_char = script_content.rindex("}")
             script_content = script_content[:last_char - 1].replace("class Script extends PluginCommand {", "")
@@ -220,8 +226,9 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
                     }
 
                 # imports
-                if imports:
-                    payload['internal-script']['script-import'] = imports
+                if imports: payload['internal-script']['script-import'] = imports
+                if jars: payload['internal-script']['internal-jar-url'] = jars
+
             # groovy script
             elif plugin == "tv.nativ.mio.plugins.actions.script.GroovyScriptCommand":
 
@@ -233,8 +240,11 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
                 }
 
                 # imports
-                if imports:
-                    payload['imports'] = {"import": imports}
+                tmp_imports = {'imports': {}}
+                if imports: tmp_imports['imports']["import"] = imports
+                if jars: tmp_imports['imports']["jar-url"] = jars
+                payload.update(tmp_imports)
+
             # groovy decision
             elif plugin == "tv.nativ.mio.plugins.actions.decision.ScriptedDecisionCommand" or \
                     "tv.nativ.mio.plugins.actions.decision.multi.ScriptedMultiDecisionCommand":
@@ -247,8 +257,10 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
                 }
 
                 # imports
-                if imports:
-                    payload['imports'] = {"import": imports}
+                tmp_imports = {'imports': {}}
+                if imports: tmp_imports['imports']["import"] = imports
+                if jars: tmp_imports['imports']["jar-url"] = jars
+                payload.update(tmp_imports)
 
             # update configuration
             query(method="PUT", url=f"{config_item}/{item_id}/configuration", payload=payload,

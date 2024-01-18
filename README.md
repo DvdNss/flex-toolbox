@@ -80,13 +80,6 @@ Just trying to make flex operations faster for all teams.
     pip install -r requirements.txt
     python3 ftbx.py init
     ```
-  
-* add ftbx to your aliases  
-
-    ```shell
-    # in ~/.bashrc
-    alias ftbx="python3 path\to\flex_toolbox\ftbx.py"
-    ```
 
 <details>  
   <summary>[OPTIONAL] Render workflowDefintions as PNG</summary>  

@@ -228,7 +228,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
 
                 # add batch of items to the list
                 items.extend(items_batch[config_item] if config_item in items_batch else items_batch)
-            except:
+            except AttributeError:
                 print(f"API error for batch_size={batch_size} and offset={offset}, skipping...")
 
             # incr. offset
@@ -646,12 +646,26 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
             # if groovy script
             if 'script-contents' in items.get(item).get('configuration').get('instance'):
                 create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
+                if items.get(item).get('configuration').get('instance').get('imports', {}).get('jar-url'):
+                    with open(f"{environment}/{config_item}/{folder_name}/jars.json", "w") as jars_config:
+                        json.dump(items.get(item).get('configuration').get('instance').get('imports').get('jar-url'),
+                                  jars_config, indent=2)
                 items.get(item).get('configuration').get('instance').pop('script-contents')
+            # if jef
             elif 'internal-script' in items.get(item).get('configuration').get('instance'):
                 create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
+                if items.get(item).get('configuration').get('instance').get('internal-script', {}).get('internal-jar-url'):
+                    with open(f"{environment}/{config_item}/{folder_name}/jars.json", "w") as jars_config:
+                        json.dump(items.get(item).get('configuration').get('instance').get('internal-script').get(
+                            'internal-jar-url'), jars_config, indent=2)
                 items.get(item).get('configuration').get('instance').pop('internal-script')
+            # if groovy decision
             elif 'script_type' in items.get(item).get('configuration').get('instance'):
                 create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
+                if items.get(item).get('configuration').get('instance').get('imports', {}).get('jar-url'):
+                    with open(f"{environment}/{config_item}/{folder_name}/jars.json", "w") as jars_config:
+                        json.dump(items.get(item).get('configuration').get('instance').get('imports').get('jar-url'),
+                                  jars_config, indent=2)
                 items.get(item).get('configuration').get('instance').pop('script_type')
             else:
                 with open(f"{environment}/{config_item}/{folder_name}/configuration.json", "w") as item_config:
@@ -1195,11 +1209,11 @@ def query(method: str, url: str, payload=None, log: bool = True, environment: st
         if isinstance(query_result, list):
             pass
         else:
-            raise Exception(f"{ex}: {query_result}")
+            raise TypeError(f"{ex}: {query_result}")
 
     # exception handler
     if isinstance(query_result, dict) and 'errors' in query_result:
-        raise Exception(
+        raise AttributeError(
             f"\n\nError while sending {query}. \nError message: {str(query_result['errors'])}\n ")
 
     return query_result
