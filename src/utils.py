@@ -72,6 +72,15 @@ def apply_post_retrieval_filters(items, filters, log: bool = True):
                     value = str_to_bool(str(value))
                 elif isinstance(item_value, int):
                     value = int(value)
+                # todo: handle dates
+                # elif isinstance(item_value, str):
+                #     try:
+                #         value: datetime = datetime.datetime.strptime(value, '%d %b %Y %H:%M:%S %z')
+                #         print(value, type(value))
+                #         item_value: datetime = datetime.datetime.strptime(item_value, '%d %b %Y %H:%M:%S %z')
+                #         print(item_value, type(item_value))
+                #     except:
+                #         pass
 
                 # switch
                 if operator == '=':
@@ -219,7 +228,7 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
 
                 # add batch of items to the list
                 items.extend(items_batch[config_item] if config_item in items_batch else items_batch)
-            except:
+            except AttributeError:
                 print(f"API error for batch_size={batch_size} and offset={offset}, skipping...")
 
             # incr. offset
@@ -405,7 +414,8 @@ def enumerate_sub_items(config_item: str):
         return VARIABLES.WORKSPACES_SUB_ITEMS
 
 
-def get_full_items(config_item, filters, post_filters: List = [], save: bool = False, with_dependencies: bool = False,
+def get_full_items(config_item, filters: List = [], post_filters: List = [], save: bool = False,
+                   with_dependencies: bool = False,
                    log: bool = True, environment: str = "default", cmd: str = None):
     """
     Get full config items, including sub items, with filters.
@@ -516,6 +526,11 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'tasks':
+        # add account ID by default otherwise some tasks are missing
+        try:
+            filters.append(f"accountId={get_default_account_id(environment=environment)}")
+        except:
+            filters = [f"accountId={get_default_account_id(environment=environment)}"]
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'taxonomies':
@@ -539,16 +554,21 @@ def get_full_items(config_item, filters, post_filters: List = [], save: bool = F
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log, environment=environment)
     elif config_item == 'workflows':
-        # retrieve variables by default
+        # retrieve workflow variables by default
         filters.append("includeVariables=true") if "includeVariables=false" not in filters else None
-        # mute jobs if asked to
-        # todo: rework includeJobs and includeVariables?
-        if any(f in filters for f in ["includeJobs=false", "includeJobs=False"]):
-            sub_items.remove("jobs")
-            filters.remove("includeJobs=false") if "includeJobs=false" in filters else None
-            filters.remove("includeJobs=False") if "includeJobs=False" in filters else None
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log, environment=environment)
+        # pull workflow jobs
+        if cmd != 'list':
+            for item in sorted_items:
+                jobs = {}
+                for job in tqdm(sorted_items.get(item).get('jobs').get('jobs'),
+                                desc=f"Retrieving workflow ID {sorted_items.get(item).get('id')} jobs"):
+                    job_id = job.get('id')
+                    jobs.update(get_full_items(config_item='jobs', filters=[f'id={job_id}'], log=False,
+                                               environment=environment))
+                save_items(config_item='jobs', items=jobs, log=False, environment=environment)
+
     elif config_item == 'workspaces':
         sorted_items = get_items(config_item=config_item, sub_items=sub_items, filters=filters,
                                  with_dependencies=with_dependencies, log=log, environment=environment)
@@ -626,12 +646,26 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
             # if groovy script
             if 'script-contents' in items.get(item).get('configuration').get('instance'):
                 create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
+                if items.get(item).get('configuration').get('instance').get('imports', {}).get('jar-url'):
+                    with open(f"{environment}/{config_item}/{folder_name}/jars.json", "w") as jars_config:
+                        json.dump(items.get(item).get('configuration').get('instance').get('imports').get('jar-url'),
+                                  jars_config, indent=2)
                 items.get(item).get('configuration').get('instance').pop('script-contents')
+            # if jef
             elif 'internal-script' in items.get(item).get('configuration').get('instance'):
                 create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
+                if items.get(item).get('configuration').get('instance').get('internal-script', {}).get('internal-jar-url'):
+                    with open(f"{environment}/{config_item}/{folder_name}/jars.json", "w") as jars_config:
+                        json.dump(items.get(item).get('configuration').get('instance').get('internal-script').get(
+                            'internal-jar-url'), jars_config, indent=2)
                 items.get(item).get('configuration').get('instance').pop('internal-script')
+            # if groovy decision
             elif 'script_type' in items.get(item).get('configuration').get('instance'):
                 create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
+                if items.get(item).get('configuration').get('instance').get('imports', {}).get('jar-url'):
+                    with open(f"{environment}/{config_item}/{folder_name}/jars.json", "w") as jars_config:
+                        json.dump(items.get(item).get('configuration').get('instance').get('imports').get('jar-url'),
+                                  jars_config, indent=2)
                 items.get(item).get('configuration').get('instance').pop('script_type')
             else:
                 with open(f"{environment}/{config_item}/{folder_name}/configuration.json", "w") as item_config:
@@ -1175,11 +1209,11 @@ def query(method: str, url: str, payload=None, log: bool = True, environment: st
         if isinstance(query_result, list):
             pass
         else:
-            raise Exception(f"{ex}: {query_result}")
+            raise TypeError(f"{ex}: {query_result}")
 
     # exception handler
     if isinstance(query_result, dict) and 'errors' in query_result:
-        raise Exception(
+        raise AttributeError(
             f"\n\nError while sending {query}. \nError message: {str(query_result['errors'])}\n ")
 
     return query_result
@@ -1447,3 +1481,23 @@ def convert_to_native_type(string: str):
             else:
                 # default to str
                 return string
+
+
+def get_default_account_id(environment: str = "default"):
+    """
+    Retrieve account id for the default env.
+
+    TEST STATUS: FULLY TESTED
+
+    :return:
+    """
+
+    # get default account id
+    try:
+        accounts = query(method="GET", url="accounts;limit=1", log=False, environment=environment)['accounts']
+        account_id = accounts[0]['id']
+
+        return account_id
+    except:
+        print(f"Failed to retrieve default account.")
+        return 0

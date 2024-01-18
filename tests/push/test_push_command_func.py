@@ -20,7 +20,7 @@ from src.utils import query
 
 class TestPushCommandFunc(TestCase):
 
-    def test_push_command_func_actions_with_configuration(self):
+    def test_push_command_func_actions_with_jars_and_imports(self):
         # ins
         pull_args = argparse.Namespace()
         pull_args.config_item = 'actions'
@@ -40,7 +40,8 @@ class TestPushCommandFunc(TestCase):
         push_command_func(push_args)
 
         # test
-        assert os.path.isdir('cs-sandbox-ovh-flex-config')
+        assert os.path.isdir('cs-sandbox-ovh-flex-config') and os.path.isfile(
+            os.path.join('cs-sandbox-ovh-flex-config', 'actions', 'ftbx-action-dnaisse', 'jars.json'))
 
         # reset
         shutil.rmtree('cs-sandbox-ovh-flex-config', ignore_errors=False, onerror=None)
@@ -93,10 +94,13 @@ class TestPushCommandFunc(TestCase):
         assert os.path.isdir('cs-sandbox-ovh-flex-config') and os.path.isdir('devstaging.flex.daletdemos.com')
 
         # reset
-        ftbx_action = query(method='GET', url='actions;name=ftbx-action-dnaisse;exactNameMatch=true', environment="devstaging.flex.daletdemos.com")
+        ftbx_action = query(method='GET', url='actions;name=ftbx-action-dnaisse;exactNameMatch=true',
+                            environment="devstaging.flex.daletdemos.com")
         ftbx_action_id = ftbx_action.get('actions')[0].get('id')
-        query(method="POST", url=f"actions/{ftbx_action_id}/actions", payload={'action': 'disable'}, environment="devstaging.flex.daletdemos.com")
-        query(method="POST", url=f"actions/{ftbx_action_id}/actions", payload={'action': 'delete'}, environment="devstaging.flex.daletdemos.com")
+        query(method="POST", url=f"actions/{ftbx_action_id}/actions", payload={'action': 'disable'},
+              environment="devstaging.flex.daletdemos.com")
+        query(method="POST", url=f"actions/{ftbx_action_id}/actions", payload={'action': 'delete'},
+              environment="devstaging.flex.daletdemos.com")
 
         shutil.rmtree('cs-sandbox-ovh-flex-config', ignore_errors=False, onerror=None)
         shutil.rmtree('devstaging.flex.daletdemos.com', ignore_errors=False, onerror=None)

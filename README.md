@@ -66,7 +66,11 @@ Just trying to make flex operations faster for all teams.
 
 ## 2. Linux
 
-* install Python (link above)  
+* install Python
+
+  ```shell
+  sudo apt-get install python3-pip
+  ```
 
 * clone the repo, install requirements and run ftbx init  
 
@@ -75,13 +79,6 @@ Just trying to make flex operations faster for all teams.
     cd flex_toolbox
     pip install -r requirements.txt
     python3 ftbx.py init
-    ```
-  
-* add ftbx to your aliases  
-
-    ```shell
-    # in ~/.bashrc
-    alias ftbx="python3 path\to\flex_toolbox\ftbx.py"
     ```
 
 <details>  
