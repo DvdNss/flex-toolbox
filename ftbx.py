@@ -81,7 +81,7 @@ if __name__ == "__main__":
     push_command.add_argument('item_names', type=str, nargs='*', help='Items to push')
     push_command.add_argument('--from', dest="from_", type=str, default="default", help='Environment to push from')
     push_command.add_argument('--to', type=str, nargs='*', default=["default"], help='Environments to push to')
-    push_command.add_argument('--push-to-failed-jobs', nargs='?', const=True, default=False, help='Whether to retry failed jobs with new code. If a value is provided, it will be treated as the filename.')
+    push_command.add_argument('--push-to-failed-jobs', nargs='?', const=True, default=False, help='Whether to retry failed jobs with new code. If a value is provided, it will be treated as a filename.')
     # push_command.add_argument('--all', type=bool, help='Whether to push all config items or not')
     # todo: --retry
     # todo: same syntax than pull

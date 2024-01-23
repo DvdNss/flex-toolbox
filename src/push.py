@@ -64,10 +64,10 @@ def push_command_func(args):
     # todo: temp fix join bcz jenkins container split args by space
 
     # if path exists
-    if os.path.isdir(f"{src_environment}/{args.config_item}/{item}"):
+    if os.path.isdir(os.path.join(src_environment, args.config_item, item)):
 
         # get obj
-        with open(f"{src_environment}/{args.config_item}/{item}/_object.json", 'r') as config_file:
+        with open(os.path.join(src_environment, args.config_item, item, '_object.json'), 'r') as config_file:
             data = json.load(config_file)
 
         # iterate over dest envs
@@ -122,6 +122,7 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
         plugin = item_config.get('action').get('pluginClass')
         is_item_instance = True
     else:
+        # todo: name based with id query (update in other env)
         query_content = f"id={item_id}"
 
     # check if item already exists first
@@ -176,8 +177,8 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
         query(method="PUT", url=f"{config_item}/{item_id}", payload=payload, environment=dest_environment)
 
     # push script
-    if os.path.isfile(f"{src_environment}/{config_item}/{item_name}/script.groovy"):
-        with open(f"{src_environment}/{config_item}/{item_name}/script.groovy", 'r') as groovy_file:
+    if os.path.isfile(os.path.join(src_environment, config_item, item_name, 'script.groovy')):
+        with open(os.path.join(src_environment, config_item, item_name, 'script.groovy'), 'r') as groovy_file:
             script_content = groovy_file.read().strip() \
                 .replace("import com.ooyala.flex.plugins.PluginCommand", "")
 
@@ -188,8 +189,8 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
                     script_content = script_content.replace(line + "\n", "")
 
             # get jars
-            if os.path.isfile(f"{src_environment}/{config_item}/{item_name}/jars.json"):
-                with open(f"{src_environment}/{config_item}/{item_name}/jars.json") as jars_file:
+            if os.path.isfile(os.path.join(src_environment, config_item, item_name, 'jars.json')):
+                with open(os.path.join(src_environment, config_item, item_name, 'jars.json')) as jars_file:
                     jars = json.load(jars_file)
 
             # get code
@@ -274,8 +275,9 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
 
     # push config
     for item_property in ['configuration', 'metadata', 'definition', 'status']:
-        if os.path.isfile(f"{src_environment}/{config_item}/{item_name}/{item_property}.json"):
-            with open(f"{src_environment}/{config_item}/{item_name}/{item_property}.json", 'r') as config_json:
+        if os.path.isfile(os.path.join(src_environment, config_item, item_name, item_property + '.json')):
+            with open(os.path.join(src_environment, config_item, item_name, item_property + '.json'),
+                      'r') as config_json:
                 # build payload
                 payload = json.load(config_json)
 

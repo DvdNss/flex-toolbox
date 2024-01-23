@@ -49,6 +49,9 @@ def connect(url_or_alias: str, username: str = None, password: str = None, alias
     :return:
     """
 
+    # remove last slash if needed
+    if url_or_alias.endswith('/'): url_or_alias = url_or_alias[:-1]
+
     environments = read_environments_json()
     existing_env = None
     existing_alias = None
@@ -70,8 +73,7 @@ def connect(url_or_alias: str, username: str = None, password: str = None, alias
             url=f"{url}/api/resources;limit=1",
             auth=HTTPBasicAuth(
                 username=username if username else existing_env.get('username'),
-                password=password if password else decrypt_pwd(existing_env.get('password'))),
-            timeout=(1, 1),
+                password=password if password else decrypt_pwd(existing_env.get('password')))
         ).json()
     except AttributeError as ae:
         raise Exception(f"\n\nError: [{url_or_alias}] does not exist. Please check the information provided. \n ")
