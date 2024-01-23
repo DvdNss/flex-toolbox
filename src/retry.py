@@ -45,16 +45,19 @@ def retry_command_func(args):
 
             # iterate over df and retry instances
             for id in tqdm(df['id'], desc=f"Retrying {args.config_item}"):
-                name, progress = retry_config_item_instance(config_item=args.config_item, id=id,
-                                                            environment=environment)
-                retried_instances.loc[len(retried_instances) + 1] = {
-                    'config_item': args.config_item,
-                    'name': name,
-                    'id': id,
-                    'status': "Running",
-                    'progress': str(progress) + "%",
-                }
-
+                # todo: handle errors and log?
+                try:
+                    name, progress = retry_config_item_instance(config_item=args.config_item, id=id,
+                                                                environment=environment)
+                    retried_instances.loc[len(retried_instances) + 1] = {
+                        'config_item': args.config_item,
+                        'name': name,
+                        'id': id,
+                        'status': "Running",
+                        'progress': str(progress) + "%",
+                    }
+                except AttributeError:
+                    pass
         # json
         elif ".json" in args.file:
             with open(args.file, "r") as json_file:

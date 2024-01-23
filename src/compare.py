@@ -10,6 +10,7 @@
     TEST STATUS: FULLY TESTED
 """
 import json
+import os
 
 import numpy as np
 import pandas as pd
@@ -84,7 +85,7 @@ def compare_items(config_item: str, filters: list, environments: list, sub_items
 
         # save df
         if not check_all_x_or_nan(df):
-            df.to_csv(f"compare/{item}.tsv", sep='\t')
+            df.to_csv(os.path.join('compare', item + '.tsv'), sep='\t')
 
     # display
     print("")

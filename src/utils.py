@@ -613,8 +613,8 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
     environment = get_default_env_alias() if environment == "default" else environment
 
     # parent folder
-    create_folder(folder_name=f"{environment}", ignore_error=True)
-    create_folder(folder_name=f"{environment}/{config_item}", ignore_error=True)
+    create_folder(folder_name=environment, ignore_error=True)
+    create_folder(folder_name=os.path.join(environment, config_item), ignore_error=True)
     now = datetime.datetime.now().strftime("%Y-%m-%d %Hh%Mm%Ss")
 
     print("") if log else None
@@ -631,12 +631,12 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
             folder_name = f"{items.get(item).get('name')}".replace("/", "").replace(":", "")
 
         # create object folder
-        create_folder(folder_name=f"{environment}/{config_item}/{folder_name}", ignore_error=True)
-        create_folder(folder_name=f"{environment}/{config_item}/{folder_name}/backup", ignore_error=True)
+        create_folder(folder_name=os.path.join(environment, config_item, folder_name), ignore_error=True)
+        create_folder(folder_name=os.path.join(environment, config_item, folder_name, 'backup'), ignore_error=True)
 
         if backup:
-            create_folder(folder_name=f"{environment}/{config_item}/{folder_name}/backup/{now}", ignore_error=True)
-            folder_name = f"{folder_name}/backup/{now}"
+            create_folder(folder_name=os.path.join(environment, config_item, folder_name, 'backup', now), ignore_error=True)
+            folder_name = os.path.join(folder_name, 'backup', now)
 
         # prevents commit loop
         remove_last_modified_keys(items)
@@ -645,118 +645,118 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
         if 'configuration' in items.get(item) and items.get(item).get('configuration').get('instance'):
             # if groovy script
             if 'script-contents' in items.get(item).get('configuration').get('instance'):
-                create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
+                create_script(item_name=os.path.join(environment, config_item, folder_name), item_config=items.get(item))
                 if items.get(item).get('configuration').get('instance').get('imports', {}).get('jar-url'):
-                    with open(f"{environment}/{config_item}/{folder_name}/jars.json", "w") as jars_config:
+                    with open(os.path.join(environment, config_item, folder_name,'jars.json'), "w") as jars_config:
                         json.dump(items.get(item).get('configuration').get('instance').get('imports').get('jar-url'),
                                   jars_config, indent=2)
                 items.get(item).get('configuration').get('instance').pop('script-contents')
             # if jef
             elif 'internal-script' in items.get(item).get('configuration').get('instance'):
-                create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
+                create_script(item_name=os.path.join(environment, config_item, folder_name), item_config=items.get(item))
                 if items.get(item).get('configuration').get('instance').get('internal-script', {}).get('internal-jar-url'):
-                    with open(f"{environment}/{config_item}/{folder_name}/jars.json", "w") as jars_config:
+                    with open(os.path.join(environment, config_item, folder_name, 'jars.json'), "w") as jars_config:
                         json.dump(items.get(item).get('configuration').get('instance').get('internal-script').get(
                             'internal-jar-url'), jars_config, indent=2)
                 items.get(item).get('configuration').get('instance').pop('internal-script')
             # if groovy decision
             elif 'script_type' in items.get(item).get('configuration').get('instance'):
-                create_script(item_name=f"{environment}/{config_item}/{folder_name}", item_config=items.get(item))
+                create_script(item_name=os.path.join(environment, config_item, folder_name), item_config=items.get(item))
                 if items.get(item).get('configuration').get('instance').get('imports', {}).get('jar-url'):
-                    with open(f"{environment}/{config_item}/{folder_name}/jars.json", "w") as jars_config:
+                    with open(os.path.join(environment, config_item, folder_name, 'jars.json'), "w") as jars_config:
                         json.dump(items.get(item).get('configuration').get('instance').get('imports').get('jar-url'),
                                   jars_config, indent=2)
                 items.get(item).get('configuration').get('instance').pop('script_type')
             else:
-                with open(f"{environment}/{config_item}/{folder_name}/configuration.json", "w") as item_config:
+                with open(os.path.join(environment, config_item, folder_name, 'configuration.json'), "w") as item_config:
                     json.dump(obj=items.get(item).get('configuration').get('instance'), fp=item_config, indent=2)
                     items.get(item).pop('configuration')
 
         if 'asset' in items.get(item) and items.get(item).get('asset'):
-            with open(f"{environment}/{config_item}/{folder_name}/asset.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'asset.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('asset'), fp=item_config, indent=2)
                 items.get(item).pop('asset')
 
         if 'workflowInstance' in items.get(item) and items.get(item).get('workflowInstance'):
-            with open(f"{environment}/{config_item}/{folder_name}/workflowInstance.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'workflowInstance.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('workflowInstance'), fp=item_config, indent=2)
                 items.get(item).pop('workflowInstance')
 
         if 'definition' in items.get(item) and items.get(item).get('definition').get('definition'):
-            with open(f"{environment}/{config_item}/{folder_name}/definition.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'definition.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('definition').get('definition'), fp=item_config, indent=2)
                 items.get(item).pop('definition')
 
         if 'body' in items.get(item) and items.get(item).get('body'):
-            with open(f"{environment}/{config_item}/{folder_name}/body.html", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'body.html'), "w") as item_config:
                 item_config.write(items.get(item).get('body'))
                 items.get(item).pop('body')
 
         if 'workflow' in items.get(item) and items.get(item).get('workflow'):
-            with open(f"{environment}/{config_item}/{folder_name}/workflow.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'workflow.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('workflow'), fp=item_config, indent=2)
                 items.get(item).pop('workflow')
 
         if 'properties' in items.get(item) and items.get(item).get('properties').get('accountProperties'):
-            with open(f"{environment}/{config_item}/{folder_name}/properties.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'properties.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('properties').get('accountProperties'), fp=item_config, indent=2)
                 items.get(item).pop('properties')
 
         if 'references' in items.get(item) and items.get(item).get('references').get('objects'):
-            with open(f"{environment}/{config_item}/{folder_name}/references.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'references.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('references').get('objects'), fp=item_config, indent=2)
                 items.get(item).pop('references')
 
         if 'metadata' in items.get(item) and items.get(item).get('metadata').get('instance'):
-            with open(f"{environment}/{config_item}/{folder_name}/metadata.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'metadata.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('metadata').get('instance'), fp=item_config, indent=2)
                 items.get(item).pop('metadata')
 
         if 'fileInformation' in items.get(item) and items.get(item).get('fileInformation'):
-            with open(f"{environment}/{config_item}/{folder_name}/fileInformation.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'fileInformation.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('fileInformation'), fp=item_config, indent=2)
                 items.get(item).pop('fileInformation')
 
         if 'assetContext' in items.get(item) and items.get(item).get('assetContext'):
-            with open(f"{environment}/{config_item}/{folder_name}/assetContext.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'assetContext.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('assetContext'), fp=item_config, indent=2)
                 items.get(item).pop('assetContext')
 
         if 'members' in items.get(item) and items.get(item).get('members').get('users'):
-            with open(f"{environment}/{config_item}/{folder_name}/members.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'members.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('members').get('users'), fp=item_config, indent=2)
                 items.get(item).pop('members')
 
         if 'role' in items.get(item) and items.get(item).get('role'):
-            with open(f"{environment}/{config_item}/{folder_name}/role.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'role.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('role'), fp=item_config, indent=2)
                 items.get(item).pop('role')
         # todo: convert permissions to dataframe
         if 'permissions' in items.get(item) and items.get(item).get('permissions'):
-            with open(f"{environment}/{config_item}/{folder_name}/permissions.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'permissions.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('permissions'), fp=item_config, indent=2)
                 items.get(item).pop('permissions')
 
         if 'hierarchy' in items.get(item) and items.get(item).get('hierarchy'):
-            with open(f"{environment}/{config_item}/{folder_name}/hierarchy.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'hierarchy.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('hierarchy'), fp=item_config, indent=2)
                 items.get(item).pop('hierarchy')
 
         if 'structure' in items.get(item) and items.get(item).get('structure'):
             if VARIABLES.RENDER_WORKFLOW_GRAPHS:
                 render_workflow(workflow_structure=items.get(item).get('structure'),
-                                save_to=f"{environment}/{config_item}/{folder_name}/")
-            with open(f"{environment}/{config_item}/{folder_name}/structure.json", "w") as item_config:
+                                save_to=os.path.join(environment, config_item, folder_name))
+            with open(os.path.join(environment, config_item, folder_name, 'structure.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('structure'), fp=item_config, indent=2)
                 items.get(item).pop('structure')
 
         if 'variables' in items.get(item) and items.get(item).get('variables'):
-            with open(f"{environment}/{config_item}/{folder_name}/variables.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'variables.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('variables'), fp=item_config, indent=2)
                 items.get(item).pop('variables')
 
         if 'jobs' in items.get(item) and items.get(item).get('jobs').get('jobs'):
-            with open(f"{environment}/{config_item}/{folder_name}/jobs.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'jobs.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('jobs').get('jobs'), fp=item_config, indent=2)
                 items.get(item).pop('jobs')
 
@@ -765,18 +765,18 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
             for idx, logs in enumerate(history.get('events')):
                 history.get('events')[idx].pop('object')
                 history.get('events')[idx].pop('user')
-            with open(f"{environment}/{config_item}/{folder_name}/history.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'history.json'), "w") as item_config:
                 json.dump(obj=items.get(item).get('history'), fp=item_config, indent=2)
                 items.get(item).pop('history')
 
         if 'status' in items.get(item) and items.get(item).get('taskDefinition'):
-            with open(f"{environment}/{config_item}/{folder_name}/status.json", "w") as item_config:
+            with open(os.path.join(environment, config_item, folder_name, 'status.json'), "w") as item_config:
                 json.dump(obj={'status': items.get(item).get('status')}, fp=item_config, indent=2)
                 items.get(item).pop('status')
 
         try:
             if 'relationships' in items.get(item) and items.get(item).get('relationships').get('relationships'):
-                with open(f"{environment}/{config_item}/{folder_name}/relationships.json", "w") as item_config:
+                with open(os.path.join(environment, config_item, folder_name, 'relationships.json'), "w") as item_config:
                     json.dump(obj=items.get(item).get('relationships').get('relationships'), fp=item_config, indent=2)
                     items.get(item).pop('relationships')
         except:
@@ -789,7 +789,7 @@ def save_items(config_item: str, items: dict, backup: bool = False, log: bool = 
             items.get(item).pop('revision')
 
         # save main object
-        with open(f"{environment}/{config_item}/{folder_name}/_object.json", "w") as item_config:
+        with open(os.path.join(environment, config_item, folder_name, '_object.json'), "w") as item_config:
             json.dump(obj=items.get(item), fp=item_config, indent=2)
 
     print(f"{environment}/{config_item} have been retrieved successfully. \n") if items and log else None
@@ -810,20 +810,20 @@ def save_taxonomies(taxonomies, environment: str = "default"):
     environment = get_default_env_alias() if environment == "default" else environment
 
     # create parent folders
-    create_folder(folder_name=f"{environment}", ignore_error=True)
-    create_folder(folder_name=f"{environment}/taxonomies", ignore_error=True)
+    create_folder(folder_name=environment, ignore_error=True)
+    create_folder(folder_name=os.path.join(environment, 'taxonomies'), ignore_error=True)
 
     print("")
 
     for idx, taxonomy in enumerate(taxonomies):
         # create taxonomy folder
-        create_folder(folder_name=f"{environment}/taxonomies/{taxonomy.get('name')}", ignore_error=True)
+        create_folder(folder_name=os.path.join(environment, 'taxonomies', str(taxonomy.get('name'))), ignore_error=True)
 
         # removed useless keys
         remove_last_modified_keys(taxonomies)
 
         # save taxonomy
-        with open(f"{environment}/taxonomies/{taxonomy.get('name')}/_object.json", "w") as item_config:
+        with open(os.path.join(environment, 'taxonomies', taxonomy.get('name'), '_object.json'), "w") as item_config:
             json.dump(obj=taxonomies[idx], fp=item_config, indent=2)
             print(f"{environment}/taxonomies: {taxonomy.get('name')} has been retrieved successfully. ")
 
@@ -1105,13 +1105,13 @@ def get_tags_and_taxonomies(metadata_definitions: dict, save_to: str = "",
 
     # save tags as JSON
     if save_to and 'tagCollections' in mode:
-        with open(f"{save_to}/configs/tags.json", "w") as tags_config:
+        with open(os.path.join(save_to, 'configs', 'tags.json'), "w") as tags_config:
             json.dump(obj=sorted_tag_dict, fp=tags_config, indent=2)
             print(f"tags have been saved to {save_to}/configs/tags.json")
 
     # save taxonomies as JSON
     if save_to and 'taxonomies' in mode:
-        with open(f"{save_to}/configs/taxonomies.json", "w") as taxonomies_config:
+        with open(os.path.join(save_to, 'configs', 'taxonomies.json'), "w") as taxonomies_config:
             json.dump(obj=sorted_tax_dict, fp=taxonomies_config, indent=2)
             print(f"taxonomies have been saved to {save_to}/configs/taxonomies.json. ")
 
@@ -1271,7 +1271,7 @@ def create_script(item_name, item_config):
 
     content = f"{''.join(imports)}\n{script}"
 
-    with open(f"{item_name}/script.groovy", "w") as groovy_file:
+    with open(os.path.join(item_name, 'script.groovy'), "w") as groovy_file:
         groovy_file.write(content)
 
     return content
@@ -1366,27 +1366,27 @@ def config_node(node: dict) -> tuple[str, str, str]:
     if "objectType" in node:
         # Workflow
         if node['objectType']['name'] == "workflow-definition":
-            node_image = f"{os.environ.get('FTBX')}/flex-icons/workflow.png"
+            node_image = os.path.join(os.environ.get('FTBX'), 'flex-icons', 'workflow.png')
             node_color = "GhostWhite"
         # Wizard
         elif node['objectType']['name'] == "wizard":
-            node_image = f"{os.environ.get('FTBX')}/flex-icons/wizard.png"
+            node_image = os.path.join(os.environ.get('FTBX'), 'flex-icons', 'wizard.png')
             node_color = "Yellow"
         # Resource
         elif node['objectType']['name'] == 'resource':
             if node['resourceSubType'] == 'Inbox':
-                node_image = f"{os.environ.get('FTBX')}/flex-icons/resource-inbox.png"
+                node_image = os.path.join(os.environ.get('FTBX'), 'flex-icons', 'resource-inbox.png')
                 node_color = "Lavender"
             else:
-                node_image = f"{os.environ.get('FTBX')}/flex-icons/resource-hot-folder.png"
+                node_image = os.path.join(os.environ.get('FTBX'), 'flex-icons', 'resource-hot-folder.png')
                 node_color = "LightBlue"
         # Event Handler
         elif node['objectType']['name'] == 'event-handler':
-            node_image = f"{os.environ.get('FTBX')}/flex-icons/event-handler.png"
+            node_image = os.path.join(os.environ.get('FTBX'), 'flex-icons', 'event-handler.png')
             node_color = "Grey"
         # Launch Action
         elif node['objectType']['name'] == 'action':
-            node_image = f"{os.environ.get('FTBX')}/flex-icons/workflow.png"
+            node_image = os.path.join(os.environ.get('FTBX'), 'flex-icons', 'workflow.png')
             node_color = "GhostWhite"
             try:
                 node_name = escape(node['configuration']['instance']['workflows'][0]['Workflow']['name'])
@@ -1394,28 +1394,28 @@ def config_node(node: dict) -> tuple[str, str, str]:
                 node_name = escape(node['configuration']['instance']['Workflow']['name'])
         # Timed Action
         elif node['objectType']['name'] == 'timed-action':
-            node_image = f"{os.environ.get('FTBX')}/flex-icons/timed-action.png"
+            node_image = os.path.join(os.environ.get('FTBX'), 'flex-icons', 'timed-action.png')
             node_color = "DarkGrey"
 
     # Style workflow nodes
     elif "type" in node:
         if node['type'] == "ACTION":
-            node_image = f"{os.environ.get('FTBX')}/flex-icons/" + node["action"]["type"].lower() + ".png"
+            node_image = os.path.join(os.environ.get('FTBX'), 'flex-icons', node["action"]["type"].lower() + ".png")
             node_color = "GhostWhite"
             node_action = escape(node["action"]["name"])
         else:
             if node["type"] == "START":
-                node_image = f"{os.environ.get('FTBX')}/flex-icons/start.png"
+                node_image = os.path.join(os.environ.get('FTBX'), 'flex-icons', 'start.png')
                 node_color = "LightGreen"
             if node["type"] == "END":
-                node_image = f"{os.environ.get('FTBX')}/flex-icons/end.png"
+                node_image = os.path.join(os.environ.get('FTBX'), 'flex-icons', 'end.png')
                 node_color = "LightCoral"
             if node["type"] == "FORK":
-                node_image = f"{os.environ.get('FTBX')}/flex-icons/fork.png"
+                node_image = os.path.join(os.environ.get('FTBX'), 'flex-icons','fork.png')
             if node["type"] == "JOIN":
-                node_image = f"{os.environ.get('FTBX')}/flex-icons/join.png"
+                node_image = os.path.join(os.environ.get('FTBX'), 'flex-icons', 'join.png')
             if node["type"] == "TASK":
-                node_image = f"{os.environ.get('FTBX')}/flex-icons/task.png"
+                node_image = os.path.join(os.environ.get('FTBX'), 'flex-icons', 'task.png')
                 node_color = "LightYellow"
 
     # Build label

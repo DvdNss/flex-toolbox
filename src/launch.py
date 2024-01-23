@@ -75,9 +75,9 @@ def launch_command_func(args):
         # get default env alias if not specified in args
         environment = get_default_env_alias() if args.in_ == 'default' else args.in_
         # assert local config exists
-        if os.path.isdir(f"{environment}/{config_item}/{item.get('name')}"):
+        if os.path.isdir(os.path.join(environment, config_item, item.get('name'))):
             # get obj
-            with open(f"{environment}/{config_item}/{item.get('name')}/_object.json", 'r') as config_file:
+            with open(os.path.join(environment, config_item, item.get('name'), '_object.json'), 'r') as config_file:
                 data = json.load(config_file)
             # push
             push_item(

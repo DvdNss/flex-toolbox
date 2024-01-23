@@ -23,10 +23,10 @@ def restore_command_func(args):
     """
 
     # if path exists
-    if os.path.isdir(f"{args.config_item}/{args.item_name}/backup/{args.backup}"):
+    if os.path.isdir(os.path.join(args.config_item, args.item_name, 'backup', args.backup)):
 
         # check if is action
-        with open(f"{args.config_item}/{args.item_name}/backup/{args.backup}/_object.json", 'r') as config_file:
+        with open(os.path.join(args.config_item, args.item_name, 'backup', args.backup, '_object.json', 'r')) as config_file:
             data = json.load(config_file)
 
         if args.config_item == 'actions' and data['objectType']['name'] == 'action':

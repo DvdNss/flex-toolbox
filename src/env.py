@@ -49,8 +49,8 @@ def env_command_func(args):
 
 
 def add_or_update_environments_json(env, username, password, is_default: bool = False, alias: str = None,
-                                    env_file_path: str = f"{os.environ.get('FTBX')}/environments.json",
-                                    key_path: str = f"{os.environ.get('FTBX')}/.k"):
+                                    env_file_path: str = os.path.join(os.environ.get('FTBX'), 'environments.json'),
+                                    key_path: str = os.path.join(os.environ.get('FTBX'), '.k')):
     """
     Add env to environments.json
 
@@ -84,7 +84,7 @@ def add_or_update_environments_json(env, username, password, is_default: bool = 
     return environments['environments'][alias if not is_default else "default"]
 
 
-def read_environments_json(env_file_path: str = f"{os.environ.get('FTBX')}/environments.json"):
+def read_environments_json(env_file_path: str = os.path.join(os.environ.get('FTBX'), 'environments.json')):
     """
     Read or creates the environments.json file.
 
@@ -122,7 +122,7 @@ def get_env(environment: str = "default"):
     return environments['environments'][environment]
 
 
-def get_default_env_alias(env_file_path: str = f"{os.environ.get('FTBX')}/environments.json"):
+def get_default_env_alias(env_file_path: str = os.path.join(os.environ.get('FTBX'), 'environments.json')):
     """
     Get default env alias.
 
