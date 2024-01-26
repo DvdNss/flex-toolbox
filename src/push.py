@@ -78,7 +78,8 @@ def push_command_func(args):
                 item_config=data,
                 push_to_failed_jobs=args.push_to_failed_jobs,
                 src_environment=src_environment,
-                dest_environment=dest_environment
+                dest_environment=dest_environment,
+                retry=args.retry
             )
     else:
         print(f"Cannot find {src_environment}/{args.config_item}/{item}. Please check the information provided. ")
@@ -86,7 +87,7 @@ def push_command_func(args):
 
 def push_item(config_item: str, item_name: str, item_config: dict, restore: bool = False,
               push_to_failed_jobs: Union[bool, str] = False, src_environment: str = "default",
-              dest_environment: str = "default", log=True):
+              dest_environment: str = "default", log=True, retry:bool=False):
     """
     Push action for Flex.
 
@@ -100,6 +101,7 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
     :param src_environment: src environment
     :param dest_environment: dest environment
     :param log: whether to log in terminal
+    :param retry: whether to retry the given instance after pushing changes
     :return:
     """
 
@@ -117,13 +119,15 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
             payload[field] = item_config.get(field)
 
     # id-based or name-based query
-    if config_item in ['jobs', 'workflows']:
+    if config_item in ['jobs', 'workflows', 'tasks', 'assets']:
+        try:
+            plugin = item_config.get('action').get('pluginClass')
+        except:
+            pass
         query_content = f"id={item_id}"
-        plugin = item_config.get('action').get('pluginClass')
         is_item_instance = True
     else:
-        # todo: name based with id query (update in other env)
-        query_content = f"id={item_id}"
+        query_content = f"name={item_name};exactNameMatch=true"
 
     # check if item already exists first
     item = query(method="GET", url=f"{config_item};{query_content}", log=False,
@@ -309,16 +313,16 @@ def push_item(config_item: str, item_name: str, item_config: dict, restore: bool
     #                     f"{src_environment}/{config_item} [{item_property}]: {item_name} has been restored successfully in {dest_environment}.\n")
 
     # retry
-    if is_item_instance:
+    if config_item in ['jobs', 'workflows'] and retry:
         query(method="POST", url=f"{config_item}/{item_id}/actions", payload={"action": "retry"}, log=False)
 
-    # get updated action
+    # post-push retrieval
     updated_item = get_items(config_item=config_item, sub_items=enumerate_sub_items(config_item=config_item),
                              filters=[f"id={item_id}"], environment=dest_environment, log=False)
     save_items(config_item=config_item, items=updated_item, environment=dest_environment, log=False)
 
     # push to failed jobs if needed
-    if config_item == 'actions' and push_to_failed_jobs:
+    if config_item in ['actions'] and push_to_failed_jobs:
 
         failed_jobs = []
 
