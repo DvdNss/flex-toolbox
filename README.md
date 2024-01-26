@@ -40,14 +40,14 @@ Just trying to make flex operations faster for all teams.
 
 * clone the repo, install requirements and run ftbx init    
 
-    ```shell
-    git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
-    cd flex_toolbox
-    pip install -r requirements.txt
-    python3 ftbx.py init
-    ```
+```shell
+git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
+cd flex_toolbox
+pip install -r requirements.txt
+python3 ftbx.py init
+```
 
-* add `path\to\toolbox` to your `Path` environment variable, example: `C:\Users\dvdna\PycharmProjects\flex_toolbox` 
+* add `path\to\toolbox` to your `Path` environment variable, example: `C:\Users\dvdna\PycharmProjects\flex_toolbox`  
 
 <details>  
   <summary>[OPTIONAL] Render workflowDefintions as PNG</summary>  
@@ -68,18 +68,18 @@ Just trying to make flex operations faster for all teams.
 
 * install Python
 
-  ```shell
-  sudo apt-get install python3-pip
-  ```
+```shell
+sudo apt-get install python3-pip
+```
 
 * clone the repo, install requirements and run ftbx init  
 
-    ```shell
-    git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
-    cd flex_toolbox
-    pip install -r requirements.txt
-    python3 ftbx.py init
-    ```
+```shell
+git clone git@bitbucket.org:ooyalaflex/flex-toolbox.git
+cd flex_toolbox
+pip install -r requirements.txt
+python3 ftbx.py init
+```
 
 <details>  
   <summary>[OPTIONAL] Render workflowDefintions as PNG</summary>  
@@ -457,8 +457,8 @@ JSON file must contain a dict with an "id" key for each instance, the number/nam
 # Push action to an env
 ftbx push actions check-end-node-wf # from default env to default env
 
-# Push job (yes, you can pull jobs directly and tweak their code in your IDE)
-ftbx push jobs 294036 # from default env to default env
+# Push job and retry it (yes, you can pull jobs directly and tweak their code in your IDE)
+ftbx push jobs 294036 --retry  
 
 # Push updated action to **ALL** corresponding failed jobs and retry them
 ftbx push actions "check-end-node-wf" --push-to-failed-jobs
@@ -472,7 +472,7 @@ ftbx list jobs --filters "name=check-end-node-wf" "createdFrom=20 Dec 2023"
 ftbx push actions "check-end-node-wf" --push-to-failed-jobs "list.json"
 ftbx push actions "check-end-node-wf" --push-to-failed-jobs "list.csv"
 
-# Push action from wb-dev to wb-stg AND wb-prod (yes)
+# Push (create, or update) action from wb-dev to wb-stg AND wb-prod (yes)
 ftbx push actions "set-asset-metadata" --from "wb-dev" --to "wb-stg" "wb-prod"  
 ```
 

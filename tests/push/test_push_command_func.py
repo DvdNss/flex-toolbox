@@ -36,6 +36,7 @@ class TestPushCommandFunc(TestCase):
         push_args.item_names = ['ftbx-action-dnaisse']
         push_args.from_ = 'cs-sandbox-ovh-flex-config'
         push_args.to = ['cs-sandbox-ovh-flex-config']
+        push_args.retry = False
         push_args.push_to_failed_jobs = None
         push_command_func(push_args)
 
@@ -62,6 +63,8 @@ class TestPushCommandFunc(TestCase):
         push_args.item_names = ['818']
         push_args.from_ = 'cs-sandbox-ovh-flex-config'
         push_args.to = ['cs-sandbox-ovh-flex-config']
+        push_args.retry = False
+
         push_args.push_to_failed_jobs = None
         push_command_func(push_args)
 
@@ -87,6 +90,7 @@ class TestPushCommandFunc(TestCase):
         push_args.item_names = ['ftbx-action-dnaisse']
         push_args.from_ = 'cs-sandbox-ovh-flex-config'
         push_args.to = ['devstaging.flex.daletdemos.com']
+        push_args.retry = False
         push_args.push_to_failed_jobs = None
         push_command_func(push_args)
 
@@ -123,6 +127,7 @@ class TestPushCommandFunc(TestCase):
         push_args.item_names = [f"{task_id}"]
         push_args.from_ = 'cs-sandbox-ovh-flex-config'
         push_args.to = ['cs-sandbox-ovh-flex-config']
+        push_args.retry = False
         push_args.push_to_failed_jobs = None
 
         try:
