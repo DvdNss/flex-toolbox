@@ -735,9 +735,9 @@ ftbx launch jobs "ftbx-script-dnaisse-wb-dev" --params "assetId=809" --use-local
 ftbx pull jobs --filters "id=308"
 
 # 4. Then, I update and push the code until it succeeds
-ftbx push jobs 308  # fails too, I update and push the code again 
-ftbx push jobs 308  # fails too, I update and push the code again 
-ftbx push jobs 308  # finally works!
+ftbx push jobs 308 --retry  # fails too, I update and push the code again 
+ftbx push jobs 308 --retry  # fails too, I update and push the code again 
+ftbx push jobs 308 --retry # finally works!
 
 # 5. I can now copy the script to a new action since I know my code works
 ```

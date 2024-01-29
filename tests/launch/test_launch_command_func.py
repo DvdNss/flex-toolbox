@@ -94,6 +94,6 @@ class TestLaunchCommandFunc(TestCase):
         assert os.path.isfile('launch_params.json') and launched_instance
 
         # reset
-        sleep(1)
+        sleep(3)
         query(method="POST", url=f"jobs/{launched_instance.get('id')}/actions", payload={"action": "cancel"}, environment='cs-sandbox-ovh-flex-config')
         os.remove('launch_params.json')

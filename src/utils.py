@@ -1179,7 +1179,7 @@ def query(method: str, url: str, payload=None, log: bool = True, environment: st
     :param method: method to use from [GET, POST, PUT]
     :param url: url to query after env_url/api/
     :param payload: payload to use for POST & PUT queries
-    :param log: whetherto log performed action in terminal or not
+    :param log: whether to log performed action in terminal or not
 
     :return:
     """
