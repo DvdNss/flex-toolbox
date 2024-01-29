@@ -84,7 +84,6 @@ if __name__ == "__main__":
     push_command.add_argument('--push-to-failed-jobs', nargs='?', const=True, default=False, help='Whether to retry failed jobs with new code. If a value is provided, it will be treated as a filename.')
     push_command.add_argument('--retry', nargs='?', const=True, default=False, help='Whether to retry the given instance after pushing changes (jobs, workflows).')
     # push_command.add_argument('--all', type=bool, help='Whether to push all config items or not')
-    # todo: --retry
     # todo: same syntax than pull
     push_command.set_defaults(func=push_command_func)
 

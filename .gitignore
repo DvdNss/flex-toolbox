@@ -6,6 +6,8 @@
 !/src/
 !/tests/
 !/flex-icons/
+!/templates/
+!/templates/*/*/*.json
 *.bat
 .k
 ftbx.bat
