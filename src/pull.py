@@ -25,8 +25,9 @@ def pull_command_func(args):
     """
 
     # add exactNameMatch=true when name is provided
-    if any('name=' in f for f in args.filters) and not any('fql' in f for f in args.filters):
-        args.filters.append('exactNameMatch=true')
+    if args.filters:
+        if any('name=' in f for f in args.filters) and not any('fql' in f for f in args.filters):
+            args.filters.append('exactNameMatch=true')
 
     # if list of envs provided
     if args.from_:
