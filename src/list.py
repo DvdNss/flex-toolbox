@@ -52,8 +52,9 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
     log_fields = []
 
     # add exactNameMatch=true when name is provided
-    if any('name=' in f for f in filters) and not any('fql' in f for f in filters):
-        filters.append('exactNameMatch=true')
+    if filters:
+        if any('name=' in f for f in filters) and not any('fql' in f for f in filters):
+            filters.append('exactNameMatch=true')
 
     # get items
     sorted_items = get_full_items(config_item=config_item, filters=filters, post_filters=post_filters, environment=environment, cmd="list")
