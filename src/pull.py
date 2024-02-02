@@ -24,6 +24,10 @@ def pull_command_func(args):
     TEST STATUS: FULLY TESTED
     """
 
+    # add exactNameMatch=true when name is provided
+    if any('name=' in f for f in args.filters) and not any('fql' in f for f in args.filters):
+        args.filters.append('exactNameMatch=true')
+
     # if list of envs provided
     if args.from_:
         default_env_before_command = read_environments_json()['environments']['default']

@@ -63,7 +63,7 @@ class TestPullCommandFunc(TestCase):
         # ins
         args = argparse.Namespace()
         args.config_item = 'actions'
-        args.filters = ['name=ftbx-action-dnaisse', 'exactNameMatch=True']
+        args.filters = ['name=ftbx-action-dnaisse', 'limit=1']
         args.from_ = ['cs-sandbox-ovh-flex-config']
         args.post_filters = []
         args.with_dependencies = False

@@ -284,10 +284,11 @@ ftbx list <config_item>
 
 
 This command queries any env and displays the main info of the requested items, as well as the requested post_filters
-values. Two files will then be created:  
+values. A folder and two files will then be created:  
 
-- a list.csv file with a dataframe (excel sheet)  
-- a list.json file with the raw result of the request  
+- `lists/`  
+  - `<timestamp>_<env_alias>_<config_item>_<filters>_<post-filters>.json`  
+  - `<timestamp>_<env_alias>_<config_item>_<filters>_<post-filters>.csv`  
 
 ---
 
