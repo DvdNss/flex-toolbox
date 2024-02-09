@@ -226,6 +226,8 @@ def clean_filename(filename: str):
     """
     Clean filename of special characters.
 
+    TEST STATUS: DOES NOT REQUIRE TESTING
+
     :param filename: filename to clean
     """
 

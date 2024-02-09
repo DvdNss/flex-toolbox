@@ -932,7 +932,7 @@ def find_and_pull_dependencies(json_config: {}):
         else:
             config_item = kebab_to_camel_case(tmp.get('type'))
         get_full_items(config_item=config_item, filters=[f"name={tmp.get('name')}", "exactNameMatch=true"], save=True,
-                       log=False)
+                       log=False, with_dependencies=True)
 
     return dependencies
 
