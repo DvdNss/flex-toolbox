@@ -277,6 +277,15 @@ def get_items(config_item: str, sub_items: List[str] = [], filters: List[str] = 
                             auth=auth,
                             data=PAYLOAD
                         ).content.decode("utf-8", "ignore").strip()
+
+                    # date sorting
+                    match sub_item:
+                        case 'jobs':
+                            sorted_items_dict[item][sub_item]['jobs'] = sorted(sorted_items_dict[item][sub_item]['jobs'], key=lambda x:x['start'])
+                        case 'history':
+                            sorted_items_dict[item][sub_item]['events'] = sorted(sorted_items_dict[item][sub_item]['events'], key=lambda x: x['time'])
+                        case _:
+                            pass
                 except:
                     pass
 
@@ -848,7 +857,7 @@ def get_nested_value(obj, keys):
                 match = int(re.search(r'\[-?\d+\]', key).group(0)[1:-1])
                 # skip if error from API
                 try:
-                    obj = obj[key.split('[')[0]][-match]
+                    obj = obj[key.split('[')[0]][match]
                 except:
                     return None
         elif isinstance(obj, dict) and key in obj:

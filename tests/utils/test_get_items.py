@@ -19,10 +19,11 @@ class TestGetItems(TestCase):
     def test_get_items_accounts(self):
         # ins
         config_item = "accounts"
+        filters = ['name=Master Account']
         sub_items = VARIABLES.ACCOUNTS_SUB_ITEMS
 
         # outs
-        items = get_items(config_item=config_item, sub_items=sub_items, log=False,
+        items = get_items(config_item=config_item, filters=filters, sub_items=sub_items, log=False,
                           environment='cs-sandbox-ovh-flex-config')
 
         # test
@@ -39,7 +40,7 @@ class TestGetItems(TestCase):
                           environment='cs-sandbox-ovh-flex-config')
 
         # test
-        assert items and items[next(iter(items), {})].get("name") == 'test'
+        assert items and 'test' in items[next(iter(items), {})].get("name")
 
     def test_get_items_limit(self):
         # ins

@@ -189,7 +189,7 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
                                         tmp = tmp.get(str(subfield.split('[')[0]))
                                     elif re.search(r"\[-?\d+\]", subfield):
                                         match = int(re.search(r'\[-?\d+\]', subfield).group(0)[1:-1])
-                                        tmp = tmp.get(subfield.split('[')[0])[-match]
+                                        tmp = tmp.get(subfield.split('[')[0])[match]
                                 else:
                                     tmp = tmp.get(subfield)
                                     # replace line breaks otherwise csv is broken
