@@ -126,7 +126,7 @@ class TestListCommandFunc(TestCase):
         args.config_item = 'jobs'
         args.from_ = 'cs-sandbox-ovh-flex-config'
         args.filters = ["status=Completed", "limit=1"]
-        args.post_filters = ['history.events[0].message~completed']
+        args.post_filters = ['history.events[-1].message~completed']
 
         # outs
         filename = list_command_func(args)
@@ -136,7 +136,7 @@ class TestListCommandFunc(TestCase):
 
         # test
         assert os.path.exists(f"{filename}.json") and os.path.exists(f"{filename}.csv") and "completed" in actions[
-            next(iter(actions), {})].get('history').get('events')[0].get('message')
+            next(iter(actions), {})].get('history').get('events')[-1].get('message')
 
         # reset
         shutil.rmtree('lists', ignore_errors=False, onerror=None)

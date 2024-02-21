@@ -10,6 +10,7 @@
 """
 import argparse
 import os.path
+import shutil
 from unittest import TestCase
 
 from src.compare import compare_command_func
@@ -28,10 +29,11 @@ class TestCompareCommandFunc(TestCase):
         compare_command_func(args)
 
         # test
-        assert os.path.isdir('compare') and os.path.isfile('compare.json')
+        assert os.path.isdir('compare_cs-sandbox-ovh-flex-config_default') and os.path.isdir(
+            os.path.join('compare_cs-sandbox-ovh-flex-config_default', 'actions'))
 
         # reset
-        os.remove('compare.json')
+        shutil.rmtree('compare_cs-sandbox-ovh-flex-config_default', ignore_errors=False, onerror=None)
 
     def test_compare_command_func_invalid(self):
         args = argparse.Namespace()
@@ -43,4 +45,4 @@ class TestCompareCommandFunc(TestCase):
         compare_command_func(args)
 
         # test
-        assert not (os.path.isdir('compare') and os.path.isfile('compare.json'))
+        assert not os.path.isdir('compare_cs-sandbox-ovh-flex-config_default')
