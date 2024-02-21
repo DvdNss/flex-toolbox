@@ -284,10 +284,11 @@ ftbx list <config_item>
 
 
 This command queries any env and displays the main info of the requested items, as well as the requested post_filters
-values. Two files will then be created:  
+values. A folder and two files will then be created:  
 
-- a list.csv file with a dataframe (excel sheet)  
-- a list.json file with the raw result of the request  
+- `lists/`  
+  - `<timestamp>_<env_alias>_<config_item>_<filters>_<post-filters>.json`  
+  - `<timestamp>_<env_alias>_<config_item>_<filters>_<post-filters>.csv`  
 
 ---
 
@@ -501,11 +502,7 @@ ftbx compare <config_item> <list_of_envs>
 > options:  
 > --filters [String(s)]: filters to apply, that are used directly within the query (see available filters [here](https://help.dalet.com/daletflex/admin/developer_guide/apis/apis.html))  
 
-This command compares items from different environments. The first environment provided in the list is always the reference environment. The list of differences will then be saved in a `compare/` folder with a TSV file for each item (no file if no differences).  
-
-- **'x'** means same value as reference environment  
-- **'NaN'** means value is missing in comparand  
-- **'/!\\'** means value is different than reference environment  
+This command compares items from different environments. The first environment provided in the list is always the reference environment. The list of differences will then be saved in a `compare_<env1>_<env2>_.../` folder with a TSV file for each item (no file if no differences).  
 
 ---
 
@@ -515,44 +512,25 @@ This command compares items from different environments. The first environment p
 # Compare action "check-end-node-wf" between wb-dev, wb-stg and wb-prod
 ftbx compare actions "wb-dev" "wb-stg" "wb-prod" --filters "name=check-end-node-wf"
 
-# Compare all actions between wb-dev, wb-stg and wb-prod
+# Compare **ALL** actions between wb-dev, wb-stg and wb-prod
 ftbx compare actions "wb-dev" "wb-stg" "wb-prod"
 ```
 
 ```shell
 # OUTPUT
-Performing [GET] https://portal.dev.archive.warnerbros.com/api/actions;name=check-end-node-wf...
+Performing [GET] https://vault.stg.archive.warnerbros.com/api/metadataDefinitions;name=Asset;limit=1...
 
-Retrieving actions: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  4.43it/s]
-Retrieving actions ['configuration']: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  4.70it/s]
-  
-Performing [GET] https://vault.stg.archive.warnerbros.com/api/actions;name=check-end-node-wf...
-  
-Retrieving actions: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  4.12it/s]
-Retrieving actions ['configuration']: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.58it/s] 
-  
-Performing [GET] https://vault.archive.warnerbros.com/api/actions;name=check-end-node-wf...
-  
-Retrieving actions: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  4.72it/s]
-Retrieving actions ['configuration']: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  4.89it/s] 
-  
-                                                      wb-dev            wb-stg wb-prod
-name                                                  check-end-node-wf     x       x
-displayName                                           check-end-node-wf     x       x
-description                                                               NaN       x
-enabled                                                            True     x       x
-type.name                                                      decision     x       x
-type.displayName                                               Decision     x       x
-type.category                                                  Workflow     x       x
-pluginClass                                ScriptedMultiDecisionCommand     x       x
-pluginVersion                                                     1.0.0     x     NaN
-latestPluginVersion                                               1.0.0     x     NaN
-useLatestAvailableVersion                                          True     x     NaN
-runRuleExpression                                                         NaN       x
-supportsAutoRetry                                                 False     x       x
-concurrentJobsLimit                                                   0     x       x
-configuration.instance.script_type.script                        <CODE>   /!\     /!\
+Retrieving 1 metadataDefinitions: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  3.83it/s]
+Retrieving metadataDefinitions ['definition']: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.53it/s]
 
+Performing [GET] https://vault.archive.warnerbros.com/api/metadataDefinitions;name=Asset;limit=1...
+
+Retrieving 5 metadataDefinitions: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00,  2.51it/s]
+Retrieving metadataDefinitions ['definition']: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████| 5/5 [00:01<00:00,  4.51it/s]
+
+Comparing items between ['wb-stg', 'wb-prod']: 100%|████████████████████████████████████████████████████████████████████████████████████████████████| 1/1 [00:00<00:00, 139.47it/s]
+
+Result of the comparison (if there are any differences) have been saved in compare_wb-stg_wb-prod/metadataDefinitions/<item_name>.tsv for your best convenience. 
 ```
 
 ## Retry items

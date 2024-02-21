@@ -87,7 +87,7 @@ def push_command_func(args):
 
 def push_item(config_item: str, item_name: str, item_config: dict, restore: bool = False,
               push_to_failed_jobs: Union[bool, str] = False, src_environment: str = "default",
-              dest_environment: str = "default", log=True, retry:bool=False):
+              dest_environment: str = "default", log=True, retry: bool = False):
     """
     Push action for Flex.
 

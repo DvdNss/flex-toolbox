@@ -10,12 +10,15 @@
     TEST STATUS: FULLY TESTED
 """
 import json
+import os
 import re
+import datetime
 from typing import List
 
 import pandas as pd
 
-from src.utils import get_full_items
+from src.env import get_default_env_alias
+from src.utils import get_full_items, create_folder
 
 
 def list_command_func(args):
@@ -25,11 +28,13 @@ def list_command_func(args):
     TEST STATUS: FULLY TESTED
     """
 
-    list_items(config_item=args.config_item, filters=args.filters, post_filters=args.post_filters, environment=args.from_)
+    filename = list_items(config_item=args.config_item, filters=args.filters, post_filters=args.post_filters, environment=args.from_)
+
+    return filename
 
 
 def list_items(config_item: str, filters: List[str] = [], post_filters: List[str] = [],
-               environment: str = "default") -> bool:
+               environment: str = "default") -> str:
     """
     List items ids.
 
@@ -45,6 +50,11 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
 
     # init displayed content
     log_fields = []
+
+    # add exactNameMatch=true when name is provided
+    if filters:
+        if any('name=' in f for f in filters) and not any('fql' in f for f in filters):
+            filters.append('exactNameMatch=true')
 
     # get items
     sorted_items = get_full_items(config_item=config_item, filters=filters, post_filters=post_filters, environment=environment, cmd="list")
@@ -122,6 +132,13 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
     # readability
     print("")
 
+    # build CSV and JSON filenames
+    create_folder(folder_name='lists', ignore_error=True)
+    dt = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
+    filename = f"{dt}_{get_default_env_alias()}_{config_item}{'_' + '_'.join(filters) if filters else ''}{'_' + '_'.join(post_filters) if post_filters else ''}"
+    filename = clean_filename(filename)
+    filename = os.path.join('lists', filename)
+
     # convert to dataframe and display
     # taxonomies are handled differently because the API response is different
     if config_item == 'taxonomies':
@@ -144,14 +161,13 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
         pd.set_option('display.max_colwidth', None)
         pd.set_option('display.max_rows', None)
         table.index += 1
-        pd.DataFrame.to_csv(table, "list.csv")
+        pd.DataFrame.to_csv(table, f"{filename}.csv")
         print(table)
 
         # save result as JSON for further details
-        with open('list.json', 'w') as result_file:
+        with open(f'{filename}.json', 'w') as result_file:
             json.dump(sorted_items, result_file, indent=4)
-            print(
-                "\nResults of the query (with nested taxons) have been saved as list.json for your best convenience.\n")
+            print("\nResults of the query have been saved in lists/ for your best convenience.\n")
 
     else:
         rows = []
@@ -173,7 +189,7 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
                                         tmp = tmp.get(str(subfield.split('[')[0]))
                                     elif re.search(r"\[-?\d+\]", subfield):
                                         match = int(re.search(r'\[-?\d+\]', subfield).group(0)[1:-1])
-                                        tmp = tmp.get(subfield.split('[')[0])[-match]
+                                        tmp = tmp.get(subfield.split('[')[0])[match]
                                 else:
                                     tmp = tmp.get(subfield)
                                     # replace line breaks otherwise csv is broken
@@ -191,16 +207,39 @@ def list_items(config_item: str, filters: List[str] = [], post_filters: List[str
             pd.set_option('display.max_colwidth', 75)
             pd.set_option('display.max_rows', 50)
             table.index += 1
-            pd.DataFrame.to_csv(table, "list.csv")
+            pd.DataFrame.to_csv(table, f"{filename}.csv")
             print(table)
 
             # save result as JSON for further details
-            with open('list.json', 'w') as result_file:
+            with open(f'{filename}.json', 'w') as result_file:
                 json.dump(sorted_items, result_file, indent=4)
-                print("\nResults of the query have been saved as list.json for your best convenience.\n")
+                print("\nResults of the query have been saved in lists/ for your best convenience.\n")
 
         # empty results from API
         else:
             print(f"No {config_item} found for the given parameters.\n")
 
-    return True
+    return filename
+
+
+def clean_filename(filename: str):
+    """
+    Clean filename of special characters.
+
+    TEST STATUS: DOES NOT REQUIRE TESTING
+
+    :param filename: filename to clean
+    """
+
+    filename = filename.replace('\\', '-') \
+        .replace(":", '-') \
+        .replace("/", '-') \
+        .replace("*", '-') \
+        .replace("?", 'Q') \
+        .replace("\"", '-') \
+        .replace("<=", 'LTE') \
+        .replace("<", 'LT') \
+        .replace(">=", 'GTE') \
+        .replace(">", 'GT')
+
+    return filename

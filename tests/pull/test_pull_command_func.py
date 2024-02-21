@@ -63,7 +63,7 @@ class TestPullCommandFunc(TestCase):
         # ins
         args = argparse.Namespace()
         args.config_item = 'actions'
-        args.filters = ['name=ftbx-action-dnaisse', 'exactNameMatch=True']
+        args.filters = ['name=ftbx-action-dnaisse', 'limit=1']
         args.from_ = ['cs-sandbox-ovh-flex-config']
         args.post_filters = []
         args.with_dependencies = False
@@ -100,8 +100,8 @@ class TestPullCommandFunc(TestCase):
     def test_pull_command_func_several_with_dependencies(self):
         # ins
         args = argparse.Namespace()
-        args.config_item = 'actions'
-        args.filters = ['name=Launch subWF']
+        args.config_item = 'workflowDefinitions'
+        args.filters = ['name=launch-task']
         args.from_ = ['cs-sandbox-ovh-flex-config']
         args.post_filters = []
         args.with_dependencies = True
@@ -112,8 +112,8 @@ class TestPullCommandFunc(TestCase):
 
         # test
         assert os.path.isdir(env_alias) and os.path.isdir(
-            os.path.join(env_alias, 'actions', 'Launch subWF')) and os.path.isdir(
-            os.path.join(env_alias, 'workflowDefinitions', 'Parent WF'))
+            os.path.join(env_alias, 'taskDefinitions', 'task')) and os.path.isdir(
+            os.path.join(env_alias, 'workflowDefinitions', 'launch-task'))
 
         # reset
         shutil.rmtree(env_alias, ignore_errors=False, onerror=None)

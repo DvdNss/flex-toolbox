@@ -474,7 +474,8 @@ class TestGetFullItems(TestCase):
             post_filters=post_filters,
             with_dependencies=with_dependencies,
             log=False,
-            environment='cs-sandbox-ovh-flex-config'
+            environment='cs-sandbox-ovh-flex-config',
+            cmd='list'
         )
 
         # test

@@ -11,6 +11,7 @@
 import argparse
 import json
 import os.path
+import shutil
 from unittest import TestCase
 
 from src.list import list_command_func
@@ -27,14 +28,13 @@ class TestListCommandFunc(TestCase):
         args.post_filters = []
 
         # outs
-        list_command_func(args)
+        filename = list_command_func(args)
 
         # test
-        assert os.path.isfile('list.csv') and os.path.isfile('list.json')
+        assert os.path.exists(f"{filename}.json") and os.path.exists(f"{filename}.csv")
 
         # reset
-        os.remove('list.csv')
-        os.remove('list.json')
+        shutil.rmtree('lists', ignore_errors=False, onerror=None)
 
     def test_list_command_func_filters_fql(self):
         # ins
@@ -45,18 +45,17 @@ class TestListCommandFunc(TestCase):
         args.post_filters = []
 
         # outs
-        list_command_func(args)
+        filename = list_command_func(args)
 
-        with open('list.json', 'r') as list_file:
+        with open(f"{filename}.json", 'r') as list_file:
             actions = json.load(list_file)
 
         # test
-        assert os.path.isfile('list.csv') and os.path.isfile('list.json') and "dnaisse" in actions[
+        assert os.path.exists(f"{filename}.json") and os.path.exists(f"{filename}.csv") and "dnaisse" in actions[
             next(iter(actions), {})].get('name')
 
         # reset
-        os.remove('list.csv')
-        os.remove('list.json')
+        shutil.rmtree('lists', ignore_errors=False, onerror=None)
 
     def test_list_command_func_post_filters_int(self):
         # ins
@@ -67,18 +66,17 @@ class TestListCommandFunc(TestCase):
         args.post_filters = ['concurrentJobsLimit=0']
 
         # outs
-        list_command_func(args)
+        filename = list_command_func(args)
 
-        with open('list.json', 'r') as list_file:
+        with open(f"{filename}.json", 'r') as list_file:
             actions = json.load(list_file)
 
         # test
-        assert os.path.isfile('list.csv') and os.path.isfile('list.json') and actions[
+        assert os.path.exists(f"{filename}.json") and os.path.exists(f"{filename}.csv") and actions[
             next(iter(actions), {})].get('concurrentJobsLimit') == 0
 
         # reset
-        os.remove('list.csv')
-        os.remove('list.json')
+        shutil.rmtree('lists', ignore_errors=False, onerror=None)
 
     def test_list_command_func_post_filters_bool(self):
         # ins
@@ -89,18 +87,17 @@ class TestListCommandFunc(TestCase):
         args.post_filters = ['enabled=true']
 
         # outs
-        list_command_func(args)
+        filename = list_command_func(args)
 
-        with open('list.json', 'r') as list_file:
+        with open(f"{filename}.json", 'r') as list_file:
             actions = json.load(list_file)
 
         # test
-        assert os.path.isfile('list.csv') and os.path.isfile('list.json') and actions[
+        assert os.path.exists(f"{filename}.json") and os.path.exists(f"{filename}.csv") and actions[
             next(iter(actions), {})].get('enabled') is True
 
         # reset
-        os.remove('list.csv')
-        os.remove('list.json')
+        shutil.rmtree('lists', ignore_errors=False, onerror=None)
 
     def test_list_command_func_post_filters_string(self):
         # ins
@@ -111,18 +108,17 @@ class TestListCommandFunc(TestCase):
         args.post_filters = ['name~dnaisse']
 
         # outs
-        list_command_func(args)
+        filename = list_command_func(args)
 
-        with open('list.json', 'r') as list_file:
+        with open(f"{filename}.json", 'r') as list_file:
             actions = json.load(list_file)
 
         # test
-        assert os.path.isfile('list.csv') and os.path.isfile('list.json') and "dnaisse" in actions[
+        assert os.path.exists(f"{filename}.json") and os.path.exists(f"{filename}.csv") and "dnaisse" in actions[
             next(iter(actions), {})].get('name')
 
         # reset
-        os.remove('list.csv')
-        os.remove('list.json')
+        shutil.rmtree('lists', ignore_errors=False, onerror=None)
 
     def test_list_command_func_post_filters_list(self):
         # ins
@@ -130,21 +126,20 @@ class TestListCommandFunc(TestCase):
         args.config_item = 'jobs'
         args.from_ = 'cs-sandbox-ovh-flex-config'
         args.filters = ["status=Completed", "limit=1"]
-        args.post_filters = ['history.events[0].message~completed']
+        args.post_filters = ['history.events[-1].message~completed']
 
         # outs
-        list_command_func(args)
+        filename = list_command_func(args)
 
-        with open('list.json', 'r') as list_file:
+        with open(f"{filename}.json", 'r') as list_file:
             actions = json.load(list_file)
 
         # test
-        assert os.path.isfile('list.csv') and os.path.isfile('list.json') and "completed" in actions[
-            next(iter(actions), {})].get('history').get('events')[0].get('message')
+        assert os.path.exists(f"{filename}.json") and os.path.exists(f"{filename}.csv") and "completed" in actions[
+            next(iter(actions), {})].get('history').get('events')[-1].get('message')
 
         # reset
-        os.remove('list.csv')
-        os.remove('list.json')
+        shutil.rmtree('lists', ignore_errors=False, onerror=None)
 
     def test_list_command_func_post_filters_text(self):
         # ins
@@ -155,20 +150,19 @@ class TestListCommandFunc(TestCase):
         args.post_filters = ['history[text]~completed']
 
         # outs
-        list_command_func(args)
+        filename = list_command_func(args)
 
-        with open('list.json', 'r') as list_file:
+        with open(f"{filename}.json", 'r') as list_file:
             actions = json.load(list_file)
 
         # test
-        assert os.path.isfile('list.csv') and os.path.isfile('list.json') and "completed" in str(actions[
-                                                                                                     next(iter(actions),
-                                                                                                          {})].get(
+        assert os.path.exists(f"{filename}.json") and os.path.exists(f"{filename}.csv") and "completed" in str(actions[
+            next(iter(actions),
+                 {})].get(
             'history'))
 
         # reset
-        os.remove('list.csv')
-        os.remove('list.json')
+        shutil.rmtree('lists', ignore_errors=False, onerror=None)
 
     def test_list_command_func_taxonomies(self):
         # ins
@@ -179,17 +173,17 @@ class TestListCommandFunc(TestCase):
         args.post_filters = []
 
         # outs
-        list_command_func(args)
+        filename = list_command_func(args)
 
-        with open('list.json', 'r') as list_file:
+        with open(f"{filename}.json", 'r') as list_file:
             taxonomies = json.load(list_file)
 
         # test
-        assert os.path.isfile('list.csv') and os.path.isfile('list.json') and isinstance(taxonomies, list) and taxonomies[0].get('id')
+        assert os.path.exists(f"{filename}.json") and os.path.exists(f"{filename}.csv") and isinstance(taxonomies, list) and \
+               taxonomies[0].get('id')
 
         # reset
-        os.remove('list.csv')
-        os.remove('list.json')
+        shutil.rmtree('lists', ignore_errors=False, onerror=None)
 
     def test_list_command_func_tags(self):
         # ins
@@ -200,19 +194,19 @@ class TestListCommandFunc(TestCase):
         args.post_filters = []
 
         # outs
-        list_command_func(args)
+        filename = list_command_func(args)
 
-        with open('list.json', 'r') as list_file:
-            tagCollections = json.load(list_file)
+        with open(f"{filename}.json", 'r') as list_file:
+            tag_collections = json.load(list_file)
 
         # test
-        assert os.path.isfile('list.csv') and os.path.isfile('list.json') and isinstance(tagCollections, dict) and tagCollections[next(iter(tagCollections), {})].get('id')
+        assert os.path.exists(f"{filename}.json") and os.path.exists(f"{filename}.csv") and isinstance(tag_collections, dict) and \
+               tag_collections[next(iter(tag_collections), {})].get('id')
 
         # reset
-        os.remove('list.csv')
-        os.remove('list.json')
+        shutil.rmtree('lists', ignore_errors=False, onerror=None)
 
-    def test_list_command_func_adaptative_sub_items(self):
+    def test_list_command_func_adaptive_sub_items(self):
         # ins
         args = argparse.Namespace()
         args.config_item = 'workflows'
@@ -221,16 +215,14 @@ class TestListCommandFunc(TestCase):
         args.post_filters = []
 
         # outs
-        list_command_func(args)
+        filename = list_command_func(args)
 
-        with open('list.json', 'r') as list_file:
+        with open(f"{filename}.json", 'r') as list_file:
             workflows = json.load(list_file)
 
         # test
-        assert os.path.isfile('list.csv') and os.path.isfile('list.json') and isinstance(workflows, dict) and \
+        assert os.path.exists(f"{filename}.json") and os.path.exists(f"{filename}.csv") and isinstance(workflows, dict) and \
                not workflows[next(iter(workflows), {})].get('jobs')
 
         # reset
-        os.remove('list.csv')
-        os.remove('list.json')
-
+        shutil.rmtree('lists', ignore_errors=False, onerror=None)
